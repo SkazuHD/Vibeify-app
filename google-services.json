@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "738464862163",
+    "project_id": "vibeify-16f99",
+    "storage_bucket": "vibeify-16f99.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:738464862163:android:5758e0a4d7f1850c0e2926",
+        "android_client_info": {
+          "package_name": "de.hsb.vibeify"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJAx8p9ngmySkdPnbWKTDEJpLh5a2TcWc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

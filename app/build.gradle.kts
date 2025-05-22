@@ -43,7 +43,6 @@ android {
 }
 
 dependencies {
-    val nav_version = "2.9.0"
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -52,13 +51,17 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-    implementation("androidx.navigation:navigation-compose:$nav_version")
-    implementation("com.google.dagger:hilt-android:2.56.2")
-    ksp("com.google.dagger:hilt-android-compiler:2.56.2")
-    implementation(platform("com.google.firebase:firebase-bom:33.13.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.exoplayer.dash)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.ui.compose)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -1,21 +1,49 @@
 package de.hsb.vibeify.ui.Views
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
+import de.hsb.vibeify.viewmodel.UserState
+import kotlinx.coroutines.launch
 
 @Composable
-fun LoginView(modifier: Modifier = Modifier) {
+fun LoginView(navController: NavController, modifier: Modifier = Modifier) {
+    val coroutineScope = rememberCoroutineScope()
+    val vm = UserState.current
+
     Box(
         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ){
-        Text(
-            text = "Login View",
-            modifier = modifier
-        )
+        Column {
+            Text(
+                text = "Login View",
+                modifier = modifier
+            )
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        vm.signIn("email", "password")
+                    }
+                }
+            ) {
+                Text("Login")
+            }
+            Button(
+                onClick = {
+                    navController.navigate(Destinations.RegisterView.route)
+                }
+            ) {
+                Text("Register NOW")
+            }
+        }
+
     }
 
 }

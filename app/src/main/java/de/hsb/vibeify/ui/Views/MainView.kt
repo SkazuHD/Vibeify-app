@@ -3,7 +3,6 @@ package de.hsb.vibeify.ui.Views
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -12,14 +11,12 @@ import androidx.navigation.NavController
 
 @Composable
 fun MainView(navController: NavController, modifier: Modifier = Modifier) {
+
+    val isLoggedIn = false
+
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Column {
             Text("Main View", modifier = modifier)
-            Button(
-                onClick = { navController.navigate(Views.LoginView.route) },
-            ) {
-                Text("Login")
-            }
         }
     }
 }

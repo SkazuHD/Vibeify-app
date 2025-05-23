@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.Views
+package de.hsb.vibeify.core
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -6,7 +6,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class Destinations(val route: String) {
-     Guard("guard"),
      MainView("main"),
      LoginView("login_view"),
      RegisterView("register_view"),

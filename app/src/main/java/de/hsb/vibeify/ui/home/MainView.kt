@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.Views
+package de.hsb.vibeify.ui.home
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

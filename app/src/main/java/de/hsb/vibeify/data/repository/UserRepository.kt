@@ -1,7 +1,7 @@
-package de.hsb.vibeify.repo
+package de.hsb.vibeify.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
-import de.hsb.vibeify.model.User
+import de.hsb.vibeify.data.model.User
 import javax.inject.Inject
 
 

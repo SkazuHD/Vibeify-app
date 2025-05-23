@@ -1,5 +1,6 @@
-package de.hsb.vibeify
+package de.hsb.vibeify.core
 
+import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -8,50 +9,62 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import de.hsb.vibeify.ui.Views.Destinations
-import de.hsb.vibeify.ui.Views.LoginView
-import de.hsb.vibeify.ui.Views.MainView
-import de.hsb.vibeify.ui.Views.NavbarDestinations
-import de.hsb.vibeify.ui.Views.PlaylistDetailView
-import de.hsb.vibeify.ui.Views.PlaylistView
-import de.hsb.vibeify.ui.Views.ProfileView
-import de.hsb.vibeify.ui.Views.RegisterView
-import de.hsb.vibeify.ui.Views.SearchView
+import androidx.navigation.navigation
+import de.hsb.vibeify.ui.home.MainView
+import de.hsb.vibeify.ui.login.LoginView
+import de.hsb.vibeify.ui.login.LoginViewModel
+import de.hsb.vibeify.ui.playlist.PlaylistView
+import de.hsb.vibeify.ui.register.RegisterView
+import de.hsb.vibeify.ui.search.SearchView
 
 
 @Composable
-fun GuardRouter(modifier: Modifier = Modifier) {
-    val navController = rememberNavController()
-    val startDestination = Destinations.Guard
+fun AppRouter(authViewModel: LoginViewModel = hiltViewModel()) {
+    val rootNavController = rememberNavController()
+    val isAuthenticated by authViewModel.uiState.collectAsState()
 
-    NavHost(navController = navController, startDestination = startDestination.route) {
-        composable(Destinations.Guard.route) {
-            Guard(
-                navController = navController,
-                modifier = Modifier.padding(16.dp),
-            )
+
+    LaunchedEffect(isAuthenticated) {
+        Log.d("AppRouter", "LaunchedEffect triggered. loginSuccess: ${isAuthenticated.loginSuccess}")
+        if (isAuthenticated.loginSuccess) {
+            rootNavController.navigate("root") {
+                popUpTo("auth") { inclusive = true }
+            }
+        } else {
+            rootNavController.navigate("auth") {
+                popUpTo("root") { inclusive = true }
+            }
         }
-        composable(Destinations.LoginView.route) {
-            LoginView(
-                navController = navController,
-            )
+    }
 
+    NavHost(
+        navController = rootNavController,
+        startDestination = if (isAuthenticated.loginSuccess) "root" else "auth"
+    )
+
+    {
+        navigation(startDestination = Destinations.LoginView.route, route = "auth") {
+            composable(Destinations.LoginView.route) { LoginView(rootNavController, authViewModel) }
+            composable(Destinations.RegisterView.route) { RegisterView(rootNavController) }
         }
-        composable(Destinations.RegisterView.route) {
-            RegisterView(
-                navController = navController,
-            )
 
+        navigation(
+            startDestination = NavbarDestinations.SONGS.route,
+            route = "root"
+        ) {
+            composable(NavbarDestinations.SONGS.route) { RootNavigationBar() }
         }
 
     }
@@ -72,27 +85,11 @@ fun AppNavHost(navController: NavHostController,
                 }
             }
         }
-
-        Destinations.entries.forEach { destination ->
-            composable(destination.route) {
-                when (destination) {
-                    Destinations.MainView -> MainView(navController)
-                    Destinations.LoginView -> LoginView(navController)
-                    Destinations.RegisterView -> RegisterView(navController)
-                    Destinations.ProfileView -> ProfileView()
-                    Destinations.PlaylistView -> PlaylistView()
-                    Destinations.PlaylistDetailView -> PlaylistDetailView()
-                    Destinations.SearchView -> SearchView()
-                    Destinations.Guard -> Guard(navController)
-                }
-            }
-        }
-
     }
 }
 
 @Composable
-fun RootNavigationBar(modifier: Modifier = Modifier) {
+fun RootNavigationBar( modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val startDestination = NavbarDestinations.SONGS
     var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }

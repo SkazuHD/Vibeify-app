@@ -9,7 +9,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
-import de.hsb.vibeify.ui.theme.VibeifyTheme
+import de.hsb.vibeify.core.AppRouter
+import de.hsb.vibeify.core.ui.theme.VibeifyTheme
 
 
 @AndroidEntryPoint
@@ -21,7 +22,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             VibeifyTheme {
-                    GuardRouter()
+                AppRouter()
                 }
             }
         }

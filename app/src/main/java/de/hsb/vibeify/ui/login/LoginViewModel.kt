@@ -1,10 +1,11 @@
-package de.hsb.vibeify.viewmodel
+package de.hsb.vibeify.ui.login
 
+import android.util.Log
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import de.hsb.vibeify.repo.FirebaseAuthRepo
+import de.hsb.vibeify.data.repository.FirebaseAuthRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,9 +37,11 @@ class LoginViewModel @Inject constructor(private val userRepository: FirebaseAut
             )
             result.fold(
                 onSuccess = { user ->
+                    Log.d("LoginViewModel", "signIn successful, updating UI state.")
                     _uiState.value = LoginUiState(loginSuccess = true)
                 },
                 onFailure = { exception ->
+                    Log.e("LoginViewModel", "signIn failed: ${exception.message}")
                     _uiState.value = LoginUiState(error = exception.message ?: "Login failed")
                 }
             )

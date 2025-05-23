@@ -4,13 +4,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -27,11 +25,9 @@ fun LoginView(
     modifier: Modifier = Modifier,
     vm: LoginViewModel = hiltViewModel()
 ) {
-    val usernameState = remember { TextFieldState() }
-    val passwordState = remember { TextFieldState() }
 
     Box(
-        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
         Column(
 
@@ -44,19 +40,18 @@ fun LoginView(
             )
 
             OutlinedTextField(
-                state = usernameState,
+                state = vm.usernameState,
                 label = { Text("Username") },
             )
 
             OutlinedSecureTextField(
-                state = passwordState,
+                state = vm.passwordState,
                 label = { Text("Password") },
-
-                )
+            )
 
             Button(
                 onClick = {
-                    vm.signIn(usernameState.text.toString(), passwordState.text.toString())
+                    vm.signIn()
                 }
             ) {
                 Text("Login")

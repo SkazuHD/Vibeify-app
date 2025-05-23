@@ -1,5 +1,6 @@
 package de.hsb.vibeify.viewmodel
 
+import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,11 +24,16 @@ class LoginViewModel @Inject constructor(private val userRepository: FirebaseAut
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+    val usernameState = TextFieldState()
+    val passwordState = TextFieldState()
 
-    fun signIn(email: String, password: String) {
+    fun signIn() {
         viewModelScope.launch {
             _uiState.value = LoginUiState(isLoading = true)
-            val result = userRepository.signIn(email, password)
+            val result = userRepository.signIn(
+                usernameState.text.toString(),
+                passwordState.text.toString()
+            )
             result.fold(
                 onSuccess = { user ->
                     _uiState.value = LoginUiState(loginSuccess = true)

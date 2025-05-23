@@ -11,20 +11,22 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import de.hsb.vibeify.viewmodel.UserState
-import kotlinx.coroutines.launch
+import de.hsb.vibeify.viewmodel.LoginViewModel
+
 
 @Composable
-fun LoginView(navController: NavController, modifier: Modifier = Modifier) {
-    val coroutineScope = rememberCoroutineScope()
-    val vm = UserState.current
+fun LoginView(
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    vm: LoginViewModel = hiltViewModel()
+) {
     val usernameState = remember { TextFieldState() }
     val passwordState = remember { TextFieldState() }
 
@@ -54,9 +56,7 @@ fun LoginView(navController: NavController, modifier: Modifier = Modifier) {
 
             Button(
                 onClick = {
-                    coroutineScope.launch {
-                        vm.signIn(usernameState.text.toString(), passwordState.text.toString())
-                    }
+                    vm.signIn(usernameState.text.toString(), passwordState.text.toString())
                 }
             ) {
                 Text("Login")

@@ -64,8 +64,8 @@ dependencies {
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.ui.compose)
     implementation(libs.androidx.core.splashscreen)
-    implementation("androidx.compose.foundation:foundation:1.9.0-alpha02")
-    implementation ("androidx.compose.material:material-icons-extended")
+    implementation(libs.androidx.foundation)
+    implementation(libs.androidx.material.icons.extended)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

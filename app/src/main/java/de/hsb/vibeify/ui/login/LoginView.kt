@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.Views
+package de.hsb.vibeify.ui.login
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,18 +14,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import de.hsb.vibeify.viewmodel.LoginViewModel
+import de.hsb.vibeify.core.Destinations
 
 
 @Composable
 fun LoginView(
     navController: NavController,
+    vm: LoginViewModel,
     modifier: Modifier = Modifier,
-    vm: LoginViewModel = hiltViewModel()
-) {
 
+) {
     Box(
         modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
@@ -51,7 +50,7 @@ fun LoginView(
 
             Button(
                 onClick = {
-                    vm.signIn()
+                        vm.signIn()
                 }
             ) {
                 Text("Login")

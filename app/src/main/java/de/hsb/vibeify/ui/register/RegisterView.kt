@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.Views
+package de.hsb.vibeify.ui.register
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

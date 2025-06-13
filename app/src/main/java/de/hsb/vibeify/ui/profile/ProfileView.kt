@@ -1,9 +1,9 @@
-package de.hsb.vibeify.ui.Views
+package de.hsb.vibeify.ui.profile
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
-fun PlaylistDetailView(modifier: Modifier = Modifier) {
-
+fun ProfileView(modifier: Modifier = Modifier) {
+    
 }

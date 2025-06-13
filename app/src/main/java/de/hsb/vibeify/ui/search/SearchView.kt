@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.Views
+package de.hsb.vibeify.ui.search
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier

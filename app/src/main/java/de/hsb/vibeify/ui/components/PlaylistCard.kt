@@ -46,7 +46,7 @@ fun PlaylistCard(
     ) {
         Box(
             modifier = modifier
-                .padding(16.dp)
+                .padding(4.dp)
                 .fillMaxWidth(),
         ) {
             Row {

@@ -11,7 +11,7 @@ enum class Destinations(val route: String) {
      RegisterView("register_view"),
      ProfileView("profile_view"),
      PlaylistView("playlist_view"),
-     PlaylistDetailView("playlist_detail_view"),
+     PlaylistDetailView("playlist_detail_view/{playlistId}"),
      SearchView("search_view");
 }
 

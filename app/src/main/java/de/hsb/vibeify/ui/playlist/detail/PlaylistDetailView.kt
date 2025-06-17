@@ -19,6 +19,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -31,10 +32,16 @@ import de.hsb.vibeify.R
 import de.hsb.vibeify.ui.components.SongCard
 
 @Composable
-fun PlaylistDetailView(modifier: Modifier = Modifier,
-                       onClick: () -> Unit = { /* Default no-op */ },
-                       viewModel: PlaylistDetailViewModel = hiltViewModel()
+fun PlaylistDetailView(
+    playlistId: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = { /* Default no-op */ },
+    viewModel: PlaylistDetailViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(playlistId) {
+        viewModel.loadPlaylist(playlistId)
+    }
+
     val playlistTitle = viewModel.playlistTitle
     val playlistDescription = viewModel.playlistDescription
     val playlistImage = viewModel.playlistImage

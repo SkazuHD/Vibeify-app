@@ -1,7 +1,9 @@
 package de.hsb.vibeify.core
 
 import android.util.Log
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
@@ -18,14 +20,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import de.hsb.vibeify.ui.home.MainView
 import de.hsb.vibeify.ui.login.LoginView
 import de.hsb.vibeify.ui.login.LoginViewModel
 import de.hsb.vibeify.ui.playlist.PlaylistView
+import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailView
 import de.hsb.vibeify.ui.register.RegisterView
 import de.hsb.vibeify.ui.search.SearchView
 
@@ -80,11 +85,20 @@ fun AppNavHost(navController: NavHostController,
             composable(destination.route) {
                 when (destination) {
                     NavbarDestinations.SONGS -> MainView(navController)
-                    NavbarDestinations.PLAYLISTS -> PlaylistView()
+                    NavbarDestinations.PLAYLISTS -> PlaylistView(navController)
                     NavbarDestinations.SEARCH -> SearchView()
                 }
             }
         }
+        composable(
+            "playlist_detail_view/{playlistId}",
+            arguments = listOf(navArgument("playlistId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val playlistId = backStackEntry.arguments?.getString("playlistId") ?: ""
+            PlaylistDetailView(playlistId = playlistId)
+        }
+
+
     }
 }
 
@@ -95,7 +109,9 @@ fun RootNavigationBar( modifier: Modifier = Modifier) {
     var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
 
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize()
+            .systemBarsPadding(),
+        contentWindowInsets =  NavigationBarDefaults.windowInsets,
         bottomBar = {
             NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
                 NavbarDestinations.entries.forEachIndexed { index, destination ->

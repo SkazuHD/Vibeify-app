@@ -17,7 +17,8 @@ fun PlaylistView(navController: NavController) {
             modifier = androidx.compose.ui.Modifier,
         )
 
-        Button(onClick = { navController.navigate(Destinations.PlaylistDetailView.route) }) {
+        val examplePlaylistId = "456"
+        Button(onClick = { navController.navigate("playlist_detail_view/$examplePlaylistId") }) {
             Text("Zur Playlist Detailansicht")
         }
     }
@@ -26,6 +27,5 @@ fun PlaylistView(navController: NavController) {
 @Preview
 @Composable
 fun PlaylistViewPreview() {
-    // Dummy NavController für Preview
     PlaylistView(navController = TestNavHostController(androidx.compose.ui.platform.LocalContext.current))
 }

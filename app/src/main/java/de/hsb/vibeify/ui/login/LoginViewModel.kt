@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.data.repository.FirebaseAuthRepo
+import de.hsb.vibeify.data.repository.FirestoreRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,13 +21,14 @@ data class LoginUiState(
 )
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(private val userRepository: FirebaseAuthRepo) :
+class LoginViewModel @Inject constructor(private val userRepository: FirebaseAuthRepo, private val repo: FirestoreRepo) :
     ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
     val usernameState = TextFieldState()
     val passwordState = TextFieldState()
+
 
     fun signIn() {
         viewModelScope.launch {
@@ -38,6 +40,14 @@ class LoginViewModel @Inject constructor(private val userRepository: FirebaseAut
             result.fold(
                 onSuccess = { user ->
                     Log.d("LoginViewModel", "signIn successful, updating UI state.")
+                    repo.insertUser(
+                        mapOf(
+                            "username" to "penar",
+                            "email" to "user.email",
+                            "uid" to "user.uid"
+                        )
+                    )
+
                     _uiState.value = LoginUiState(loginSuccess = true)
                 },
                 onFailure = { exception ->

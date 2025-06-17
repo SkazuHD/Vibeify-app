@@ -33,6 +33,7 @@ fun PlaylistCard(
     playlistDescription: String = "Playlist from Vibeify",
     playlistName: String = "Absolute banger",
     playlistIcon: Int = R.drawable.ic_launcher_foreground
+
 ) {
     Card(
         onClick = { onClick() },

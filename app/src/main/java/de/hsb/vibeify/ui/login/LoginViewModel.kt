@@ -40,13 +40,13 @@ class LoginViewModel @Inject constructor(private val userRepository: FirebaseAut
             result.fold(
                 onSuccess = { user ->
                     Log.d("LoginViewModel", "signIn successful, updating UI state.")
-                    repo.insertUser(
-                        mapOf(
-                            "username" to "penar",
-                            "email" to "user.email",
-                            "uid" to "user.uid"
-                        )
-                    )
+//                    repo.insertUser(
+//                        mapOf(
+//                            "username" to "penar",
+//                            "email" to "user.email",
+//                            "uid" to "user.uid"
+//                        )
+//                    )
 
                     _uiState.value = LoginUiState(loginSuccess = true)
                 },

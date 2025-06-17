@@ -3,6 +3,7 @@ package de.hsb.vibeify.data.repository
 import com.google.firebase.firestore.FirebaseFirestore as Firestore
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.android.gms.tasks.Task
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
 import de.hsb.vibeify.data.model.Song
 import javax.inject.Inject
@@ -20,6 +21,8 @@ interface FirestoreRepo {
 @Singleton
 class FirebaseRepository @Inject constructor() : FirestoreRepo {
     private val db = Firestore.getInstance()
+
+
 
     override fun getUsers(): Task<QuerySnapshot> {
         return db.collection("users").get()

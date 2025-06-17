@@ -25,17 +25,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.MediaItem
 import de.hsb.vibeify.R
+import de.hsb.vibeify.services.PlayerService
 import de.hsb.vibeify.ui.components.SongCard
+
+fun demoPlayerOnClick(context: android.content.Context) {
+    println("Player clicked - demo action")
+    val player = PlayerService.getInstance(context)
+    val mediaitem = MediaItem.fromUri("https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3")
+    player.setMediaItem(mediaitem)
+    player.prepare()
+    player.playWhenReady = true
+    player.play()
+
+}
 
 @Composable
 fun PlaylistDetailView(
     playlistId: String,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = { /* Default no-op */ },
+    onClick: () -> Unit = { },
     viewModel: PlaylistDetailViewModel = hiltViewModel()
 ) {
     LaunchedEffect(playlistId) {
@@ -47,6 +61,7 @@ fun PlaylistDetailView(
     val playlistImage = viewModel.playlistImage
     val songs = viewModel.songs
     val playlistDurationText = viewModel.playlistDurationText
+    val context = LocalContext.current
 
     //Playlist Header
     Column {
@@ -68,7 +83,9 @@ fun PlaylistDetailView(
                             .size(100.dp)
                     )
                     IconButton(
-                        onClick = onClick,
+                        onClick = {
+                            demoPlayerOnClick(context);
+                        },
                         modifier = Modifier
                             .align(Alignment.Center)
                             .size(48.dp)

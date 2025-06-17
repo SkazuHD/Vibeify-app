@@ -33,8 +33,8 @@ class PlaylistDetailViewModel @Inject constructor(
             val playlist = playlistRepository.getPlaylistById(playlistId)
             playlist?.let {
                 playlistTitle = it.title
-                playlistDescription = it.description
-                playlistImage = it.imageRes
+                playlistDescription = it.description ?: ""
+                playlistImage = it.imagePath ?: R.drawable.ic_launcher_background
                 songs = it.songs
             }
         }

@@ -85,7 +85,7 @@ fun AppNavHost(navController: NavHostController,
             composable(destination.route) {
                 when (destination) {
                     NavbarDestinations.SONGS -> MainView(navController)
-                    NavbarDestinations.PLAYLISTS -> PlaylistView(navController)
+                    NavbarDestinations.PLAYLISTS -> PlaylistView(navController = navController)
                     NavbarDestinations.SEARCH -> SearchView()
                 }
             }

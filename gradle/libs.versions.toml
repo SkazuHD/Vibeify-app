@@ -17,6 +17,7 @@ composeBom = "2025.05.01"
 media3Exoplayer = "1.7.1"
 navigationCompose = "2.9.0"
 material3 = "1.4.0-alpha15"
+navigationTestingAndroid = "2.9.0"
 
 
 [libraries]
@@ -49,6 +50,7 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+androidx-navigation-testing-android = { group = "androidx.navigation", name = "navigation-testing-android", version.ref = "navigationTestingAndroid" }
 
 
 [plugins]

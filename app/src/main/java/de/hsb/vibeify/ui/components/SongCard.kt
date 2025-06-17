@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -50,9 +51,11 @@ fun SongCard(
                 Image(
                     painter = painterResource(id = songIcon),
                     contentDescription = "Song Icon",
-                    modifier = modifier.padding(8.dp).background(
+                    modifier = modifier.padding(8.dp).width(48.dp).background(
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+
                         shape = RoundedCornerShape(4.dp)
+
                     )
                 )
                 Column(

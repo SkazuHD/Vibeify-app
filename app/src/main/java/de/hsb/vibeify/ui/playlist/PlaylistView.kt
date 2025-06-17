@@ -17,7 +17,7 @@ fun PlaylistView(navController: NavController) {
             modifier = androidx.compose.ui.Modifier,
         )
 
-        val examplePlaylistId = "456"
+        val examplePlaylistId = "123"
         Button(onClick = { navController.navigate("playlist_detail_view/$examplePlaylistId") }) {
             Text("Zur Playlist Detailansicht")
         }

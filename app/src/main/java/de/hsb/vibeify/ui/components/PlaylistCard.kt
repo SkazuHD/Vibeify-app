@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -36,26 +37,31 @@ fun PlaylistCard(
     Card(
         onClick = { onClick() },
         modifier = modifier
-            .padding(24.dp)
             .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
         )
     ) {
         Box(
             modifier = modifier
-                .padding(4.dp)
+                .padding(8.dp)
                 .fillMaxWidth(),
         ) {
             Row {
 
+
                 Image(
                     painter = painterResource(playlistIcon),
                     contentDescription = "Playlist Icon",
-                    modifier = modifier.padding(end = 8.dp)
-                )
+                    modifier = modifier
+                        .padding(end = 8.dp)
+                        .width(48.dp)
+                        .align(Alignment.CenterVertically)
+                        .clip(RoundedCornerShape(8.dp)),
+                    )
+
                 Column(
                     modifier = modifier
                         .align(Alignment.CenterVertically)

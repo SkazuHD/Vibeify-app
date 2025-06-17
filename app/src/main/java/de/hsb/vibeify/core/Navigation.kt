@@ -29,6 +29,7 @@ import androidx.navigation.navigation
 import de.hsb.vibeify.ui.home.MainView
 import de.hsb.vibeify.ui.login.LoginView
 import de.hsb.vibeify.ui.login.LoginViewModel
+import de.hsb.vibeify.ui.player.fakeSong
 import de.hsb.vibeify.ui.playlist.PlaylistView
 import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailView
 import de.hsb.vibeify.ui.register.RegisterView
@@ -86,7 +87,7 @@ fun AppNavHost(navController: NavHostController,
                 when (destination) {
                     NavbarDestinations.SONGS -> MainView(navController)
                     NavbarDestinations.PLAYLISTS -> PlaylistView(navController = navController)
-                    NavbarDestinations.SEARCH -> SearchView()
+                    NavbarDestinations.SEARCH -> SearchView(navController)
                 }
             }
         }
@@ -96,6 +97,12 @@ fun AppNavHost(navController: NavHostController,
         ) { backStackEntry ->
             val playlistId = backStackEntry.arguments?.getString("playlistId") ?: ""
             PlaylistDetailView(playlistId = playlistId)
+        }
+        composable("playback_view") {
+            de.hsb.vibeify.ui.player.MinimalMusicPlayer(
+                song = fakeSong,
+                nextSong = "Next Song"
+            )
         }
 
 

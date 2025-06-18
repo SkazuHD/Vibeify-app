@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -32,7 +33,9 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
         val error = vm.uiState.collectAsState().value.error
 
         Column(
-
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
         ) {
             Text(
                 text = "Register",
@@ -66,6 +69,7 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
             }
 
             Button(
+                modifier = Modifier.fillMaxWidth(0.5f),
                 onClick = {
                     vm.register()
                 }

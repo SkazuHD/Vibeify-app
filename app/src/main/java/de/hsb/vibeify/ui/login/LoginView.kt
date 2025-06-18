@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -37,6 +38,9 @@ fun LoginView(
         contentAlignment = Alignment.Center
     ) {
         Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
 
         ) {
             Text(
@@ -64,13 +68,15 @@ fun LoginView(
                 )
             }
             Button(
+                modifier = Modifier.fillMaxWidth(0.5f),
                 onClick = {
-                        vm.signIn()
+                    vm.signIn()
                 }
             ) {
                 Text("Login")
             }
             Button(
+                modifier = Modifier.fillMaxWidth(0.5f),
                 onClick = {
                     navController.navigate(Destinations.RegisterView.route)
                 }
@@ -78,7 +84,6 @@ fun LoginView(
                 Text("Register NOW")
             }
         }
-
     }
 
 }

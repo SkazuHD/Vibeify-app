@@ -1,40 +1,74 @@
 package de.hsb.vibeify.data.repository
 
-import com.google.firebase.auth.FirebaseAuth
+import android.util.Log
 import de.hsb.vibeify.data.model.User
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
+import javax.inject.Singleton
 
 
-interface AuthRepository {
-    suspend fun signIn(email: String, password: String): Result<User>
-    suspend fun signUp(email: String, password: String): Result<User>
-    suspend fun signOut()
-    fun getCurrentUser(): User?
+data class UserRepositoryState(
+    val currentUser: User? = null,
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
+
+interface UserRepository {
+
 }
 
-class FirebaseAuthRepo : AuthRepository {
+@Singleton
+class UserRepositoryImpl
 
-    @Inject
-    constructor()
+@Inject constructor(
+    private val authRepository: AuthRepository, private val firestoreRepository: FirestoreRepo
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+) : UserRepository {
 
-    override suspend fun signIn(email: String, password: String): Result<User> {
-        return Result.success(User("123", "test", "", null))
+    private val _state = MutableStateFlow(UserRepositoryState())
+    val state: StateFlow<UserRepositoryState> = _state
+
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    init {
+        Log.d("UserRepository", "init block entered")
+        scope.launch {
+            authRepository.state.collect { authState ->
+                Log.d("UserRepository", "collect: "+authState.currentUser)
+                if (authState.currentUser == null) {
+                    _state.value = UserRepositoryState(currentUser = null)
+                } else {
+                    var maybeUser = firestoreRepository.getUserById(authState.currentUser.uid).await()
+                    Log.d("UserRepository", "User query result: ${maybeUser.documents.size} documents found.")
+                    Log.d("maybeUser.isEmpty", "Is user empty: ${maybeUser.isEmpty}")
+                    if (maybeUser.isEmpty) {
+                        var docRef = firestoreRepository.insertUser(
+                            User(
+                                id = authState.currentUser.uid,
+                                email = authState.currentUser.email ?: "unknown",
+                                name = authState.currentUser.displayName ?: "unknown",
+                                imageUrl = authState.currentUser.photoUrl?.toString() ?: "unknown",
+                            )
+                        ).await()
+                        val userSnapshot = docRef?.get()?.result
+                        var user = userSnapshot?.toObject(User::class.java)
+
+                        _state.value = UserRepositoryState(currentUser = user)
+                    }else{
+                        val userSnapshot = maybeUser.documents.firstOrNull()
+                        val user = userSnapshot?.toObject(User::class.java)
+                        _state.value = UserRepositoryState(currentUser = user)
+                    }
+
+                }
+
+            }
+        }
     }
-
-    override suspend fun signUp(email: String, password: String): Result<User> {
-        return Result.success(User("123", "test", "", null))
-    }
-
-    override suspend fun signOut() {
-        auth.signOut()
-    }
-
-    override fun getCurrentUser(): User? {
-        return null
-        //return auth.currentUser?.let { User(it.uid, it.email.toString(), "") }
-    }
-
-
 }

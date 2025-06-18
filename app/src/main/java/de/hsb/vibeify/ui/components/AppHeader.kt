@@ -1,6 +1,7 @@
 package de.hsb.vibeify.ui.components
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -24,12 +25,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import de.hsb.vibeify.core.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppHeader(
     scrollBehavior: TopAppBarScrollBehavior,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val textFieldState = remember { TextFieldState("Search") }
     var searchResults by remember { mutableStateOf(listOf("Result 1", "Result 2", "Result 3")) }
@@ -57,7 +61,9 @@ fun AppHeader(
             )
             // Avatar
             Box(modifier.size(50.dp)
-                , contentAlignment = Alignment.Center) {
+                .clickable {
+                    authViewModel.signOut()
+                }, contentAlignment = Alignment.Center) {
                 val color = MaterialTheme.colorScheme.primary
                 val initials = ("J" + "L").uppercase()
                 Canvas(modifier = Modifier.fillMaxSize()) {

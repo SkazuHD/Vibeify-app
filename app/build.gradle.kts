@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.fragment)
     implementation(libs.androidx.navigation.testing.android)
+    implementation(libs.androidx.media3.session)
     ksp(libs.hilt.android.compiler)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)

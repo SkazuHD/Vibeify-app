@@ -2,10 +2,13 @@ package de.hsb.vibeify.ui.register
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.hsb.vibeify.data.repository.FirebaseAuthRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class RegisterUiState(
@@ -15,7 +18,7 @@ data class RegisterUiState(
 )
 
 @HiltViewModel
-class RegisterViewModel @Inject constructor() :
+class RegisterViewModel @Inject constructor(private val authRepository: FirebaseAuthRepo) :
 
     ViewModel() {
 
@@ -29,11 +32,18 @@ class RegisterViewModel @Inject constructor() :
 
 
     fun register() {
-        // Registration logic will be implemented here
-        // This is a placeholder for the actual registration logic
-        _uiState.value = RegisterUiState(isLoading = true)
+        viewModelScope.launch {
+            _uiState.value = RegisterUiState(isLoading = true)
+            try {
+                authRepository.signUp(emailState.text.toString().trim(), passwordState.text.toString().trim())
 
-        // Simulate a successful registration
-        _uiState.value = RegisterUiState(registrationSuccess = true)
+            }catch (e: Exception) {
+                _uiState.value = RegisterUiState(
+                    isLoading = false,
+                    error = e.message ?: "Registration failed"
+                )
+            }
+
+        }
     }
 }

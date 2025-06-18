@@ -1,145 +1,112 @@
 package de.hsb.vibeify.core
 
-import android.util.Log
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import androidx.navigation.navigation
 import de.hsb.vibeify.ui.components.AppHeader
+import de.hsb.vibeify.ui.components.StickyBar
 import de.hsb.vibeify.ui.home.MainView
 import de.hsb.vibeify.ui.login.LoginView
-import de.hsb.vibeify.ui.login.LoginViewModel
 import de.hsb.vibeify.ui.player.fakeSong
 import de.hsb.vibeify.ui.playlist.PlaylistView
 import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailView
 import de.hsb.vibeify.ui.register.RegisterView
 import de.hsb.vibeify.ui.search.SearchView
-import de.hsb.vibeify.ui.components.StickyBar
 
 
 @Composable
-fun AppRouter(authViewModel: LoginViewModel = hiltViewModel()) {
-    val rootNavController = rememberNavController()
-    val isAuthenticated by authViewModel.uiState.collectAsState()
+fun AppRouter(authViewModel: AuthViewModel = hiltViewModel()) {
+    val authState by authViewModel.authState.collectAsState()
 
-
-    LaunchedEffect(isAuthenticated) {
-        Log.d("AppRouter", "LaunchedEffect triggered. loginSuccess: ${isAuthenticated.loginSuccess}")
-        if (isAuthenticated.loginSuccess) {
-            rootNavController.navigate("root") {
-                popUpTo("auth") { inclusive = true }
-            }
-        } else {
-            rootNavController.navigate("auth") {
-                popUpTo("root") { inclusive = true }
-            }
-        }
+    val destination = when {
+        !authState.isAuthResolved -> "loading"
+        authState.currentUser != null -> "root"
+        else -> "auth"
     }
 
-    NavHost(
-        navController = rootNavController,
-        startDestination = if (isAuthenticated.loginSuccess) "root" else "auth"
-    )
-
-    {
-        navigation(startDestination = Destinations.LoginView.route, route = "auth") {
-            composable(Destinations.LoginView.route) { LoginView(rootNavController, authViewModel) }
-            composable(Destinations.RegisterView.route) { RegisterView(rootNavController) }
+    when (destination) {
+        "loading" -> {
+            Surface(
+                modifier = Modifier.fillMaxSize().systemBarsPadding(),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 1.dp
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onSurface)
+                }
+            }
         }
-
-        navigation(
-            startDestination = NavbarDestinations.SONGS.route,
-            route = "root"
-        ) {
-            composable(NavbarDestinations.SONGS.route) { RootNavigationBar() }
+        "auth" -> {
+            AuthNavHost()
         }
-
+        "root" -> {
+            RootNavHost()
+        }
     }
 }
 
 @Composable
-fun AppNavHost(navController: NavHostController,
-               startDestination: NavbarDestinations,
-               modifier: Modifier = Modifier) {
-
-    NavHost(navController = navController, startDestination = startDestination.route) {
-        NavbarDestinations.entries.forEach { destination ->
-            composable(destination.route) {
-                when (destination) {
-                    NavbarDestinations.SONGS -> MainView(modifier = modifier, navController = navController)
-                    NavbarDestinations.PLAYLISTS -> PlaylistView(modifier = modifier, navController = navController)
-                    NavbarDestinations.SEARCH -> SearchView(modifier, navController)
-                }
-            }
-        }
-        composable(
-            "playlist_detail_view/{playlistId}",
-            arguments = listOf(navArgument("playlistId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val playlistId = backStackEntry.arguments?.getString("playlistId") ?: ""
-            PlaylistDetailView(modifier = modifier, playlistId = playlistId)
-        }
-        composable("playback_view") {
-            de.hsb.vibeify.ui.player.MinimalMusicPlayer(
-                song = fakeSong,
-                nextSong = "Next Song"
-            )
-        }
-
-
+fun AuthNavHost() {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = Destinations.LoginView.route) {
+        composable(Destinations.LoginView.route) { LoginView(navController = navController) }
+        composable(Destinations.RegisterView.route) { RegisterView() }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RootNavigationBar( modifier: Modifier = Modifier) {
+fun RootNavHost() {
     val navController = rememberNavController()
-    val startDestination = NavbarDestinations.SONGS
-    var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
 
-
     Scaffold(
-        modifier = modifier.fillMaxSize()
-            .systemBarsPadding(),
-        contentWindowInsets =  NavigationBarDefaults.windowInsets,
+        modifier = Modifier.fillMaxSize().systemBarsPadding(),
+        contentWindowInsets = NavigationBarDefaults.windowInsets,
         topBar = {
+            val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
             AppHeader(scrollBehavior, modifier = Modifier)
         },
         bottomBar = {
+            var selectedDestination by rememberSaveable { mutableIntStateOf(NavbarDestinations.SONGS.ordinal) }
             Column {
                 if (currentRoute != "playback_view") {
-                StickyBar(song = fakeSong, navController = navController)
-            }
+                    StickyBar(song = fakeSong, navController = navController)
+                }
                 NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
                     NavbarDestinations.entries.forEachIndexed { index, destination ->
                         NavigationBarItem(
@@ -161,11 +128,33 @@ fun RootNavigationBar( modifier: Modifier = Modifier) {
             }
         }
     ) { contentPadding ->
-        AppNavHost(
+        NavHost(
             navController = navController,
-            startDestination = startDestination,
-            modifier = Modifier
-                .padding(contentPadding)
-        )
+            startDestination = NavbarDestinations.SONGS.route,
+            modifier = Modifier.padding(contentPadding)
+        ) {
+            NavbarDestinations.entries.forEach { destination ->
+                composable(destination.route) {
+                    when (destination) {
+                        NavbarDestinations.SONGS -> MainView(modifier = Modifier, navController = navController)
+                        NavbarDestinations.PLAYLISTS -> PlaylistView(modifier = Modifier, navController = navController)
+                        NavbarDestinations.SEARCH -> SearchView(Modifier, navController)
+                    }
+                }
+            }
+            composable(
+                "playlist_detail_view/{playlistId}",
+                arguments = listOf(navArgument("playlistId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val playlistId = backStackEntry.arguments?.getString("playlistId") ?: ""
+                PlaylistDetailView(modifier = Modifier, playlistId = playlistId)
+            }
+            composable("playback_view") {
+                de.hsb.vibeify.ui.player.MinimalMusicPlayer(
+                    song = fakeSong,
+                    nextSong = "Next Song"
+                )
+            }
+        }
     }
 }

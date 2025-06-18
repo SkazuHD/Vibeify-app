@@ -5,8 +5,8 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import de.hsb.vibeify.data.repository.FirebaseAuthRepo
-import de.hsb.vibeify.data.repository.FirestoreRepo
+import de.hsb.vibeify.data.repository.AuthRepository
+import de.hsb.vibeify.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,12 +17,15 @@ import javax.inject.Inject
 data class LoginUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
-    val loginSuccess: Boolean = false
+    val loginSuccess: Boolean = false,
+    val isAuthResolved: Boolean = false
 )
 
 @HiltViewModel
-class LoginViewModel @Inject constructor(private val userRepository: FirebaseAuthRepo, private val repo: FirestoreRepo) :
-    ViewModel() {
+class LoginViewModel @Inject constructor(
+    private val authRepository: AuthRepository,
+    private val userRepository: UserRepository
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
@@ -30,31 +33,35 @@ class LoginViewModel @Inject constructor(private val userRepository: FirebaseAut
     val passwordState = TextFieldState()
 
 
+    init {
+        viewModelScope.launch {
+            authRepository.state.collect{
+                Log.d("LoginViewModel", "User state updated: \\${it.currentUser?.email}")
+                _uiState.value = LoginUiState(
+                    isLoading = false,
+                    error = null,
+                    loginSuccess = it.currentUser != null,
+                    isAuthResolved = it.isAuthResolved
+                )
+            }
+        }
+    }
+
     fun signIn() {
         viewModelScope.launch {
             _uiState.value = LoginUiState(isLoading = true)
-            val result = userRepository.signIn(
-                usernameState.text.toString(),
-                passwordState.text.toString()
-            )
-            result.fold(
-                onSuccess = { user ->
-                    Log.d("LoginViewModel", "signIn successful, updating UI state.")
-//                    repo.insertUser(
-//                        mapOf(
-//                            "username" to "penar",
-//                            "email" to "user.email",
-//                            "uid" to "user.uid"
-//                        )
-//                    )
-
-                    _uiState.value = LoginUiState(loginSuccess = true)
-                },
-                onFailure = { exception ->
-                    Log.e("LoginViewModel", "signIn failed: ${exception.message}")
-                    _uiState.value = LoginUiState(error = exception.message ?: "Login failed")
-                }
-            )
+            try {
+                authRepository.signIn(
+                    usernameState.text.toString().trim(),
+                    passwordState.text.toString().trim()
+                )
+            } catch (e: Exception) {
+                _uiState.value = LoginUiState(
+                    isLoading = false,
+                    error = e.message ?: "Unbekannter Fehler beim Login"
+                )
+                return@launch
+            }
         }
     }
 

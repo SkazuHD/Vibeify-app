@@ -1,21 +1,23 @@
 package de.hsb.vibeify.data.repository
 
-import com.google.firebase.firestore.FirebaseFirestore as Firestore
-import com.google.firebase.firestore.QuerySnapshot
+import android.util.Log
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.QuerySnapshot
 import de.hsb.vibeify.data.model.Song
+import de.hsb.vibeify.data.model.User
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.google.firebase.firestore.FirebaseFirestore as Firestore
 
 interface FirestoreRepo {
     fun getUsers(): Task<QuerySnapshot>
     fun getSongs(): Task<QuerySnapshot>
     fun getPlaylists(): Task<QuerySnapshot>
-    fun insertUser(user: Map<String, Any>): Task<DocumentReference?>
+    fun insertUser(user: User): Task<DocumentReference?>
     fun insertSong(song: Map<String, Any>): Task<DocumentReference?>
     fun insertPlaylist(playlist: List<Song>): Task<DocumentReference?>
+    fun getUserById(userId: String) : Task<QuerySnapshot>
 }
 
 @Singleton
@@ -28,6 +30,16 @@ class FirebaseRepository @Inject constructor() : FirestoreRepo {
         return db.collection("users").get()
             .addOnSuccessListener { querySnapshot ->
                 println("Users retrieved successfully: ${querySnapshot.documents.size} users found.")
+            }
+            .addOnFailureListener { e ->
+                println("Error retrieving users: $e")
+            }
+    }
+
+    override fun getUserById(userId: String): Task<QuerySnapshot> {
+        return db.collection("users").whereEqualTo("id", userId).get()
+            .addOnSuccessListener { querySnapshot ->
+                println("Users retrieved successfully")
             }
             .addOnFailureListener { e ->
                 println("Error retrieving users: $e")
@@ -54,13 +66,14 @@ class FirebaseRepository @Inject constructor() : FirestoreRepo {
             }
     }
 
-    override fun insertUser(user: Map<String, Any>): Task<DocumentReference?> {
+    override fun insertUser(user: User): Task<DocumentReference?> {
+        Log.d("FirestoreRepository", "insertUser called for user: ${user.id}, ${user.email}")
         return db.collection("users").add(user)
             .addOnSuccessListener { documentReference ->
-                println("User added with ID: ${documentReference.id}")
+                Log.d("FirestoreRepository", "User added with ID: ${documentReference.id}")
             }
             .addOnFailureListener { e ->
-                println("Error adding user: $e")
+                Log.e("FirestoreRepository", "Error adding user: $e")
             }
     }
 

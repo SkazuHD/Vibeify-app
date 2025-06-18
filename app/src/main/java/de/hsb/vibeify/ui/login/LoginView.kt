@@ -12,6 +12,7 @@ import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -28,6 +29,7 @@ fun LoginView(
     navController: NavController,
     vm: LoginViewModel = hiltViewModel(),
 ) {
+    val error = vm.uiState.collectAsState().value.error
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -54,7 +56,13 @@ fun LoginView(
                 state = vm.passwordState,
                 label = { Text("Password") },
             )
-
+            if (error != null) {
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+            }
             Button(
                 onClick = {
                         vm.signIn()

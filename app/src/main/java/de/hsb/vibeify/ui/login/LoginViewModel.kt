@@ -18,7 +18,7 @@ data class LoginUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
     val loginSuccess: Boolean = false,
-    val isAuthResolved: Boolean = false // <--- NEU
+    val isAuthResolved: Boolean = false
 )
 
 @HiltViewModel
@@ -36,10 +36,10 @@ class LoginViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             authRepository.state.collect{
-                Log.d("LoginViewModel", "User state updated: ${it.currentUser?.email}")
+                Log.d("LoginViewModel", "User state updated: \\${it.currentUser?.email}")
                 _uiState.value = LoginUiState(
                     isLoading = false,
-                    error = if (it.currentUser == null && it.isAuthResolved) "No user signed in" else null,
+                    error = null,
                     loginSuccess = it.currentUser != null,
                     isAuthResolved = it.isAuthResolved
                 )
@@ -50,10 +50,18 @@ class LoginViewModel @Inject constructor(
     fun signIn() {
         viewModelScope.launch {
             _uiState.value = LoginUiState(isLoading = true)
-            authRepository.signIn(
-                usernameState.text.toString().trim(),
-                passwordState.text.toString().trim()
-            )
+            try {
+                authRepository.signIn(
+                    usernameState.text.toString().trim(),
+                    passwordState.text.toString().trim()
+                )
+            } catch (e: Exception) {
+                _uiState.value = LoginUiState(
+                    isLoading = false,
+                    error = e.message ?: "Unbekannter Fehler beim Login"
+                )
+                return@launch
+            }
         }
     }
 

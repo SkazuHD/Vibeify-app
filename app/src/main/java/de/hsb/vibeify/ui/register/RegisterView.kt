@@ -12,24 +12,25 @@ import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import de.hsb.vibeify.core.Destinations
 
 @Composable
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-fun RegisterView(navController: NavController, modifier: Modifier = Modifier, vm: RegisterViewModel = hiltViewModel()) {
+fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltViewModel()) {
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
+        val error = vm.uiState.collectAsState().value.error
+
         Column(
 
         ) {
@@ -56,6 +57,14 @@ fun RegisterView(navController: NavController, modifier: Modifier = Modifier, vm
                 label = { Text("Password") },
             )
 
+            if (error != null) {
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+            }
+
             Button(
                 onClick = {
                     vm.register()
@@ -72,7 +81,6 @@ fun RegisterView(navController: NavController, modifier: Modifier = Modifier, vm
 @Composable
 fun RegisterViewPreview() {
     RegisterView(
-        navController = NavController(androidx.compose.ui.platform.LocalContext.current),
         modifier = Modifier.fillMaxSize()
     )
 }

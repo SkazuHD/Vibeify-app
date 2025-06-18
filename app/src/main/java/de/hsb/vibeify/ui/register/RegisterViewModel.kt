@@ -33,7 +33,17 @@ class RegisterViewModel @Inject constructor(private val authRepository: Firebase
 
     fun register() {
         viewModelScope.launch {
-            authRepository.signUp(emailState.text.toString().trim(), passwordState.text.toString().trim())
+            _uiState.value = RegisterUiState(isLoading = true)
+            try {
+                authRepository.signUp(emailState.text.toString().trim(), passwordState.text.toString().trim())
+
+            }catch (e: Exception) {
+                _uiState.value = RegisterUiState(
+                    isLoading = false,
+                    error = e.message ?: "Registration failed"
+                )
+            }
+
         }
     }
 }

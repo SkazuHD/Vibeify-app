@@ -83,7 +83,7 @@ fun AuthNavHost() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Destinations.LoginView.route) {
         composable(Destinations.LoginView.route) { LoginView(navController = navController) }
-        composable(Destinations.RegisterView.route) { RegisterView(navController) }
+        composable(Destinations.RegisterView.route) { RegisterView() }
     }
 }
 

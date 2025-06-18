@@ -46,7 +46,6 @@ class UserRepositoryImpl
                 } else {
                     var maybeUser = firestoreRepository.getUserById(authState.currentUser.uid).await()
                     Log.d("UserRepository", "User query result: ${maybeUser.documents.size} documents found.")
-                    Log.d("maybeUser.isEmpty", "Is user empty: ${maybeUser.isEmpty}")
                     if (maybeUser.isEmpty) {
                         var docRef = firestoreRepository.insertUser(
                             User(
@@ -56,7 +55,7 @@ class UserRepositoryImpl
                                 imageUrl = authState.currentUser.photoUrl?.toString() ?: "unknown",
                             )
                         ).await()
-                        val userSnapshot = docRef?.get()?.result
+                        val userSnapshot = docRef?.get()?.await()
                         var user = userSnapshot?.toObject(User::class.java)
 
                         _state.value = UserRepositoryState(currentUser = user)

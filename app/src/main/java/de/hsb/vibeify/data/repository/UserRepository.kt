@@ -20,11 +20,11 @@ class FirebaseAuthRepo : AuthRepository {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     override suspend fun signIn(email: String, password: String): Result<User> {
-        return Result.success(User("123", "test", ""))
+        return Result.success(User("123", "test", "", null))
     }
 
     override suspend fun signUp(email: String, password: String): Result<User> {
-        return Result.success(User("123", "test", ""))
+        return Result.success(User("123", "test", "", null))
     }
 
     override suspend fun signOut() {

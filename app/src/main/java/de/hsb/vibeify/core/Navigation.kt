@@ -4,12 +4,15 @@ import android.util.Log
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,6 +29,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import de.hsb.vibeify.ui.components.AppHeader
 import de.hsb.vibeify.ui.home.MainView
 import de.hsb.vibeify.ui.login.LoginView
 import de.hsb.vibeify.ui.login.LoginViewModel
@@ -85,8 +89,8 @@ fun AppNavHost(navController: NavHostController,
         NavbarDestinations.entries.forEach { destination ->
             composable(destination.route) {
                 when (destination) {
-                    NavbarDestinations.SONGS -> MainView(navController)
-                    NavbarDestinations.PLAYLISTS -> PlaylistView(navController = navController)
+                    NavbarDestinations.SONGS -> MainView(modifier = modifier, navController = navController)
+                    NavbarDestinations.PLAYLISTS -> PlaylistView(modifier = modifier, navController = navController)
                     NavbarDestinations.SEARCH -> SearchView(navController)
                 }
             }
@@ -96,7 +100,7 @@ fun AppNavHost(navController: NavHostController,
             arguments = listOf(navArgument("playlistId") { type = NavType.StringType })
         ) { backStackEntry ->
             val playlistId = backStackEntry.arguments?.getString("playlistId") ?: ""
-            PlaylistDetailView(playlistId = playlistId)
+            PlaylistDetailView(modifier = modifier, playlistId = playlistId)
         }
         composable("playback_view") {
             de.hsb.vibeify.ui.player.MinimalMusicPlayer(
@@ -109,16 +113,22 @@ fun AppNavHost(navController: NavHostController,
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RootNavigationBar( modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val startDestination = NavbarDestinations.SONGS
     var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+
 
     Scaffold(
         modifier = modifier.fillMaxSize()
             .systemBarsPadding(),
         contentWindowInsets =  NavigationBarDefaults.windowInsets,
+        topBar = {
+            AppHeader(scrollBehavior, modifier = Modifier)
+        },
         bottomBar = {
             NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
                 NavbarDestinations.entries.forEachIndexed { index, destination ->
@@ -140,6 +150,11 @@ fun RootNavigationBar( modifier: Modifier = Modifier) {
             }
         }
     ) { contentPadding ->
-        AppNavHost(navController, startDestination, modifier = Modifier.padding(contentPadding))
+        AppNavHost(
+            navController = navController,
+            startDestination = startDestination,
+            modifier = Modifier
+                .padding(contentPadding)
+        )
     }
 }

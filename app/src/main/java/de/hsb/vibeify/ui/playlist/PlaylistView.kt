@@ -28,7 +28,6 @@ fun PlaylistView(modifier : Modifier = Modifier, navController: NavController, v
                 .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-
             items(playlists) {
                 PlaylistCard(
                     playlistDescription = it.description ?: "",
@@ -39,7 +38,6 @@ fun PlaylistView(modifier : Modifier = Modifier, navController: NavController, v
                     }
                 )
             }
-
         }
     }
 }

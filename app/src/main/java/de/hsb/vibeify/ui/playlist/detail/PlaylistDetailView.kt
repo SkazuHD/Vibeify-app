@@ -47,8 +47,8 @@ fun demoPlayerOnClick(context: android.content.Context) {
 
 @Composable
 fun PlaylistDetailView(
-    playlistId: String,
     modifier: Modifier = Modifier,
+    playlistId: String,
     onClick: () -> Unit = { },
     viewModel: PlaylistDetailViewModel = hiltViewModel()
 ) {
@@ -64,11 +64,11 @@ fun PlaylistDetailView(
     val context = LocalContext.current
 
     //Playlist Header
-    Column {
-        Box(modifier = modifier.fillMaxWidth())
+    Column(modifier = modifier) {
+        Box(modifier = Modifier.fillMaxWidth())
         {
             Row(
-                modifier = modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp)
             ) {
                 Box(
                     modifier = Modifier.size(100.dp),
@@ -130,7 +130,7 @@ fun PlaylistDetailView(
         }
         //Playlist list
 
-        Box(modifier = modifier) {
+        Box() {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()

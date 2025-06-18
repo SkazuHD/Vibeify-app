@@ -3,6 +3,8 @@ package de.hsb.vibeify
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ServiceComponent
+import dagger.hilt.android.scopes.ServiceScoped
 import dagger.hilt.components.SingletonComponent
 import de.hsb.vibeify.data.repository.AuthRepository
 import de.hsb.vibeify.data.repository.FirebaseAuthRepo
@@ -12,6 +14,7 @@ import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.PlaylistRepositoryImpl
 import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.data.repository.UserRepositoryImpl
+import de.hsb.vibeify.services.MediaService
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -32,7 +35,20 @@ object UserModule {
     }
 
     @Provides
-    fun provideUserRepository(): UserRepository{
-        return UserRepositoryImpl(provideAuthRepository(), provideFirebaseRepo())
+    fun provideUserRepository(
+        authRepository: AuthRepository,
+        firestoreRepo: FirestoreRepo
+    ): UserRepository {
+        return UserRepositoryImpl(authRepository, firestoreRepo)
+    }
+}
+
+@Module
+@InstallIn(ServiceComponent::class)
+object MediaServiceModule {
+    @Provides
+    @ServiceScoped
+    fun provideMediaService(): MediaService {
+        return MediaService()
     }
 }

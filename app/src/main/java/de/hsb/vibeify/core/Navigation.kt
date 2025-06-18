@@ -91,7 +91,7 @@ fun AppNavHost(navController: NavHostController,
                 when (destination) {
                     NavbarDestinations.SONGS -> MainView(modifier = modifier, navController = navController)
                     NavbarDestinations.PLAYLISTS -> PlaylistView(modifier = modifier, navController = navController)
-                    NavbarDestinations.SEARCH -> SearchView(navController)
+                    NavbarDestinations.SEARCH -> SearchView(modifier, navController)
                 }
             }
         }

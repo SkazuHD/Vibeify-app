@@ -85,8 +85,12 @@ fun MinimalMusicPlayer(
     var isUserSeeking by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        demoPlayer(context)
-        isPlaying = true
+        if (!player.isPlaying) {
+            demoPlayer(context)
+            isPlaying = true
+        } else {
+            isPlaying = true
+        }
     }
 
     LaunchedEffect(isPlaying) {

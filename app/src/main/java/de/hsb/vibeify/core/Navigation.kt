@@ -1,6 +1,7 @@
 package de.hsb.vibeify.core
 
 import android.util.Log
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
@@ -26,6 +27,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
@@ -38,6 +40,7 @@ import de.hsb.vibeify.ui.playlist.PlaylistView
 import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailView
 import de.hsb.vibeify.ui.register.RegisterView
 import de.hsb.vibeify.ui.search.SearchView
+import de.hsb.vibeify.ui.components.StickyBar
 
 
 @Composable
@@ -121,6 +124,9 @@ fun RootNavigationBar( modifier: Modifier = Modifier) {
     var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
 
     Scaffold(
         modifier = modifier.fillMaxSize()
@@ -130,22 +136,27 @@ fun RootNavigationBar( modifier: Modifier = Modifier) {
             AppHeader(scrollBehavior, modifier = Modifier)
         },
         bottomBar = {
-            NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
-                NavbarDestinations.entries.forEachIndexed { index, destination ->
-                    NavigationBarItem(
-                        selected = selectedDestination == index,
-                        onClick = {
-                            navController.navigate(route = destination.route)
-                            selectedDestination = index
-                        },
-                        icon = {
-                            Icon(
-                                destination.icon,
-                                contentDescription = destination.contentDescription
-                            )
-                        },
-                        label = { Text(destination.label) }
-                    )
+            Column {
+                if (currentRoute != "playback_view") {
+                StickyBar(song = fakeSong, navController = navController)
+            }
+                NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+                    NavbarDestinations.entries.forEachIndexed { index, destination ->
+                        NavigationBarItem(
+                            selected = selectedDestination == index,
+                            onClick = {
+                                navController.navigate(route = destination.route)
+                                selectedDestination = index
+                            },
+                            icon = {
+                                Icon(
+                                    destination.icon,
+                                    contentDescription = destination.contentDescription
+                                )
+                            },
+                            label = { Text(destination.label) }
+                        )
+                    }
                 }
             }
         }

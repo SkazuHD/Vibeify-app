@@ -25,7 +25,6 @@ interface UserRepository {
 
 @Singleton
 class UserRepositoryImpl
-
 @Inject constructor(
     private val authRepository: AuthRepository, private val firestoreRepository: FirestoreRepo
 
@@ -40,12 +39,16 @@ class UserRepositoryImpl
         Log.d("UserRepository", "init block entered")
         scope.launch {
             authRepository.state.collect { authState ->
-                Log.d("UserRepository", "collect: "+authState.currentUser)
+                Log.d("UserRepository", "collect: " + authState.currentUser)
                 if (authState.currentUser == null) {
                     _state.value = UserRepositoryState(currentUser = null)
                 } else {
-                    var maybeUser = firestoreRepository.getUserById(authState.currentUser.uid).await()
-                    Log.d("UserRepository", "User query result: ${maybeUser.documents.size} documents found.")
+                    var maybeUser =
+                        firestoreRepository.getUserById(authState.currentUser.uid).await()
+                    Log.d(
+                        "UserRepository",
+                        "User query result: ${maybeUser.documents.size} documents found."
+                    )
                     if (maybeUser.isEmpty) {
                         var docRef = firestoreRepository.insertUser(
                             User(
@@ -55,11 +58,11 @@ class UserRepositoryImpl
                                 imageUrl = authState.currentUser.photoUrl?.toString() ?: "unknown",
                             )
                         ).await()
-                        val userSnapshot = docRef?.get()?.await()
+                        val userSnapshot = docRef.documents.firstOrNull()
                         var user = userSnapshot?.toObject(User::class.java)
 
                         _state.value = UserRepositoryState(currentUser = user)
-                    }else{
+                    } else {
                         val userSnapshot = maybeUser.documents.firstOrNull()
                         val user = userSnapshot?.toObject(User::class.java)
                         _state.value = UserRepositoryState(currentUser = user)

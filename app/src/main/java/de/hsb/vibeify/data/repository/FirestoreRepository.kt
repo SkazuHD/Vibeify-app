@@ -6,6 +6,7 @@ import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.QuerySnapshot
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.model.User
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.google.firebase.firestore.FirebaseFirestore as Firestore
@@ -14,16 +15,15 @@ interface FirestoreRepo {
     fun getUsers(): Task<QuerySnapshot>
     fun getSongs(): Task<QuerySnapshot>
     fun getPlaylists(): Task<QuerySnapshot>
-    fun insertUser(user: User): Task<DocumentReference?>
+    suspend fun insertUser(user: User): Task<QuerySnapshot>
     fun insertSong(song: Map<String, Any>): Task<DocumentReference?>
     fun insertPlaylist(playlist: List<Song>): Task<DocumentReference?>
-    fun getUserById(userId: String) : Task<QuerySnapshot>
+    fun getUserById(userId: String): Task<QuerySnapshot>
 }
 
 @Singleton
 class FirebaseRepository @Inject constructor() : FirestoreRepo {
     private val db = Firestore.getInstance()
-
 
 
     override fun getUsers(): Task<QuerySnapshot> {
@@ -66,15 +66,16 @@ class FirebaseRepository @Inject constructor() : FirestoreRepo {
             }
     }
 
-    override fun insertUser(user: User): Task<DocumentReference?> {
+    override suspend fun insertUser(user: User): Task<QuerySnapshot> {
         Log.d("FirestoreRepository", "insertUser called for user: ${user.id}, ${user.email}")
-        return db.collection("users").add(user)
-            .addOnSuccessListener { documentReference ->
-                Log.d("FirestoreRepository", "User added with ID: ${documentReference.id}")
+        db.collection("users").document(user.id).set(user)
+            .addOnSuccessListener { _ ->
+                Log.d("FirestoreRepository", "User added with ID: ${user.id}")
             }
             .addOnFailureListener { e ->
                 Log.e("FirestoreRepository", "Error adding user: $e")
-            }
+            }.await()
+        return getUserById(user.id)
     }
 
     override fun insertSong(song: Map<String, Any>): Task<DocumentReference?> {

@@ -23,6 +23,7 @@ data class AuthRepositoryState(
     val isAuthResolved: Boolean = false,
     val error: String? = null
 )
+
 @Singleton
 class FirebaseAuthRepo : AuthRepository {
 
@@ -35,6 +36,9 @@ class FirebaseAuthRepo : AuthRepository {
 
     private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
         val user = firebaseAuth.currentUser
+
+        Log.d("FirebaseAuthRepo", "Auth state changed: ${user?.email}")
+
         state.update {
             it.copy(currentUser = user, isAuthResolved = true)
         }
@@ -84,5 +88,4 @@ class FirebaseAuthRepo : AuthRepository {
             throw Exception(e.message ?: "Abmelden fehlgeschlagen")
         }
     }
-
 }

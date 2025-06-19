@@ -1,6 +1,5 @@
 package de.hsb.vibeify.ui.login
 
-import android.util.Log
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -35,8 +34,7 @@ class LoginViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            authRepository.state.collect{
-                Log.d("LoginViewModel", "User state updated: \\${it.currentUser?.email}")
+            authRepository.state.collect {
                 _uiState.value = LoginUiState(
                     isLoading = false,
                     error = null,

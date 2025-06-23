@@ -15,27 +15,47 @@ import javax.inject.Singleton
 @Singleton
 class PlayerServiceV2 {
 
-    var context: Context
+    private var context: Context
 
     private val controllerReadyActions = mutableListOf<(MediaController) -> Unit>()
     private var mediaController: MediaController? = null
 
-    private fun demoPlayBack() {
+    fun demoPlayBack() {
         // This is a demo playback function that sets up a media item and starts playback.
-        val mediaUri = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+        val mediaUri = "asset:///Bread.mp3"
         val artworkUri =
             "https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png".toUri()
 
 
         val mediaItem =
             MediaItem.Builder()
-                .setMediaId("media-1")
+                .setMediaId("outkast_hey_ya")
                 .setUri(mediaUri)
                 .setMediaMetadata(
                     MediaMetadata.Builder()
-                        .setArtist("David Bowie")
-                        .setTitle("Heroes")
+                        .setTitle("Hey Ya!")
+                        .setArtist("Outkast")
+                        .setAlbumTitle("Speakerboxxx/The Love Below")
+                        .setAlbumArtist("Outkast")
                         .setArtworkUri(artworkUri)
+                        .setGenre(
+                            "Hip Hop"
+                        )
+                        .setDescription(
+                            "A classic hip hop track from Outkast's double album, featuring a catchy hook and infectious beat."
+                        )
+                        .setTrackNumber(1)
+                        .setDiscNumber(
+                            1
+                        ).setReleaseYear(
+                            2003
+                        ).setReleaseMonth(
+                            9
+                        ).setReleaseDay(
+                            9
+                        ).setIsPlayable(
+                            true
+                        )
                         .build()
                 )
                 .build()
@@ -59,7 +79,7 @@ class PlayerServiceV2 {
             mediaController = controller
             controllerReadyActions.forEach { it(controller) }
             controllerReadyActions.clear()
-            demoPlayBack()
+
         }, ContextCompat.getMainExecutor(context))
     }
 

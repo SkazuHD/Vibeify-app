@@ -33,6 +33,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import de.hsb.vibeify.services.PlayerViewModel
 import de.hsb.vibeify.ui.components.AppHeader
 import de.hsb.vibeify.ui.components.StickyBar
 import de.hsb.vibeify.ui.home.MainView
@@ -45,7 +46,7 @@ import de.hsb.vibeify.ui.search.SearchView
 
 
 @Composable
-fun AppRouter(authViewModel: AuthViewModel = hiltViewModel()) {
+fun AppRouter(authViewModel: AuthViewModel = hiltViewModel(), playerViewModel: PlayerViewModel = hiltViewModel()) {
     val authState by authViewModel.authState.collectAsState()
 
     val destination = when {

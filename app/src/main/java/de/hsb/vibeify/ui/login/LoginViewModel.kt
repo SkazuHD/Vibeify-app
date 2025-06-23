@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.data.repository.AuthRepository
 import de.hsb.vibeify.data.repository.UserRepository
-import de.hsb.vibeify.services.PlayerServiceV2
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +24,6 @@ data class LoginUiState(
 class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
-    private val playerServiceV2: PlayerServiceV2
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())

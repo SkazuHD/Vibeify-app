@@ -1,6 +1,5 @@
 package de.hsb.vibeify.ui.player
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,13 +9,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
@@ -36,20 +30,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
-import de.hsb.vibeify.R
+import androidx.media3.common.Player
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.services.PlayerService
-import de.hsb.vibeify.ui.components.SongCard
+import de.hsb.vibeify.services.PlayerViewModel
 import kotlinx.coroutines.delay
-import androidx.media3.common.Player
-
 
 
 fun demoPlayer(context: android.content.Context) {
@@ -73,10 +62,11 @@ val fakeSong = Song(
 @Composable
 fun MinimalMusicPlayer(
     song: Song = fakeSong,
-    nextSong: String = "Next Song"
+    nextSong: String = "Next Song",
+    playerViewModel: PlayerViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
-    val player = PlayerService.getInstance(context)
+    val player = playerViewModel.player
 
     var isPlaying by remember { mutableStateOf(false) }
     var position by remember { mutableStateOf(0L) }

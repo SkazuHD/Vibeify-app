@@ -8,6 +8,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -15,7 +16,9 @@ import javax.inject.Singleton
 class PlayerServiceV2 {
 
     var context: Context
-    lateinit var mediaController: MediaController
+
+    private val controllerReadyActions = mutableListOf<(MediaController) -> Unit>()
+    private var mediaController: MediaController? = null
 
     private fun demoPlayBack() {
         // This is a demo playback function that sets up a media item and starts playback.
@@ -37,9 +40,9 @@ class PlayerServiceV2 {
                 )
                 .build()
 
-        mediaController.setMediaItem(mediaItem)
-        mediaController.prepare()
-        mediaController.play()
+        mediaController?.setMediaItem(mediaItem)
+        mediaController?.prepare()
+        mediaController?.play()
     }
 
     @Inject
@@ -54,16 +57,32 @@ class PlayerServiceV2 {
         controllerFuture.addListener({
             val controller = controllerFuture.get()
             mediaController = controller
+            controllerReadyActions.forEach { it(controller) }
+            controllerReadyActions.clear()
             demoPlayBack()
         }, ContextCompat.getMainExecutor(context))
     }
 
-    fun release() {
-        mediaController.release()
+    fun withController(action: (MediaController) -> Unit) {
+        val controller = mediaController
+        if (controller != null) {
+            action(controller)
+        } else {
+            controllerReadyActions.add(action)
+        }
     }
 
-    fun getController(): MediaController {
+    suspend fun awaitController(): MediaController {
         return mediaController
+            ?: suspendCancellableCoroutine { continuation ->
+                controllerReadyActions.add { controller ->
+                    continuation.resume(controller) { cause, _, _ -> }
+                }
+            }
+    }
+
+    fun release() {
+        mediaController?.release()
     }
 
 }

@@ -32,12 +32,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.services.PlayerService
-import de.hsb.vibeify.services.PlayerViewModel
 import kotlinx.coroutines.delay
 
 
@@ -63,16 +61,16 @@ val fakeSong = Song(
 fun MinimalMusicPlayer(
     song: Song = fakeSong,
     nextSong: String = "Next Song",
-    playerViewModel: PlayerViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
-    val player = playerViewModel.player
+    val player = PlayerService.getInstance(context)
 
     var isPlaying by remember { mutableStateOf(false) }
     var position by remember { mutableStateOf(0L) }
     var duration by remember { mutableStateOf(1L) }
     var sliderPosition by remember { mutableStateOf(0f) }
     var isUserSeeking by remember { mutableStateOf(false) }
+
 
     LaunchedEffect(Unit) {
         if (!player.isPlaying) {

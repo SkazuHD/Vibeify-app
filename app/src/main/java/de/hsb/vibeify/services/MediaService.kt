@@ -1,5 +1,6 @@
 package de.hsb.vibeify.services
 
+import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
@@ -12,8 +13,13 @@ class MediaService : MediaSessionService() {
 
     override fun onCreate() {
         super.onCreate()
-        val player = ExoPlayer.Builder(this).build()
-        mediaSession = MediaSession.Builder(this, player).build()
+        val player = ExoPlayer.Builder(this)
+            .setHandleAudioBecomingNoisy(true)
+            .setWakeMode(C.WAKE_MODE_LOCAL)
+            .build()
+        mediaSession = MediaSession.Builder(this, player)
+            .setId("VibeifyMediaSession")
+            .build()
     }
 
 

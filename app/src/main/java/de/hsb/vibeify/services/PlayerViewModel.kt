@@ -20,7 +20,7 @@ class PlayerViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             _controller.value = service.awaitController()
-            service.demoPlayBack()
+           // service.demoPlayBack()
         }
     }
 }

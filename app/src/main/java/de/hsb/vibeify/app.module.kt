@@ -13,6 +13,8 @@ import de.hsb.vibeify.data.repository.FirebaseRepository
 import de.hsb.vibeify.data.repository.FirestoreRepo
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.PlaylistRepositoryImpl
+import de.hsb.vibeify.data.repository.SongRepository
+import de.hsb.vibeify.data.repository.SongRepositoryImpl
 import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.data.repository.UserRepositoryImpl
 import de.hsb.vibeify.services.MediaService
@@ -27,8 +29,14 @@ object UserModule {
     }
 
     @Provides
-    fun providePlaylistRepository(): PlaylistRepository {
-        return PlaylistRepositoryImpl()
+    fun providePlaylistRepository(
+        songRepository: SongRepository
+    ): PlaylistRepository {
+        return PlaylistRepositoryImpl(songRepository)
+    }
+    @Provides
+    fun provideSongRepository(): SongRepository {
+        return SongRepositoryImpl()
     }
 
     @Provides

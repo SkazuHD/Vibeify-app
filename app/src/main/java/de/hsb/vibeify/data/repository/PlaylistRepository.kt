@@ -33,7 +33,7 @@ interface PlaylistRepository {
     suspend fun deletePlaylist(id: String): Boolean {
         return false
     }
-    suspend fun addSongToPlaylist(playlistId: String, song: Song): Boolean {
+    suspend fun addSongToPlaylist(playlistId: String, songId: String): Boolean {
         return false
     }
     suspend fun removeSongFromPlaylist(playlistId: String, songId: String): Boolean {
@@ -42,7 +42,9 @@ interface PlaylistRepository {
 }
 
 @Singleton
-class PlaylistRepositoryImpl  : PlaylistRepository {
+class PlaylistRepositoryImpl @Inject constructor(
+    private val songRepository: SongRepository
+) : PlaylistRepository {
 
     private val db = Firestore.getInstance()
     private val collectionName = "playlists"
@@ -54,11 +56,7 @@ class PlaylistRepositoryImpl  : PlaylistRepository {
             title = "Absolute banger",
             description = "Playlist from Vibeify",
             imagePath = R.drawable.ic_launcher_background,
-            songs = mutableListOf(
-                Song(name = "Song Name 1", duration = 153),
-                Song(name = "Song Name 2", duration = 215),
-                Song(name = "Song Name 3", duration = 391)
-            )
+            songIds = mutableListOf("song1", "song2", "song3")
         ),
         Playlist(
             id = "456",
@@ -66,10 +64,7 @@ class PlaylistRepositoryImpl  : PlaylistRepository {
             title = "Chill Vibes",
             description = "Relax and enjoy!",
             imagePath = R.drawable.ic_launcher_background,
-            songs = mutableListOf(
-                Song(name = "Chill Song 1", duration = 200),
-                Song(name = "Chill Song 2", duration = 180)
-            )
+            songIds = mutableListOf("song4", "song5")
         ),
         Playlist(
             id = "789",
@@ -77,18 +72,32 @@ class PlaylistRepositoryImpl  : PlaylistRepository {
             title = "Workout Hits",
             description = "Get pumped up!",
             imagePath = R.drawable.ic_launcher_background,
-            songs = mutableListOf(
-                Song(name = "Workout Song 1", duration = 240),
-                Song(name = "Workout Song 2", duration = 300)
-            )
+            songIds = mutableListOf("song6", "song7")
         )
     )
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
+    init {
+        // Initialisieren der Beispiel-Songs
+        scope.launch {
+            // Song-Beispieldaten erstellen
+            val sampleSongs = listOf(
+                Song(id = "song1", name = "Song Name 1", duration = 153),
+                Song(id = "song2", name = "Song Name 2", duration = 215),
+                Song(id = "song3", name = "Song Name 3", duration = 391),
+                Song(id = "song4", name = "Chill Song 1", duration = 200),
+                Song(id = "song5", name = "Chill Song 2", duration = 180),
+                Song(id = "song6", name = "Workout Song 1", duration = 240),
+                Song(id = "song7", name = "Workout Song 2", duration = 300)
+            )
 
-    @Inject constructor(){
-        for (playlist in playlists) {
-            scope.launch {
+            // Songs in die Songs-Collection einfügen
+            sampleSongs.forEach { song ->
+                songRepository.createSong(song)
+            }
+
+            // Playlists in die Playlists-Collection einfügen
+            playlists.forEach { playlist ->
                 createPlaylist(playlist)
             }
         }
@@ -101,9 +110,7 @@ class PlaylistRepositoryImpl  : PlaylistRepository {
             return null
         }
 
-        val playlistData = res.firstOrNull()?.toObject(Playlist::class.java)
-
-        return playlistData
+        return res.firstOrNull()?.toObject(Playlist::class.java)
     }
 
     override suspend fun getAllPlaylists(): List<Playlist> {
@@ -111,9 +118,9 @@ class PlaylistRepositoryImpl  : PlaylistRepository {
         if (res.isEmpty) {
             return emptyList()
         }
-        val playlists = res.documents.mapNotNull { it.toObject(Playlist::class.java) }
-        return playlists
+        return res.documents.mapNotNull { it.toObject(Playlist::class.java) }
     }
+
     override suspend fun searchPlaylists(query: String): List<Playlist> {
         var res = db.collection(collectionName)
             .whereGreaterThanOrEqualTo("title", query)
@@ -125,43 +132,40 @@ class PlaylistRepositoryImpl  : PlaylistRepository {
             return emptyList()
         }
 
-        val playlists = res.documents.mapNotNull { it.toObject(Playlist::class.java) }
-
-        return playlists
+        return res.documents.mapNotNull { it.toObject(Playlist::class.java) }
     }
+
     override suspend fun getPlaylistsByUserId(userId: String): List<Playlist> {
         var res = db.collection(collectionName).whereEqualTo("userId", userId).get().await()
         if (res.isEmpty) {
             return emptyList()
         }
-        val playlists = res.documents.mapNotNull { it.toObject(Playlist::class.java) }
-        return playlists
-    }
-    override suspend fun createPlaylist(playlist: Playlist): Boolean {
-        db.collection(
-            collectionName
-        ).document(playlist.id).set(playlist).await()
-        return true
-    }
-    override suspend fun updatePlaylist(playlist: Playlist): Boolean {
-        db.collection(collectionName).document(playlist.id).set(playlist).await()
-        return  true
-    }
-    override suspend fun deletePlaylist(id: String): Boolean {
-        db.collection(collectionName).document(id).delete().await()
-        return  true
+        return res.documents.mapNotNull { it.toObject(Playlist::class.java) }
     }
 
-    override suspend fun addSongToPlaylist(playlistId: String, song: Song): Boolean {
-        db.collection(collectionName).document(playlistId).update("songs", FieldValue.arrayUnion(song)).await()
+    override suspend fun createPlaylist(playlist: Playlist): Boolean {
+        db.collection(collectionName).document(playlist.id).set(playlist).await()
+        return true
+    }
+
+    override suspend fun updatePlaylist(playlist: Playlist): Boolean {
+        db.collection(collectionName).document(playlist.id).set(playlist).await()
+        return true
+    }
+
+    override suspend fun deletePlaylist(id: String): Boolean {
+        db.collection(collectionName).document(id).delete().await()
+        return true
+    }
+
+    override suspend fun addSongToPlaylist(playlistId: String, songId: String): Boolean {
+        db.collection(collectionName).document(playlistId).update("songIds", FieldValue.arrayUnion(songId)).await()
         return true
     }
 
     override suspend fun removeSongFromPlaylist(playlistId: String, songId: String): Boolean {
-        db.collection(collectionName).document(playlistId).update("songs", FieldValue.arrayRemove(Song(id = songId))).await()
+        db.collection(collectionName).document(playlistId).update("songIds", FieldValue.arrayRemove(songId)).await()
         return true
     }
-
-
 }
 

@@ -10,12 +10,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.repository.PlaylistRepository
+import de.hsb.vibeify.data.repository.SongRepository
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PlaylistDetailViewModel @Inject constructor(
-    private val playlistRepository: PlaylistRepository
+    private val playlistRepository: PlaylistRepository,
+    private val songRepository: SongRepository
 ) : ViewModel() {
     var playlistTitle by mutableStateOf("")
         private set
@@ -35,7 +37,15 @@ class PlaylistDetailViewModel @Inject constructor(
                 playlistTitle = it.title
                 playlistDescription = it.description ?: ""
                 playlistImage = it.imagePath ?: R.drawable.ic_launcher_background
-                songs = it.songs
+
+                // Lädt Songs basierend auf den songIds
+                val loadedSongs = mutableListOf<Song>()
+                for (songId in it.songIds) {
+                    songRepository.getSongById(songId)?.let { song ->
+                        loadedSongs.add(song)
+                    }
+                }
+                songs = loadedSongs
             }
         }
     }

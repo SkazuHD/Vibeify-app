@@ -20,7 +20,7 @@ data class UserRepositoryState(
 )
 
 interface UserRepository {
-
+    val state: StateFlow<UserRepositoryState>
 }
 
 @Singleton
@@ -31,7 +31,7 @@ class UserRepositoryImpl
 ) : UserRepository {
 
     private val _state = MutableStateFlow(UserRepositoryState())
-    val state: StateFlow<UserRepositoryState> = _state
+    override val state: StateFlow<UserRepositoryState> = _state
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 

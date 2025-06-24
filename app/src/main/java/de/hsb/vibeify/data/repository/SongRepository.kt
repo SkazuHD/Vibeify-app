@@ -1,5 +1,7 @@
 package de.hsb.vibeify.data.repository
 
+import com.google.firebase.firestore.Filter
+import com.google.firebase.firestore.Query
 import de.hsb.vibeify.data.model.Song
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -36,8 +38,25 @@ class SongRepositoryImpl @Inject constructor() : SongRepository {
 
     override suspend fun searchSongs(query: String): List<Song> {
         val res = db.collection(collectionName)
-            .whereGreaterThanOrEqualTo("name", query)
-            .whereLessThanOrEqualTo("name", query + "\uf8ff")
+            .where(
+                Filter.or(
+                    Filter.and(
+                        Filter.greaterThanOrEqualTo("name", query),
+                        Filter.lessThanOrEqualTo("name", query + "\uf8ff")
+                    ),
+                    Filter.and(
+                        Filter.greaterThanOrEqualTo("artist", query),
+                        Filter.lessThanOrEqualTo("artist", query + "\uf8ff")
+                    ),
+                    Filter.and(
+                        Filter.greaterThanOrEqualTo("album", query),
+                        Filter.lessThanOrEqualTo("album", query + "\uf8ff")
+                    )
+                )
+            ).orderBy(
+                "name",
+                Query.Direction.ASCENDING
+            )
             .get()
             .await()
 

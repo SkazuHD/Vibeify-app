@@ -1,6 +1,7 @@
 package de.hsb.vibeify.data.repository
 
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.Filter
 import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.model.Song
@@ -122,9 +123,14 @@ class PlaylistRepositoryImpl @Inject constructor(
     }
 
     override suspend fun searchPlaylists(query: String): List<Playlist> {
-        var res = db.collection(collectionName)
-            .whereGreaterThanOrEqualTo("title", query)
-            .whereLessThanOrEqualTo("title", query + "\uf8ff")
+        var res = db.collection(collectionName).limit(
+            10
+        ).where(
+                Filter.or(
+                    Filter.greaterThanOrEqualTo("title", query),
+                    Filter.lessThanOrEqualTo("title", query + "\uf8ff"),
+                )
+            )
             .get()
             .await()
 

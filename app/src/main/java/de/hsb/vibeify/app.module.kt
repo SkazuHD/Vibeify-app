@@ -19,6 +19,8 @@ import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.data.repository.UserRepositoryImpl
 import de.hsb.vibeify.services.MediaService
 import de.hsb.vibeify.services.PlayerServiceV2
+import de.hsb.vibeify.services.SearchService
+import de.hsb.vibeify.services.SearchServiceImpl
 import javax.inject.Singleton
 
 @Module
@@ -59,6 +61,15 @@ object UserModule {
     @Provides
     fun providePlayerService(@ApplicationContext context: android.content.Context): PlayerServiceV2 {
         return PlayerServiceV2(context)
+    }
+
+    @Singleton
+    @Provides
+    fun provideSearchService(
+        songRepository: SongRepository,
+        playlistRepository: PlaylistRepository
+    ): SearchService {
+        return SearchServiceImpl(songRepository, playlistRepository)
     }
 }
 

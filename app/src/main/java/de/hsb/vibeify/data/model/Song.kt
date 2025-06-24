@@ -5,6 +5,7 @@ data class Song(
                 val name: String = "",
                 val artist: String? = null,
                 val album: String? = null,
+                val genre: String? = null,
                 val imageUrl: String? = null,
                 val filePath: String? = null,
                 val duration: Int = 0) {

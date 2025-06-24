@@ -8,6 +8,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import de.hsb.vibeify.data.model.Song
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,53 +17,25 @@ import javax.inject.Singleton
 class PlayerServiceV2 {
 
     private var context: Context
+    private var wasPlayingBeforeViewChange = false
 
     private val controllerReadyActions = mutableListOf<(MediaController) -> Unit>()
     private var mediaController: MediaController? = null
+    var currentSong: Song? = null
 
-    fun demoPlayBack() {
-        // This is a demo playback function that sets up a media item and starts playback.
-        val mediaUri = "asset:///Bread.mp3"
-        val artworkUri =
-            "https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png".toUri()
-
-
-        val mediaItem =
-            MediaItem.Builder()
-                .setMediaId("outkast_hey_ya")
-                .setUri(mediaUri)
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle("Hey Ya!")
-                        .setArtist("Outkast")
-                        .setAlbumTitle("Speakerboxxx/The Love Below")
-                        .setAlbumArtist("Outkast")
-                        .setArtworkUri(artworkUri)
-                        .setGenre(
-                            "Hip Hop"
-                        )
-                        .setDescription(
-                            "A classic hip hop track from Outkast's double album, featuring a catchy hook and infectious beat."
-                        )
-                        .setTrackNumber(1)
-                        .setDiscNumber(
-                            1
-                        ).setReleaseYear(
-                            2003
-                        ).setReleaseMonth(
-                            9
-                        ).setReleaseDay(
-                            9
-                        ).setIsPlayable(
-                            true
-                        )
-                        .build()
-                )
-                .build()
-
-        mediaController?.setMediaItem(mediaItem)
-        mediaController?.prepare()
-        mediaController?.play()
+    fun buildMediaItem(song: Song): MediaItem {
+        return MediaItem.Builder()
+            .setMediaId(song.name)
+            .setUri("${song.filePath}")
+            .setMediaMetadata(
+                MediaMetadata.Builder()
+                    .setTitle(song.name)
+                    .setArtist(song.artist)
+                    .setAlbumTitle(song.album)
+                    .setArtworkUri(song.imageUrl?.toUri())
+                    .build()
+            )
+            .build()
     }
 
     @Inject
@@ -81,6 +54,16 @@ class PlayerServiceV2 {
             controllerReadyActions.clear()
 
         }, ContextCompat.getMainExecutor(context))
+    }
+
+    fun savePlaybackState() {
+        mediaController?.let {
+            wasPlayingBeforeViewChange = it.isPlaying
+        }
+    }
+
+    fun shouldResumePlayback(): Boolean {
+        return wasPlayingBeforeViewChange
     }
 
     fun withController(action: (MediaController) -> Unit) {

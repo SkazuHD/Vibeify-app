@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.components
+package de.hsb.vibeify.ui.components.StickyBar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +14,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,7 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.media3.common.MediaItem
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.Player
 import androidx.navigation.NavController
 import de.hsb.vibeify.data.model.Song
@@ -35,33 +36,26 @@ import kotlinx.coroutines.delay
 
 
 @Composable
-fun StickyBar(song: Song,
-              navController: NavController,
-              modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val player = PlayerService.getInstance(context)
+fun StickyBar(song: Song, navController: NavController, modifier: Modifier = Modifier) {
+    val viewModel: StickyBarViewModel = hiltViewModel()
+    val isPlaying by viewModel.isPlaying.collectAsState()
+    val position by viewModel.position.collectAsState()
+    val duration by viewModel.duration.collectAsState()
+    val playbackState by viewModel.playbackState.collectAsState()
+
 
     var showBar by remember { mutableStateOf(false) }
-    var isPlaying by remember { mutableStateOf(false) }
-    var position by remember { mutableStateOf(0L) }
-    var duration by remember { mutableStateOf(1L) }
-
     var sliderPosition by remember { mutableStateOf(0f) }
     var isUserSeeking by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            showBar = player.playbackState != Player.STATE_IDLE && player.playbackState != Player.STATE_ENDED
-            isPlaying = player.isPlaying
-            position = player.currentPosition
-            duration = player.duration.takeIf { it > 0 } ?: 1L
-            delay(500)
-        }
-    }
     LaunchedEffect(position, duration, isUserSeeking) {
         if (!isUserSeeking && duration > 0) {
             sliderPosition = position / duration.toFloat()
         }
+    }
+
+    LaunchedEffect(playbackState) {
+        showBar = playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED
     }
 
     if (showBar) {
@@ -112,9 +106,9 @@ fun StickyBar(song: Song,
                 Spacer(modifier = Modifier.width(8.dp))
                 IconButton(onClick = {
                     if (isPlaying) {
-                        player.pause()
+                        viewModel.pause()
                     } else {
-                        player.play()
+                        viewModel.play()
                     }
                 }) {
                     Icon(
@@ -127,8 +121,8 @@ fun StickyBar(song: Song,
                 Spacer(modifier = Modifier.width(8.dp))
                 IconButton(
                     onClick = {
-                        player.stop()
-                        player.clearMediaItems()
+                        viewModel.stop()
+                        viewModel.clearMediaItems()
                     },
                     modifier = Modifier.size(26.dp)
                 ) {
@@ -147,7 +141,7 @@ fun StickyBar(song: Song,
                     },
                     onValueChangeFinished = {
                         val seekPos = (sliderPosition * duration).toLong()
-                        player.seekTo(seekPos)
+                        viewModel.seekTo(seekPos)
                         isUserSeeking = false
                     },
                     modifier = Modifier

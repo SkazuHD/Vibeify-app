@@ -1,8 +1,8 @@
 package de.hsb.vibeify.data.model
 
 data class Song(
-                val id: String? = null,
-                val name: String,
+                val id: String = "",
+                val name: String = "",
                 val artist: String? = null,
                 val album: String? = null,
                 val imageUrl: String? = null,

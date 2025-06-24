@@ -22,7 +22,7 @@ class PlaylistViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            playlists = playlistRepository.getPlaylistsByUserId("TODO()")
+            playlists = playlistRepository.getPlaylistsByUserId("123")
         }
     }
 

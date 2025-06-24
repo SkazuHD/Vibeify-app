@@ -35,7 +35,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import de.hsb.vibeify.services.PlayerViewModel
 import de.hsb.vibeify.ui.components.AppHeader
-import de.hsb.vibeify.ui.components.StickyBar
+import de.hsb.vibeify.ui.components.StickyBar.StickyBar
 import de.hsb.vibeify.ui.home.MainView
 import de.hsb.vibeify.ui.login.LoginView
 import de.hsb.vibeify.ui.player.fakeSong

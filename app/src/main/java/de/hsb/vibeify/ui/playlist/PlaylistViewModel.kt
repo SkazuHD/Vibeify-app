@@ -27,8 +27,8 @@ class PlaylistViewModel @Inject constructor(
                 if (userState.currentUser != null) {
                     val userPlaylists = playlistRepository.getPlaylistsForUser(userState.currentUser.playlists)
 
-                    val likedSongIds = userRepository.getLikedSongIds()
-                    val likedSongsPlaylist = playlistRepository.getLikedSongsPlaylist(likedSongIds)
+                    //No need to load all songs here
+                    val likedSongsPlaylist = playlistRepository.getLikedSongsPlaylist(emptyList())
 
                     playlists = listOf(likedSongsPlaylist) + userPlaylists
                 } else {

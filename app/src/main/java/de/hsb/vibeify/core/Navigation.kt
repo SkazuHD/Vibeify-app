@@ -1,5 +1,6 @@
 package de.hsb.vibeify.core
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -55,6 +56,8 @@ fun AppRouter(authViewModel: AuthViewModel = hiltViewModel(), playerViewModel: P
         authState.currentUser != null -> "root"
         else -> "auth"
     }
+
+    Log.d("AppRouter", "Navigating to destination: $destination")
 
     when (destination) {
         "loading" -> {

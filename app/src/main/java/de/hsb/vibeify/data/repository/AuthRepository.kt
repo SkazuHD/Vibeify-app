@@ -25,10 +25,9 @@ data class AuthRepositoryState(
 )
 
 @Singleton
-class FirebaseAuthRepo : AuthRepository {
+class FirebaseAuthRepo @Inject
+constructor(): AuthRepository {
 
-    @Inject
-    constructor()
 
     override val state = MutableStateFlow(AuthRepositoryState())
 
@@ -43,8 +42,8 @@ class FirebaseAuthRepo : AuthRepository {
             it.copy(currentUser = user, isAuthResolved = true)
         }
     }
-
     init {
+        Log.d("FirebaseAuthRepo", "FirebaseAuthRepo initialized")
         auth.addAuthStateListener(authStateListener)
     }
 
@@ -55,7 +54,7 @@ class FirebaseAuthRepo : AuthRepository {
             if (user != null) {
                 state.update {
                     Log.d("AuthDebug", "User signed in successfully: ${user.email}")
-                    AuthRepositoryState(currentUser = user)
+                    AuthRepositoryState(currentUser = user, isAuthResolved = true)
                 }
             }
         } catch (e: Exception) {
@@ -70,7 +69,7 @@ class FirebaseAuthRepo : AuthRepository {
             if (user != null) {
                 state.update {
                     Log.d("AuthDebug", "User registered and signed in successfully: ${user.email}")
-                    AuthRepositoryState(currentUser = user)
+                    AuthRepositoryState(currentUser = user, isAuthResolved = true)
                 }
             }
         } catch (e: Exception) {
@@ -82,7 +81,7 @@ class FirebaseAuthRepo : AuthRepository {
         try {
             auth.signOut()
             state.update {
-                AuthRepositoryState(currentUser = null)
+                AuthRepositoryState(currentUser = null, isAuthResolved = true)
             }
         } catch (e: Exception) {
             throw Exception(e.message ?: "Abmelden fehlgeschlagen")

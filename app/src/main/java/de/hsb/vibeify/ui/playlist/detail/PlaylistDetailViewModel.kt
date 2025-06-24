@@ -1,5 +1,6 @@
 package de.hsb.vibeify.ui.playlist.detail
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +48,7 @@ class PlaylistDetailViewModel @Inject constructor(
             isLoadingPlayList = true
             if (playlistId == LIKED_SONGS_PLAYLIST_ID) {
                 val likedSongIds = userRepository.getLikedSongIds()
+                Log.d("PlaylistDetailViewModel", "Liked song IDs: $likedSongIds")
                 val likedSongsPlaylist = playlistRepository.getLikedSongsPlaylist(likedSongIds)
 
                 playlistTitle = likedSongsPlaylist.title

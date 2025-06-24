@@ -35,10 +35,8 @@ interface UserRepository {
 }
 
 @Singleton
-class UserRepositoryImpl
-@Inject constructor(
-    private val authRepository: AuthRepository, private val firestoreRepository: FirestoreRepo
-
+class UserRepositoryImpl @Inject constructor(
+    authRepository: AuthRepository, firestoreRepository: FirestoreRepo
 ) : UserRepository {
 
     private val db = Firestore.getInstance()
@@ -90,6 +88,7 @@ class UserRepositoryImpl
     }
 
     override fun getLikedSongIds(): List<String> {
+        Log.d("UserRepository", "getLikedSongIds called")
         return _state.value.currentUser?.likedSongs ?: emptyList()
     }
 

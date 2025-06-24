@@ -19,31 +19,35 @@ import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.data.repository.UserRepositoryImpl
 import de.hsb.vibeify.services.MediaService
 import de.hsb.vibeify.services.PlayerServiceV2
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object UserModule {
+
+    @Singleton
     @Provides
     fun provideAuthRepository(): AuthRepository {
         return FirebaseAuthRepo()
     }
-
+    @Singleton
     @Provides
     fun providePlaylistRepository(
         songRepository: SongRepository
     ): PlaylistRepository {
         return PlaylistRepositoryImpl(songRepository)
     }
+    @Singleton
     @Provides
     fun provideSongRepository(): SongRepository {
         return SongRepositoryImpl()
     }
-
+    @Singleton
     @Provides
     fun provideFirebaseRepo(): FirestoreRepo {
         return FirebaseRepository()
     }
-
+    @Singleton
     @Provides
     fun provideUserRepository(
         authRepository: AuthRepository,
@@ -51,7 +55,7 @@ object UserModule {
     ): UserRepository {
         return UserRepositoryImpl(authRepository, firestoreRepo)
     }
-
+    @Singleton
     @Provides
     fun providePlayerService(@ApplicationContext context: android.content.Context): PlayerServiceV2 {
         return PlayerServiceV2(context)

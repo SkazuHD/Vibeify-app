@@ -30,7 +30,10 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
-        val error = vm.uiState.collectAsState().value.error
+        val error = vm.uiState.collectAsState().value.generalError
+        val hasErrors = vm.uiState.collectAsState().value.hasErrors
+        val uiState = vm.uiState.collectAsState().value
+
 
         Column(
             modifier = Modifier.padding(16.dp),
@@ -39,53 +42,68 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
         ) {
             Text(
                 text = "Register",
-                textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onBackground,
                 fontSize = MaterialTheme.typography.titleLargeEmphasized.fontSize,
                 modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 20.dp)
             )
 
-            OutlinedTextField(
-                state = vm.usernameState,
-                label = { Text("Username") },
-            )
 
             OutlinedTextField(
                 state = vm.emailState,
                 label = { Text("Email") },
+                isError = uiState.emailError.isNotEmpty(),
+                supportingText = {
+                    if (uiState.emailError.isNotEmpty()) {
+                        Text(uiState.emailError.toString())
+                    }
+                }
+            )
+
+            OutlinedTextField(
+                state = vm.confirmEmailState,
+                label = { Text("Confirm Email") },
+                isError = uiState.confirmEmailError.isNotEmpty(),
+                supportingText = {
+                    if (uiState.confirmEmailError.isNotEmpty()) {
+                        Text(uiState.confirmEmailError.toString())
+                    }
+                }
             )
 
             OutlinedSecureTextField(
                 state = vm.passwordState,
                 label = { Text("Password") },
+                isError = uiState.passwordError.isNotEmpty(),
+                supportingText = {
+                    if (uiState.passwordError.isNotEmpty()) {
+                        Text(uiState.passwordError.toString())
+                    }
+                }
             )
 
-            if (error != null) {
-                Text(
-                    text = error,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(top = 12.dp)
-                )
-            }
+            OutlinedSecureTextField(
+                state = vm.confirmPasswordState,
+                label = { Text("Confirm Password") },
+                isError = uiState.confirmPasswordError.isNotEmpty(),
+                supportingText = {
+                    if (uiState.confirmPasswordError.isNotEmpty()) {
+                        Text(uiState.confirmPasswordError.toString())
+                    }
+                }
+            )
 
             Button(
                 modifier = Modifier.fillMaxWidth(0.5f),
+                enabled = !hasErrors,
                 onClick = {
                     vm.register()
                 }
             ) {
-                Text("Register NOW")
+                Text("Register")
             }
+
         }
 
     }
-}
-
-@Preview
-@Composable
-fun RegisterViewPreview() {
-    RegisterView(
-        modifier = Modifier.fillMaxSize()
-    )
 }
 

@@ -26,6 +26,10 @@ interface UserRepository {
     fun isPlaylistFavorite(string: String): Boolean
     suspend fun removePlaylistFromFavorites(string: String)
     suspend fun addPlaylistToFavorites(string: String)
+    fun isSongFavorite(string: String): Boolean
+    suspend fun removeSongFromFavorites(string: String)
+    suspend fun addSongToFavorites(string: String)
+    fun getLikedSongIds(): List<String>
 
     val state: StateFlow<UserRepositoryState>
 }
@@ -85,22 +89,45 @@ class UserRepositoryImpl
         }
     }
 
-    override fun isPlaylistFavorite(string: String): Boolean {
+    override fun getLikedSongIds(): List<String> {
+        return _state.value.currentUser?.likedSongs ?: emptyList()
+    }
+
+    override fun isPlaylistFavorite(playlistId: String): Boolean {
         if (_state.value.currentUser == null) {
             return false
         }else{
-            return _state.value.currentUser?.playlists?.contains(string) == true
+            return _state.value.currentUser?.playlists?.contains(playlistId) == true
         }
     }
 
-    override suspend fun removePlaylistFromFavorites(string: String) {
+    override suspend fun removePlaylistFromFavorites(playlistId: String) {
         val user = _state.value.currentUser ?: return
-        db.collection(collectionName).document(user.id).update("playlists", FieldValue.arrayRemove(string)).await()
+        db.collection(collectionName).document(user.id).update("playlists", FieldValue.arrayRemove(playlistId)).await()
     }
 
     override suspend fun addPlaylistToFavorites(playlistId: String) {
         val user = _state.value.currentUser ?: return
         db.collection(collectionName).document(user.id).update("playlists", FieldValue.arrayUnion(playlistId)).await()
 
+    }
+
+    override fun isSongFavorite(songId: String): Boolean {
+        if (_state.value.currentUser == null) {
+            return false
+        } else {
+            return _state.value.currentUser?.likedSongs?.contains(songId) == true
+        }
+
+    }
+
+    override suspend fun removeSongFromFavorites(songId: String) {
+        val user = _state.value.currentUser ?: return
+        db.collection(collectionName).document(user.id).update("likedSongs", FieldValue.arrayRemove(songId)).await()
+    }
+
+    override suspend fun addSongToFavorites(songId: String) {
+        val user = _state.value.currentUser ?: return
+        db.collection(collectionName).document(user.id).update("likedSongs", FieldValue.arrayUnion(songId)).await()
     }
 }

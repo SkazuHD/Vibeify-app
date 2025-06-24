@@ -21,19 +21,20 @@ class PlaylistViewModel @Inject constructor(
     var playlists by mutableStateOf(emptyList<Playlist>())
         private set
 
-
     init {
         viewModelScope.launch {
             userRepository.state.collect { userState ->
                 if (userState.currentUser != null) {
-                    playlists = playlistRepository.getPlaylistsForUser(userState.currentUser.playlists)
+                    val userPlaylists = playlistRepository.getPlaylistsForUser(userState.currentUser.playlists)
+
+                    val likedSongIds = userRepository.getLikedSongIds()
+                    val likedSongsPlaylist = playlistRepository.getLikedSongsPlaylist(likedSongIds)
+
+                    playlists = listOf(likedSongsPlaylist) + userPlaylists
                 } else {
                     playlists = emptyList()
                 }
             }
-
-
-
         }
     }
 

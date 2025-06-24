@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Song
+import de.hsb.vibeify.data.repository.LIKED_SONGS_PLAYLIST_ID
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.SongRepository
 import de.hsb.vibeify.data.repository.UserRepository
@@ -34,23 +35,55 @@ class PlaylistDetailViewModel @Inject constructor(
     var isFavorite by mutableStateOf(false)
         private set
 
+    var isFavoriteAble by mutableStateOf(true)
+        private set
+    var isLoadingPlayList by mutableStateOf(true)
+        private set
+    var isLoadingSongs by mutableStateOf(true)
+        private set
+
     fun loadPlaylist(playlistId: String) {
         viewModelScope.launch {
-            val playlist = playlistRepository.getPlaylistById(playlistId)
-            playlist?.let {
-                playlistTitle = it.title
-                playlistDescription = it.description ?: ""
-                playlistImage = it.imagePath ?: R.drawable.ic_launcher_background
+            isLoadingPlayList = true
+            if (playlistId == LIKED_SONGS_PLAYLIST_ID) {
+                val likedSongIds = userRepository.getLikedSongIds()
+                val likedSongsPlaylist = playlistRepository.getLikedSongsPlaylist(likedSongIds)
 
+                playlistTitle = likedSongsPlaylist.title
+                playlistDescription = likedSongsPlaylist.description ?: ""
+                playlistImage = likedSongsPlaylist.imagePath ?: R.drawable.ic_launcher_background
+                isLoadingPlayList = false
+                isLoadingSongs = true
                 val loadedSongs = mutableListOf<Song>()
-                for (songId in it.songIds) {
+                for (songId in likedSongsPlaylist.songIds) {
                     songRepository.getSongById(songId)?.let { song ->
                         loadedSongs.add(song)
                     }
                 }
                 songs = loadedSongs
+                isFavorite = false
+                isFavoriteAble = false
+                isLoadingSongs = false
+            } else {
+                val playlist = playlistRepository.getPlaylistById(playlistId)
+                playlist?.let {
+                    playlistTitle = it.title
+                    playlistDescription = it.description ?: ""
+                    playlistImage = it.imagePath ?: R.drawable.ic_launcher_background
+                    isLoadingPlayList = false
+                    isLoadingSongs = true
+                    val loadedSongs = mutableListOf<Song>()
+                    for (songId in it.songIds) {
+                        songRepository.getSongById(songId)?.let { song ->
+                            loadedSongs.add(song)
+                        }
+                    }
+                    songs = loadedSongs
+                }
+                isFavorite = userRepository.isPlaylistFavorite(playlistId)
+                isFavoriteAble = true
+                isLoadingSongs = false
             }
-            isFavorite = userRepository.isPlaylistFavorite(playlistId)
         }
     }
 

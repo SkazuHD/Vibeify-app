@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -65,6 +66,7 @@ fun PlaylistDetailView(
     val playlistDurationText = viewModel.playlistDurationText
     val context = LocalContext.current
     val isFavorite = viewModel.isFavorite
+    val isFavoriteAble = viewModel.isFavoriteAble
 
     //Playlist Header
     Column(modifier = modifier) {
@@ -129,48 +131,57 @@ fun PlaylistDetailView(
 
                     }
                 }
-                Column {
-                    Box {
-                        IconButton(
-                            onClick = {
-                                viewModel.toggleFavorite(playlistId)
-                            },
-                            modifier = Modifier
-                                .align(Alignment.Center)
-                                .size(48.dp)
+                if(isFavoriteAble){
+                    Column {
+                        Box {
+                            IconButton(
+                                onClick = {
+                                    viewModel.toggleFavorite(playlistId)
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .size(48.dp)
 
-                        ) {
-                            Icon(
-                                imageVector = isFavorite
-                                    .let { if (it) Icons.Default.Favorite else Icons.Default.FavoriteBorder },
-                                contentDescription = null
-                            )
+                            ) {
+                                Icon(
+                                    imageVector = isFavorite
+                                        .let { if (it) Icons.Default.Favorite else Icons.Default.FavoriteBorder },
+                                    contentDescription = null
+                                )
+                            }
                         }
                     }
                 }
+
             }
         }
-        //Playlist list
-
-        Box() {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-
-                items(songs) {
-                    SongCard(
-                        title = it.name,
-                        artist = it.artist ?: "Unknown Artist",
-                        songIcon = R.drawable.ic_launcher_foreground,
-                        onClick = onClick
-                    )
+            Box() {
+                if (viewModel.isLoadingSongs){
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
+                    }
+                    return
                 }
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
 
+                    items(songs) {
+                        SongCard(
+                            title = it.name,
+                            artist = it.artist ?: "Unknown Artist",
+                            songIcon = R.drawable.ic_launcher_foreground,
+                            onClick = onClick
+                        )
+                    }
+
+                }
             }
-        }
+
+
     }
 
 }

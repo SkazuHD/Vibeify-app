@@ -22,7 +22,8 @@ data class RegisterUiState(
     val confirmEmailError: String = "",
     val passwordError: String = "",
     val confirmPasswordError: String = "",
-    val generalError: String? = null
+    val generalError: String? = null,
+    val hasErrors: Boolean = false
 )
 
 @HiltViewModel
@@ -41,22 +42,26 @@ class RegisterViewModel @Inject constructor(private val authRepository: Firebase
         viewModelScope.launch {
             launch {
                 snapshotFlow { emailState.text }.collectLatest {
-                    _uiState.value = _uiState.value.copy(emailError = "")
+                    validateEmail()
+                    hasErrors()
                 }
             }
             launch {
                 snapshotFlow { confirmEmailState.text }.collectLatest {
-                    _uiState.value = _uiState.value.copy(confirmEmailError = "")
+                    validateConfirmEmail()
+                    hasErrors()
                 }
             }
             launch {
                 snapshotFlow { passwordState.text }.collectLatest {
-                    _uiState.value = _uiState.value.copy(passwordError = "")
+                    validatePassword()
+                    hasErrors()
                 }
             }
             launch {
                 snapshotFlow { confirmPasswordState.text }.collectLatest {
-                    _uiState.value = _uiState.value.copy(confirmPasswordError = "")
+                    validateConfirmPassword()
+                    hasErrors()
                 }
             }
         }
@@ -64,67 +69,71 @@ class RegisterViewModel @Inject constructor(private val authRepository: Firebase
 
 
     fun register() {
-
-        if (validate()){
             viewModelScope.launch {
-                _uiState.value = RegisterUiState(isLoading = true)
+                _uiState.value = _uiState.value.copy(isLoading = true)
                 try {
                     authRepository.signUp(emailState.text.toString().trim(), passwordState.text.toString().trim())
 
                 }catch (e: Exception) {
-                    _uiState.value = RegisterUiState(
+                    _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        generalError = e.message ?: "Registration failed"
+                        generalError = e.message ?: "Unknown error during registration"
                     )
                 }
-
             }
+
+    }
+
+    fun validateEmail(){
+        _uiState.value = _uiState.value.copy(emailError = "")
+        if (emailState.text.isBlank()) {
+            _uiState.value = _uiState.value.copy(emailError = "Email cannot be empty")
+        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(emailState.text).matches()) {
+            _uiState.value = _uiState.value.copy(emailError = "Invalid email format")
         }
     }
 
-    fun validate() : Boolean {
-        var isValid = true
-        _uiState.value = RegisterUiState(
-            emailError = "",
-            confirmEmailError = "",
-            passwordError = "",
-            confirmPasswordError = ""
-        )
-        //validate email
-        if (emailState.text.isBlank()) {
-            _uiState.value = _uiState.value.copy(emailError = "Email cannot be empty")
-            isValid = false
-        } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(emailState.text).matches()) {
-            _uiState.value = _uiState.value.copy(emailError = "Invalid email format")
-            isValid = false
-        }
-
-        //validate password
-        if(passwordState.text.isBlank()) {
-            _uiState.value = _uiState.value.copy(passwordError = "Password cannot be empty")
-            isValid = false
-        } else if (!passwordState.text.matches(Regex("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$"))) {
-            _uiState.value = _uiState.value.copy(passwordError = "Password must be at least 6 characters long and contain letters and numbers")
-            isValid = false
-        }
-
-        //match emails
+    fun validateConfirmEmail(){
+        _uiState.value = _uiState.value.copy(confirmEmailError = "")
         if(emailState.text.isNotBlank() && confirmEmailState.text.isNotBlank() &&
             emailState.text != confirmEmailState.text) {
             _uiState.value = _uiState.value.copy(
                 confirmEmailError = "email does not match"
             )
-            isValid = false
         }
-        //match passwords
+
+    }
+
+    fun validatePassword(){
+        _uiState.value = _uiState.value.copy(passwordError = "")
+        if(passwordState.text.isBlank()) {
+            _uiState.value = _uiState.value.copy(passwordError = "Password cannot be empty")
+        } else if (!passwordState.text.matches(Regex("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}$"))) {
+            _uiState.value = _uiState.value.copy(passwordError = "Password must be at least 6 characters long and contain letters and numbers")
+        }
+
+    }
+    fun validateConfirmPassword(){
+        _uiState.value = _uiState.value.copy(confirmPasswordError = "")
         if(passwordState.text.isNotBlank() && confirmPasswordState.text.isNotBlank() &&
             passwordState.text != confirmPasswordState.text) {
             _uiState.value = _uiState.value.copy(
                 confirmPasswordError = "password does not match"
             )
-            isValid = false
         }
-    return isValid
+
     }
 
+
+    fun hasErrors() {
+        if(uiState.value.emailError.isNotEmpty() ||
+            uiState.value.confirmEmailError.isNotEmpty() ||
+            uiState.value.passwordError.isNotEmpty() ||
+            uiState.value.confirmPasswordError.isNotEmpty()) {
+            _uiState.value = _uiState.value.copy(hasErrors = true)
+        }
+        else {
+            _uiState.value = _uiState.value.copy(hasErrors = false)
+        }
+    }
 }

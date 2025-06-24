@@ -126,7 +126,7 @@ class PlaylistRepositoryImpl @Inject constructor(
         var res = db.collection(collectionName).limit(
             10
         ).where(
-                Filter.or(
+                Filter.and(
                     Filter.greaterThanOrEqualTo("title", query),
                     Filter.lessThanOrEqualTo("title", query + "\uf8ff"),
                 )

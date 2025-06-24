@@ -1,6 +1,7 @@
 package de.hsb.vibeify.data.repository
 
 import android.util.Log
+import com.google.firebase.firestore.FieldValue
 import de.hsb.vibeify.data.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,6 +12,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.google.firebase.firestore.FirebaseFirestore as Firestore
+
 
 
 data class UserRepositoryState(
@@ -20,6 +23,10 @@ data class UserRepositoryState(
 )
 
 interface UserRepository {
+    fun isPlaylistFavorite(string: String): Boolean
+    suspend fun removePlaylistFromFavorites(string: String)
+    suspend fun addPlaylistToFavorites(string: String)
+
     val state: StateFlow<UserRepositoryState>
 }
 
@@ -30,7 +37,11 @@ class UserRepositoryImpl
 
 ) : UserRepository {
 
+    private val db = Firestore.getInstance()
+    private val collectionName = "users"
+
     private val _state = MutableStateFlow(UserRepositoryState())
+
     override val state: StateFlow<UserRepositoryState> = _state
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -72,5 +83,24 @@ class UserRepositoryImpl
 
             }
         }
+    }
+
+    override fun isPlaylistFavorite(string: String): Boolean {
+        if (_state.value.currentUser == null) {
+            return false
+        }else{
+            return _state.value.currentUser?.playlists?.contains(string) == true
+        }
+    }
+
+    override suspend fun removePlaylistFromFavorites(string: String) {
+        val user = _state.value.currentUser ?: return
+        db.collection(collectionName).document(user.id).update("playlists", FieldValue.arrayRemove(string)).await()
+    }
+
+    override suspend fun addPlaylistToFavorites(playlistId: String) {
+        val user = _state.value.currentUser ?: return
+        db.collection(collectionName).document(user.id).update("playlists", FieldValue.arrayUnion(playlistId)).await()
+
     }
 }

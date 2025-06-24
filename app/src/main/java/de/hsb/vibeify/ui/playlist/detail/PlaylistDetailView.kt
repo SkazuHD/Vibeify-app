@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,6 +64,7 @@ fun PlaylistDetailView(
     val songs = viewModel.songs
     val playlistDurationText = viewModel.playlistDurationText
     val context = LocalContext.current
+    val isFavorite = viewModel.isFavorite
 
     //Playlist Header
     Column(modifier = modifier) {
@@ -124,6 +127,25 @@ fun PlaylistDetailView(
                             modifier = Modifier.padding(start = 8.dp, top = 8.dp)
                         )
 
+                    }
+                }
+                Column {
+                    Box {
+                        IconButton(
+                            onClick = {
+                                viewModel.toggleFavorite(playlistId)
+                            },
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(48.dp)
+
+                        ) {
+                            Icon(
+                                imageVector = isFavorite
+                                    .let { if (it) Icons.Default.Favorite else Icons.Default.FavoriteBorder },
+                                contentDescription = null
+                            )
+                        }
                     }
                 }
             }

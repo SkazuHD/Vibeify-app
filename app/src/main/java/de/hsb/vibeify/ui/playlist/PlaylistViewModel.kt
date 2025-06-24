@@ -8,12 +8,14 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.repository.PlaylistRepository
+import de.hsb.vibeify.data.repository.UserRepository
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PlaylistViewModel @Inject constructor(
-    private val playlistRepository: PlaylistRepository
+    private val playlistRepository: PlaylistRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     var playlists by mutableStateOf(emptyList<Playlist>())
@@ -22,7 +24,16 @@ class PlaylistViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            playlists = playlistRepository.getPlaylistsByUserId("123")
+            userRepository.state.collect { userState ->
+                if (userState.currentUser != null) {
+                    playlists = playlistRepository.getPlaylistsForUser(userState.currentUser.playlists)
+                } else {
+                    playlists = emptyList()
+                }
+            }
+
+
+
         }
     }
 

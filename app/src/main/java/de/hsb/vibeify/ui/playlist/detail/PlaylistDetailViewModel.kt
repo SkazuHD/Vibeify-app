@@ -11,13 +11,15 @@ import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.SongRepository
+import de.hsb.vibeify.data.repository.UserRepository
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class PlaylistDetailViewModel @Inject constructor(
     private val playlistRepository: PlaylistRepository,
-    private val songRepository: SongRepository
+    private val songRepository: SongRepository,
+    private val userRepository: UserRepository
 ) : ViewModel() {
     var playlistTitle by mutableStateOf("")
         private set
@@ -29,6 +31,8 @@ class PlaylistDetailViewModel @Inject constructor(
         listOf<Song>()
     )
         private set
+    var isFavorite by mutableStateOf(false)
+        private set
 
     fun loadPlaylist(playlistId: String) {
         viewModelScope.launch {
@@ -38,7 +42,6 @@ class PlaylistDetailViewModel @Inject constructor(
                 playlistDescription = it.description ?: ""
                 playlistImage = it.imagePath ?: R.drawable.ic_launcher_background
 
-                // Lädt Songs basierend auf den songIds
                 val loadedSongs = mutableListOf<Song>()
                 for (songId in it.songIds) {
                     songRepository.getSongById(songId)?.let { song ->
@@ -47,6 +50,7 @@ class PlaylistDetailViewModel @Inject constructor(
                 }
                 songs = loadedSongs
             }
+            isFavorite = userRepository.isPlaylistFavorite(playlistId)
         }
     }
 
@@ -65,4 +69,15 @@ class PlaylistDetailViewModel @Inject constructor(
                 else -> "$playlistDurationSeconds Sekunden"
             }
         }
+
+    fun toggleFavorite(playlistId: String) {
+        viewModelScope.launch {
+            if (isFavorite) {
+                userRepository.removePlaylistFromFavorites(playlistId)
+            } else {
+                userRepository.addPlaylistToFavorites(playlistId)
+            }
+            isFavorite = !isFavorite
+        }
+    }
 }

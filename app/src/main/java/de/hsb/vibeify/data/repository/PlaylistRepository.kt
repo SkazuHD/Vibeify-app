@@ -39,6 +39,7 @@ interface PlaylistRepository {
     suspend fun removeSongFromPlaylist(playlistId: String, songId: String): Boolean {
         return false
     }
+    suspend fun getPlaylistsForUser(playlistIds: List<String>): List<Playlist>
 }
 
 @Singleton
@@ -140,6 +141,21 @@ class PlaylistRepositoryImpl @Inject constructor(
         if (res.isEmpty) {
             return emptyList()
         }
+        return res.documents.mapNotNull { it.toObject(Playlist::class.java) }
+    }
+
+    override suspend fun getPlaylistsForUser(playlistIds: List<String>): List<Playlist> {
+        if (playlistIds.isEmpty()) return emptyList()
+
+        val res = db.collection(collectionName)
+            .whereIn("id", playlistIds)
+            .get()
+            .await()
+
+        if (res.isEmpty) {
+            return emptyList()
+        }
+
         return res.documents.mapNotNull { it.toObject(Playlist::class.java) }
     }
 

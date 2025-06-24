@@ -41,6 +41,7 @@ import de.hsb.vibeify.ui.login.LoginView
 import de.hsb.vibeify.ui.player.fakeSong
 import de.hsb.vibeify.ui.playlist.PlaylistView
 import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailView
+import de.hsb.vibeify.ui.profile.ProfileView
 import de.hsb.vibeify.ui.register.RegisterView
 import de.hsb.vibeify.ui.search.SearchView
 
@@ -140,6 +141,7 @@ fun RootNavHost() {
                         NavbarDestinations.SONGS -> MainView(modifier = Modifier, navController = navController)
                         NavbarDestinations.PLAYLISTS -> PlaylistView(modifier = Modifier, navController = navController)
                         NavbarDestinations.SEARCH -> SearchView(Modifier, navController)
+                        NavbarDestinations.PROFILE -> ProfileView()
                     }
                 }
             }

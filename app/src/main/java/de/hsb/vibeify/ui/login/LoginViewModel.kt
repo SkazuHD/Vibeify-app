@@ -1,6 +1,7 @@
 package de.hsb.vibeify.ui.login
 
 import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -9,6 +10,7 @@ import de.hsb.vibeify.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,6 +43,19 @@ class LoginViewModel @Inject constructor(
                     loginSuccess = it.currentUser != null,
                     isAuthResolved = it.isAuthResolved
                 )
+            }
+        }
+
+        viewModelScope.launch {
+            launch {
+                snapshotFlow { usernameState.text.toString() }.collectLatest { text ->
+                    if (text.isNotEmpty()) resetError()
+                }
+            }
+            launch {
+                snapshotFlow { passwordState.text.toString() }.collectLatest { text ->
+                    if (text.isNotEmpty()) resetError()
+                }
             }
         }
     }

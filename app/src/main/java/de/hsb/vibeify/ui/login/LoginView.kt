@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
@@ -54,11 +55,13 @@ fun LoginView(
             OutlinedTextField(
                 state = vm.usernameState,
                 label = { Text("Username") },
+                lineLimits = TextFieldLineLimits.SingleLine,
             )
 
             OutlinedSecureTextField(
                 state = vm.passwordState,
                 label = { Text("Password") },
+
             )
             if (error != null) {
                 Text(

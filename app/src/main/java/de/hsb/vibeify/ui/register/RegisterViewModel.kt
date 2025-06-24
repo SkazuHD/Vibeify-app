@@ -3,6 +3,7 @@ package de.hsb.vibeify.ui.register
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,6 +11,7 @@ import de.hsb.vibeify.data.repository.FirebaseAuthRepo
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,6 +36,31 @@ class RegisterViewModel @Inject constructor(private val authRepository: Firebase
         val confirmEmailState = TextFieldState()
         val passwordState = TextFieldState()
         val confirmPasswordState = TextFieldState()
+
+    init {
+        viewModelScope.launch {
+            launch {
+                snapshotFlow { emailState.text }.collectLatest {
+                    _uiState.value = _uiState.value.copy(emailError = "")
+                }
+            }
+            launch {
+                snapshotFlow { confirmEmailState.text }.collectLatest {
+                    _uiState.value = _uiState.value.copy(confirmEmailError = "")
+                }
+            }
+            launch {
+                snapshotFlow { passwordState.text }.collectLatest {
+                    _uiState.value = _uiState.value.copy(passwordError = "")
+                }
+            }
+            launch {
+                snapshotFlow { confirmPasswordState.text }.collectLatest {
+                    _uiState.value = _uiState.value.copy(confirmPasswordError = "")
+                }
+            }
+        }
+    }
 
 
     fun register() {

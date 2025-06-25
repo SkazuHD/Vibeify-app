@@ -4,7 +4,6 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Filter
 import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Playlist
-import de.hsb.vibeify.data.model.Song
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -61,7 +60,7 @@ class PlaylistRepositoryImpl @Inject constructor(
             title = "Absolute banger",
             description = "Playlist from Vibeify",
             imagePath = R.drawable.ic_launcher_background,
-            songIds = mutableListOf("song1", "song2", "song3")
+            songIds = mutableListOf("0013b362dfcecebbd7794c204fc8954bde648af6", "01c761885705ea7f145776bb0e50767d290330d9", "0804eb8eaac3e727b247142ecb35f99c326489b8")
         ),
         Playlist(
             id = "456",
@@ -69,7 +68,7 @@ class PlaylistRepositoryImpl @Inject constructor(
             title = "Chill Vibes",
             description = "Relax and enjoy!",
             imagePath = R.drawable.ic_launcher_background,
-            songIds = mutableListOf("song4", "song5")
+            songIds = mutableListOf("10b5773de4a2307280ff8048cc7d6c739c811d6f", "156489a1e356bac8c39c43f1248556cf6354e0da")
         ),
         Playlist(
             id = "789",
@@ -77,26 +76,13 @@ class PlaylistRepositoryImpl @Inject constructor(
             title = "Workout Hits",
             description = "Get pumped up!",
             imagePath = R.drawable.ic_launcher_background,
-            songIds = mutableListOf("song6", "song7")
+            songIds = mutableListOf("1db767253c94eedc2ac4029d857733fca9be6829", "20efe98d5f33a110f4b390dea15ca33c30e34356")
         )
     )
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     init {
         scope.launch {
-            val sampleSongs = listOf(
-                Song(id = "song1", name = "Song Name 1", duration = 153),
-                Song(id = "song2", name = "Song Name 2", duration = 215),
-                Song(id = "song3", name = "Song Name 3", duration = 391),
-                Song(id = "song4", name = "Chill Song 1", duration = 200),
-                Song(id = "song5", name = "Chill Song 2", duration = 180),
-                Song(id = "song6", name = "Workout Song 1", duration = 240),
-                Song(id = "song7", name = "Workout Song 2", duration = 300)
-            )
-
-            sampleSongs.forEach { song ->
-                songRepository.createSong(song)
-            }
 
             playlists.forEach { playlist ->
                 createPlaylist(playlist)

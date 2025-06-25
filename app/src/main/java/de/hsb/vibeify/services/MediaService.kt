@@ -2,13 +2,15 @@ package de.hsb.vibeify.services
 
 import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
-import androidx.media3.session.MediaSessionService
 import dagger.hilt.android.scopes.ServiceScoped
 
 @ServiceScoped
-class MediaService : MediaSessionService() {
-    private var mediaSession: MediaSession? = null
+class MediaService : MediaLibraryService() {
+    private var mediaLibrarySession: MediaLibrarySession? = null
+    var callback: MediaLibrarySession.Callback = object : MediaLibrarySession.Callback {}
+
 
 
     override fun onCreate() {
@@ -17,19 +19,18 @@ class MediaService : MediaSessionService() {
             .setHandleAudioBecomingNoisy(true)
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .build()
-        mediaSession = MediaSession.Builder(this, player)
-            .build()
+        mediaLibrarySession = MediaLibrarySession.Builder(this, player, callback).build()
     }
 
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? =
-        mediaSession
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? =
+        mediaLibrarySession
 
     override fun onDestroy() {
-        mediaSession?.run {
+        mediaLibrarySession?.run {
             player.release()
             release()
-            mediaSession = null
+            mediaLibrarySession = null
         }
         super.onDestroy()
     }

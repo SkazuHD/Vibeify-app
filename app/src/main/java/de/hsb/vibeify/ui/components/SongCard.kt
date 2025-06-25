@@ -29,7 +29,8 @@ fun SongCard(
 
     title: String = "Song Title",
     artist: String = "Artist Name",
-    songIcon: Int = R.drawable.ic_launcher_foreground
+    songIcon: Int = R.drawable.ic_launcher_foreground,
+    shape: RoundedCornerShape = RoundedCornerShape(8.dp)
 
 ) {
     return Card(
@@ -37,7 +38,7 @@ fun SongCard(
         modifier = modifier
             .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(8.dp),
+        shape = shape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
@@ -54,7 +55,7 @@ fun SongCard(
                     modifier = modifier.padding(8.dp).width(48.dp).background(
                         MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
 
-                        shape = RoundedCornerShape(4.dp)
+                        shape = shape
 
                     )
                 )

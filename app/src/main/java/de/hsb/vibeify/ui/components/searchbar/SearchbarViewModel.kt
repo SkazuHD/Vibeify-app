@@ -1,8 +1,7 @@
 package de.hsb.vibeify.ui.components.searchbar
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,27 +13,25 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchbarViewModel @Inject constructor(val searchService: SearchService) : ViewModel() {
 
-    var searchResults = SearchResult()
+    var searchResults = mutableStateOf(SearchResult())
         private set
-    val tempSearchResultStrings: SnapshotStateList<String> = mutableStateListOf()
 
     fun onSearch(query: String) {
         viewModelScope.launch {
-            searchResults = searchService.search(query)
+            if (
+                query.isBlank() || query.length < 2
+            ) {
+                searchResults.value = SearchResult()
+                Log.d("AppHeaderViewModel", "Invalid search query: $query")
+                return@launch
+            }
+            searchResults.value = searchService.search(query)
             Log.d("AppHeaderViewModel", "Search results: $searchResults")
 
-            tempSearchResultStrings.clear()
-
-            searchResults.playlists.let { results ->
-                tempSearchResultStrings.addAll(results.map { it.title })
-            }
-            searchResults.songs.let { results ->
-                tempSearchResultStrings.addAll(results.map { it.name })
-            }
-            Log.d(
-                "AppHeaderViewModel",
-                "Temp search result strings: $tempSearchResultStrings"
-            )
         }
+    }
+    fun clearSearchResults() {
+        searchResults.value = SearchResult()
+        Log.d("AppHeaderViewModel", "Search results cleared")
     }
 }

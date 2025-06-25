@@ -18,7 +18,6 @@ class MediaService : MediaSessionService() {
             .setWakeMode(C.WAKE_MODE_LOCAL)
             .build()
         mediaSession = MediaSession.Builder(this, player)
-            .setId("VibeifyMediaSession")
             .build()
     }
 

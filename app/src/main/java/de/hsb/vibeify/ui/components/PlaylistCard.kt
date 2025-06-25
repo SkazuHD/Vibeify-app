@@ -32,7 +32,8 @@ fun PlaylistCard(
     onClick: () -> Unit = { /* Default no-op */ },
     playlistDescription: String = "Playlist from Vibeify",
     playlistName: String = "Absolute banger",
-    playlistIcon: Int = R.drawable.ic_launcher_foreground
+    playlistIcon: Int = R.drawable.ic_launcher_foreground,
+    shape: RoundedCornerShape = RoundedCornerShape(8.dp)
 
 ) {
     Card(
@@ -40,7 +41,7 @@ fun PlaylistCard(
         modifier = modifier
             .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(8.dp),
+        shape = shape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer
         )
@@ -60,7 +61,7 @@ fun PlaylistCard(
                         .padding(end = 8.dp)
                         .width(48.dp)
                         .align(Alignment.CenterVertically)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .clip(shape),
                     )
 
                 Column(

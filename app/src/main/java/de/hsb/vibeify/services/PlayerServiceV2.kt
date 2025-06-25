@@ -25,7 +25,7 @@ class PlayerServiceV2 {
 
     fun buildMediaItem(song: Song): MediaItem {
         return MediaItem.Builder()
-            .setMediaId(song.name)
+            .setMediaId(song.id)
             .setUri("${song.filePath}")
             .setMediaMetadata(
                 MediaMetadata.Builder()

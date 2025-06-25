@@ -4,14 +4,10 @@ import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
-import dagger.hilt.android.scopes.ServiceScoped
 
-@ServiceScoped
 class MediaService : MediaLibraryService() {
     private var mediaLibrarySession: MediaLibrarySession? = null
     var callback: MediaLibrarySession.Callback = object : MediaLibrarySession.Callback {}
-
-
 
     override fun onCreate() {
         super.onCreate()

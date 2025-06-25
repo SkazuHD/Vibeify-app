@@ -1,13 +1,10 @@
 package de.hsb.vibeify.ui.player
-import androidx.media3.session.MediaController
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import de.hsb.vibeify.data.model.Song
-import de.hsb.vibeify.services.PlayerService
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.session.MediaController
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.services.PlayerServiceV2
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -81,6 +78,5 @@ class PlaybackViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        playerServiceV2.release()
     }
 }

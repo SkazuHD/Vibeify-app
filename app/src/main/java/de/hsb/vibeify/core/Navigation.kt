@@ -143,7 +143,7 @@ fun RootNavHost() {
                     when (destination) {
                         NavbarDestinations.SONGS -> MainView(modifier = Modifier, navController = navController)
                         NavbarDestinations.PLAYLISTS -> PlaylistView(modifier = Modifier, navController = navController)
-                        NavbarDestinations.SEARCH -> SearchView(Modifier, navController)
+                        NavbarDestinations.SEARCH -> SearchView(modifier = Modifier)
                         NavbarDestinations.PROFILE -> ProfileView()
                     }
                 }

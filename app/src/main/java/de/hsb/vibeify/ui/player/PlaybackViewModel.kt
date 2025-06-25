@@ -1,13 +1,10 @@
 package de.hsb.vibeify.ui.player
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.media3.common.Player
-import androidx.media3.session.MediaController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.services.PlayerServiceV2
 import jakarta.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -17,63 +14,33 @@ class PlaybackViewModel @Inject constructor(
 ) : ViewModel() {
 
 
-    private val _isPlaying = MutableStateFlow(false)
+    private val _isPlaying = playerServiceV2.isPlaying
     val isPlaying: StateFlow<Boolean> = _isPlaying
 
-    private val _position = MutableStateFlow(0L)
-    val position: StateFlow<Long> = _position
+    val position: StateFlow<Long> = playerServiceV2.position
+    val duration: StateFlow<Long> = playerServiceV2.duration
 
-    private val _duration = MutableStateFlow(1L)
-    val duration: StateFlow<Long> = _duration
-
-    private val _currentSong = MutableStateFlow<Song?>(null)
+    private val _currentSong = playerServiceV2.currentSong
     val currentSong: StateFlow<Song?> = _currentSong
 
-    var controller: MediaController? = null
 
-    init {
-        viewModelScope.launch {
-            controller = playerServiceV2.awaitController()
-            _currentSong.value = playerServiceV2.currentSong
-            while (true) {
-                controller?.let {
-                    _position.value = it.currentPosition
-                    _duration.value = it.duration.coerceAtLeast(1L)
-                    _isPlaying.value = it.isPlaying
-                    _currentSong.value = playerServiceV2.currentSong
-                }
-                kotlinx.coroutines.delay(300)
-            }
-        }
-    }
+
     fun play(song: Song) {
         viewModelScope.launch {
-            val ctrl = controller ?: playerServiceV2.awaitController()
-            if (_currentSong.value?.name != song.name || controller?.currentMediaItem == null) {
-                val mediaItem = playerServiceV2.buildMediaItem(song)
-                ctrl.setMediaItem(mediaItem)
-                ctrl.repeatMode = Player.REPEAT_MODE_ONE
-                ctrl.prepare()
-                ctrl.seekTo(_position.value)
-                ctrl.play()
-                playerServiceV2.currentSong = song
-                _currentSong.value = song
-            } else {
-                ctrl.play()
-            }
-            _isPlaying.value = true
+            playerServiceV2.play(song)
         }
+    }
+    fun resume() {
+        playerServiceV2.resume()
     }
 
 
     fun pause() {
-        controller?.pause()
-        _isPlaying.value = false
+        playerServiceV2.pause()
     }
 
     fun seekTo(pos: Long) {
-        controller?.seekTo(pos)
-        _position.value = pos
+        playerServiceV2.seekTo(pos)
     }
 
     override fun onCleared() {

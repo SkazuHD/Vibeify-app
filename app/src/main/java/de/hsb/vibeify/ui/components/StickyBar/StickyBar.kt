@@ -2,7 +2,18 @@ package de.hsb.vibeify.ui.components.StickyBar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -22,27 +33,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.Player
 import androidx.navigation.NavController
-import de.hsb.vibeify.data.model.Song
-import de.hsb.vibeify.services.PlayerService
-import kotlinx.coroutines.delay
-
-
-
 
 
 @Composable
-fun StickyBar(song: Song, navController: NavController, modifier: Modifier = Modifier) {
+fun StickyBar(navController: NavController, modifier: Modifier = Modifier) {
     val viewModel: StickyBarViewModel = hiltViewModel()
     val isPlaying by viewModel.isPlaying.collectAsState()
     val position by viewModel.position.collectAsState()
     val duration by viewModel.duration.collectAsState()
-    val playbackState by viewModel.playbackState.collectAsState()
-
+    val song by viewModel.currentSong.collectAsState()
+    val playbackState by viewModel.playerState.collectAsState()
 
     var showBar by remember { mutableStateOf(false) }
     var sliderPosition by remember { mutableStateOf(0f) }
@@ -58,7 +62,7 @@ fun StickyBar(song: Song, navController: NavController, modifier: Modifier = Mod
         showBar = playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED
     }
 
-    if (showBar) {
+    if (showBar && song != null) {
         Box(
 
             modifier = Modifier
@@ -90,11 +94,11 @@ fun StickyBar(song: Song, navController: NavController, modifier: Modifier = Mod
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = song.name,
+                        text = song!!.name,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
                     )
-                    song.artist?.let {
+                    song!!.artist?.let {
                         Text(
                             text = it,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

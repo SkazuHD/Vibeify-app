@@ -34,12 +34,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import de.hsb.vibeify.services.PlayerViewModel
 import de.hsb.vibeify.ui.components.AppHeader.AppHeader
 import de.hsb.vibeify.ui.components.StickyBar.StickyBar
 import de.hsb.vibeify.ui.home.MainView
 import de.hsb.vibeify.ui.login.LoginView
-import de.hsb.vibeify.ui.player.fakeSong
 import de.hsb.vibeify.ui.playlist.PlaylistView
 import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailView
 import de.hsb.vibeify.ui.profile.ProfileView
@@ -48,7 +46,7 @@ import de.hsb.vibeify.ui.search.SearchView
 
 
 @Composable
-fun AppRouter(authViewModel: AuthViewModel = hiltViewModel(), playerViewModel: PlayerViewModel = hiltViewModel()) {
+fun AppRouter(authViewModel: AuthViewModel = hiltViewModel()) {
     val authState by authViewModel.authState.collectAsState()
 
     val destination = when {
@@ -110,7 +108,7 @@ fun RootNavHost() {
             var selectedDestination by rememberSaveable { mutableIntStateOf(NavbarDestinations.SONGS.ordinal) }
             Column {
                 if (currentRoute != "playback_view") {
-                    StickyBar(song = fakeSong, navController = navController)
+                    StickyBar(navController = navController)
                 }
                 NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
                     NavbarDestinations.entries.forEachIndexed { index, destination ->
@@ -157,7 +155,6 @@ fun RootNavHost() {
             }
             composable("playback_view") {
                 de.hsb.vibeify.ui.player.MinimalMusicPlayer(
-                    song = fakeSong,
                     nextSong = "Next Song"
                 )
             }

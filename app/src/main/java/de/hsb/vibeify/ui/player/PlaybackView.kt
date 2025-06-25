@@ -1,6 +1,5 @@
 package de.hsb.vibeify.ui.player
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,18 +31,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media3.common.MediaItem
-import androidx.media3.common.Player
-import de.hsb.vibeify.data.model.Song
-import de.hsb.vibeify.services.PlayerService
-import kotlinx.coroutines.delay
-import androidx.lifecycle.viewmodel.compose.viewModel
-import de.hsb.vibeify.R
 import coil.compose.AsyncImage
+import de.hsb.vibeify.data.model.Song
 
 
 val fakeSong = Song(
@@ -57,7 +48,6 @@ val fakeSong = Song(
 
 @Composable
 fun MinimalMusicPlayer(
-    song: Song = fakeSong,
     nextSong: String = "Next Song",
     viewModel: PlaybackViewModel = hiltViewModel()
 ) {
@@ -74,7 +64,7 @@ fun MinimalMusicPlayer(
     LaunchedEffect(Unit) {
 
         if (!isPlaying) {
-            viewModel.play(song)
+            viewModel.resume()
         }
     }
 
@@ -99,7 +89,7 @@ fun MinimalMusicPlayer(
             verticalArrangement = Arrangement.Center
         ) {
             AsyncImage(
-                model = song.imageUrl,
+                model = currentSong!!.imageUrl,
                 contentDescription = "Song Cover",
                 modifier = Modifier
                     .size(220.dp)
@@ -108,12 +98,12 @@ fun MinimalMusicPlayer(
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = song.name,
+                text = currentSong!!.name,
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onPrimary
             )
 
-            song.artist?.let {
+            currentSong!!.artist?.let {
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodyMedium,
@@ -174,7 +164,7 @@ fun MinimalMusicPlayer(
                     if (isPlaying) {
                         viewModel.pause()
                     } else {
-                        viewModel.play(song)
+                        viewModel.resume()
                     }
                 }) {
                     Icon(

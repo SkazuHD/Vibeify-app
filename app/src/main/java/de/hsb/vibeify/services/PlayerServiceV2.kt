@@ -6,9 +6,17 @@ import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import de.hsb.vibeify.data.model.Song
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -21,7 +29,24 @@ class PlayerServiceV2 {
 
     private val controllerReadyActions = mutableListOf<(MediaController) -> Unit>()
     private var mediaController: MediaController? = null
-    var currentSong: Song? = null
+
+    val _currentSong: MutableStateFlow<Song?> = MutableStateFlow(null)
+    var currentSong: StateFlow<Song?> = _currentSong
+
+    private val _isPlaying = MutableStateFlow(false)
+    val isPlaying: StateFlow<Boolean> = _isPlaying
+
+    private val _position = MutableStateFlow(0L)
+    val position: StateFlow<Long> = _position
+
+    private val _duration = MutableStateFlow(1L)
+    val duration: StateFlow<Long> = _duration
+
+    private val _playerState = MutableStateFlow(Player.STATE_IDLE)
+    val playerState: StateFlow<Int> = _playerState
+
+    private var positionTrackingJob: Job? = null
+    private val serviceScope = CoroutineScope(Dispatchers.Main)
 
     fun buildMediaItem(song: Song): MediaItem {
         return MediaItem.Builder()
@@ -53,8 +78,33 @@ class PlayerServiceV2 {
             controllerReadyActions.forEach { it(controller) }
             controllerReadyActions.clear()
 
+            controller.addListener(object : Player.Listener {
+                override fun onPlaybackStateChanged(playbackState: Int) {
+                    _isPlaying.value = controller.isPlaying && playbackState == Player.STATE_READY
+                    _playerState.value = playbackState
+                }
+
+                override fun onIsPlayingChanged(isPlayingState: Boolean) {
+                    _isPlaying.value = isPlayingState
+                    if (isPlayingState) {
+                        startPositionTracking()
+                    } else {
+                        stopPositionTracking()
+                    }
+                }
+
+                override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+                }
+
+                override fun onEvents(player: Player, events: Player.Events) {
+                    updatePositionAndDuration()
+                }
+            })
+            updatePositionAndDuration()
+
         }, ContextCompat.getMainExecutor(context))
     }
+
 
     fun savePlaybackState() {
         mediaController?.let {
@@ -84,8 +134,88 @@ class PlayerServiceV2 {
             }
     }
 
+    fun play(song: Song) {
+        _currentSong.value = song
+        val mediaItem = buildMediaItem(song)
+        withController { controller ->
+            controller.setMediaItem(mediaItem)
+            controller.prepare()
+            controller.play()
+        }
+        startPositionTracking()
+    }
+
+    fun pause() {
+        withController { controller ->
+            controller.pause()
+        }
+        stopPositionTracking()
+    }
+    fun stop() {
+        withController { controller ->
+            controller.stop()
+        }
+        stopPositionTracking()
+    }
+
+
+    fun resume() {
+        withController { controller ->
+            controller.play()
+        }
+    }
+
+    fun clearMediaItems() {
+        withController { controller ->
+            controller.clearMediaItems()
+        }
+    }
+
+    fun seekTo(positionMs: Long) {
+        withController { controller ->
+            controller.seekTo(positionMs)
+            _position.value = positionMs
+        }
+    }
+
+    fun skipToNext() {
+        withController { controller ->
+            controller.seekToNextMediaItem()
+        }
+    }
+
+    fun skipToPrevious() {
+        withController { controller ->
+            controller.seekToPreviousMediaItem()
+        }
+    }
+
     fun release() {
+        stopPositionTracking()
         mediaController?.release()
     }
+
+    private fun updatePositionAndDuration() {
+        withController { controller ->
+            _position.value = controller.currentPosition
+            _duration.value = controller.duration.coerceAtLeast(1L)
+        }
+    }
+
+    fun startPositionTracking(intervalMs: Long = 200) {
+        stopPositionTracking()
+        positionTrackingJob = serviceScope.launch {
+            while (isActive) {
+                updatePositionAndDuration()
+                kotlinx.coroutines.delay(intervalMs)
+            }
+        }
+    }
+
+    fun stopPositionTracking() {
+        positionTrackingJob?.cancel()
+        positionTrackingJob = null
+    }
+
 
 }

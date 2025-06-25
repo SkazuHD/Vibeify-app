@@ -36,6 +36,7 @@ import androidx.media3.common.MediaItem
 import de.hsb.vibeify.R
 import de.hsb.vibeify.services.PlayerService
 import de.hsb.vibeify.ui.components.SongCard
+import de.hsb.vibeify.ui.player.PlaybackViewModel
 
 fun demoPlayerOnClick(context: android.content.Context) {
     println("Player clicked - demo action")
@@ -52,8 +53,8 @@ fun demoPlayerOnClick(context: android.content.Context) {
 fun PlaylistDetailView(
     modifier: Modifier = Modifier,
     playlistId: String,
-    onClick: () -> Unit = { },
-    viewModel: PlaylistDetailViewModel = hiltViewModel()
+    viewModel: PlaylistDetailViewModel = hiltViewModel(),
+    playbackViewModel: PlaybackViewModel = hiltViewModel()
 ) {
     LaunchedEffect(playlistId) {
         viewModel.loadPlaylist(playlistId)
@@ -89,7 +90,7 @@ fun PlaylistDetailView(
                     )
                     IconButton(
                         onClick = {
-                            demoPlayerOnClick(context);
+                            playbackViewModel.play(songs[0])
                         },
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -174,7 +175,9 @@ fun PlaylistDetailView(
                             title = it.name,
                             artist = it.artist ?: "Unknown Artist",
                             songIcon = R.drawable.ic_launcher_foreground,
-                            onClick = onClick
+                            onClick = {
+                                playbackViewModel.play(it)
+                            },
                         )
                     }
 

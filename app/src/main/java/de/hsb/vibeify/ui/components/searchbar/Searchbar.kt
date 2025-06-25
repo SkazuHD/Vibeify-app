@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.components
+package de.hsb.vibeify.ui.components.searchbar
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box

@@ -28,6 +28,7 @@ class PlayerServiceV2 {
 
     private var context: Context
     private var wasPlayingBeforeViewChange = false
+    private var currentSongList: List<Song> = emptyList() // Neue Variable für aktuelle Song-Liste
 
     private val controllerReadyActions = mutableListOf<(MediaController) -> Unit>()
     private var mediaController: MediaController? = null
@@ -98,6 +99,10 @@ class PlayerServiceV2 {
                     }
                 }
 
+                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                    updateCurrentSongFromMediaItem(controller)
+                }
+
                 override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
                 }
 
@@ -141,6 +146,7 @@ class PlayerServiceV2 {
 
     fun play(song: Song) {
         _currentSong.value = song
+        currentSongList = listOf(song)
         val mediaItem = buildMediaItem(song)
         withController { controller ->
             controller.setMediaItem(mediaItem)
@@ -149,9 +155,11 @@ class PlayerServiceV2 {
         }
         startPositionTracking()
     }
+
     fun play(songs: List<Song>, startIndex: Int = 0) {
         if (songs.isEmpty()) return
         _currentSong.value = songs[startIndex]
+        currentSongList = songs
         val mediaItems = songs.map { buildMediaItem(it) }
         withController { controller ->
             controller.setMediaItems(mediaItems)
@@ -214,6 +222,13 @@ class PlayerServiceV2 {
     fun skipToPrevious() {
         withController { controller ->
             controller.seekToPreviousMediaItem()
+        }
+    }
+
+    private fun updateCurrentSongFromMediaItem(controller: MediaController) {
+        val currentIndex = controller.currentMediaItemIndex
+        if (currentIndex >= 0 && currentIndex < currentSongList.size) {
+            _currentSong.value = currentSongList[currentIndex]
         }
     }
 

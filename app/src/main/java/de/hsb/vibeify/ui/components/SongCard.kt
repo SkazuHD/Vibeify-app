@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -26,12 +27,13 @@ import de.hsb.vibeify.R
 fun SongCard(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = { /* Default no-op */ },
-
     title: String = "Song Title",
     artist: String = "Artist Name",
     songIcon: Int = R.drawable.ic_launcher_foreground,
-    shape: RoundedCornerShape = RoundedCornerShape(8.dp)
-
+    shape: RoundedCornerShape = RoundedCornerShape(8.dp),
+    showMenu: Boolean = true,
+    menuOptions: List<MenuOption> = emptyList(),
+    onMenuIconClick: (() -> Unit)? = null
 ) {
     return Card(
         onClick = { onClick() },
@@ -44,7 +46,7 @@ fun SongCard(
         )
     ) {
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .wrapContentSize()
                 .fillMaxWidth(),
         ) {
@@ -52,27 +54,37 @@ fun SongCard(
                 Image(
                     painter = painterResource(id = songIcon),
                     contentDescription = "Song Icon",
-                    modifier = modifier.padding(8.dp).width(48.dp).background(
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-
-                        shape = shape
-
-                    )
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .width(48.dp)
+                        .background(
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                            shape = shape
+                        )
                 )
                 Column(
-                    modifier = modifier
+                    modifier = Modifier
                         .align(Alignment.CenterVertically)
-                        .fillMaxWidth()
                 ) {
                     Text (
                         text = title,
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = modifier.padding(bottom = 4.dp)
+                        modifier = Modifier.padding(bottom = 4.dp)
                     )
                     Text(
                         text = artist,
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = modifier.padding(bottom = 2.dp)
+                        modifier = Modifier.padding(bottom = 2.dp)
+                    )
+                }
+                if (showMenu) {
+                    Spacer(
+                        modifier = Modifier.weight(1f) // Spacer to push the menu to the right
+                    )
+                    SongCardMenu(
+                        modifier = Modifier.padding(end = 8.dp),
+                        menuOptions = menuOptions,
+                        onMenuIconClick = onMenuIconClick
                     )
                 }
             }
@@ -86,6 +98,10 @@ fun SongCardPreview() {
     SongCard(
         title = "Sample Song",
         artist = "Sample Artist",
-        songIcon = R.drawable.ic_launcher_foreground
+        songIcon = R.drawable.ic_launcher_foreground,
+        menuOptions = listOf(
+            MenuOption("Zur Playlist hinzufügen", { /* No-op für Preview */ }),
+            MenuOption("Song teilen", { /* No-op für Preview */ })
+        )
     )
 }

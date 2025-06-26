@@ -23,12 +23,12 @@ data class UserRepositoryState(
 )
 
 interface UserRepository {
-    fun isPlaylistFavorite(string: String): Boolean
-    suspend fun removePlaylistFromFavorites(string: String)
-    suspend fun addPlaylistToFavorites(string: String)
-    fun isSongFavorite(string: String): Boolean
-    suspend fun removeSongFromFavorites(string: String)
-    suspend fun addSongToFavorites(string: String)
+    fun isPlaylistFavorite(playlistId: String): Boolean
+    suspend fun removePlaylistFromFavorites(playlistId: String)
+    suspend fun addPlaylistToFavorites(playlistId: String)
+    fun isSongFavorite(songId: String): Boolean
+    suspend fun removeSongFromFavorites(songId: String)
+    suspend fun addSongToFavorites(songId: String)
     fun getLikedSongIds(): List<String>
 
     val state: StateFlow<UserRepositoryState>
@@ -103,12 +103,17 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun removePlaylistFromFavorites(playlistId: String) {
         val user = _state.value.currentUser ?: return
         db.collection(collectionName).document(user.id).update("playlists", FieldValue.arrayRemove(playlistId)).await()
+        _state.value = _state.value.copy(
+            currentUser = user.copy(playlists = user.playlists.filter { it != playlistId })
+        )
     }
 
     override suspend fun addPlaylistToFavorites(playlistId: String) {
         val user = _state.value.currentUser ?: return
         db.collection(collectionName).document(user.id).update("playlists", FieldValue.arrayUnion(playlistId)).await()
-
+        _state.value = _state.value.copy(
+            currentUser = user.copy(playlists = user.playlists + playlistId)
+        )
     }
 
     override fun isSongFavorite(songId: String): Boolean {
@@ -123,10 +128,16 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun removeSongFromFavorites(songId: String) {
         val user = _state.value.currentUser ?: return
         db.collection(collectionName).document(user.id).update("likedSongs", FieldValue.arrayRemove(songId)).await()
+        _state.value = _state.value.copy(
+            currentUser = user.copy(likedSongs = user.likedSongs.filter { it != songId })
+        )
     }
 
     override suspend fun addSongToFavorites(songId: String) {
         val user = _state.value.currentUser ?: return
         db.collection(collectionName).document(user.id).update("likedSongs", FieldValue.arrayUnion(songId)).await()
+        _state.value = _state.value.copy(
+            currentUser = user.copy(likedSongs = user.likedSongs + songId)
+        )
     }
 }

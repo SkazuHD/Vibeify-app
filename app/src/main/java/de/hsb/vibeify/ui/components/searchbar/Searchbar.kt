@@ -27,11 +27,15 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.services.SearchResult
+import de.hsb.vibeify.ui.components.MenuOption
 import de.hsb.vibeify.ui.components.PlaylistCard
 import de.hsb.vibeify.ui.components.SongCard
+import de.hsb.vibeify.ui.player.PlaybackViewModel
+import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,8 +44,10 @@ fun SimpleSearchBar(
     onSearch: (String) -> Unit,
     searchResults: SearchResult,
     modifier: Modifier = Modifier,
-    onPlaylistClick: (Playlist) -> Unit = {}, // Callback für Playlist-Klicks
-    onSongClick: (Song) -> Unit = {}      // Optional: Callback für Song-Klicks
+    onPlaylistClick: (Playlist) -> Unit = {},
+    onSongClick: (Song) -> Unit = {},
+    playbackViewModel: PlaybackViewModel = hiltViewModel(),
+    playlistDetailViewModel: PlaylistDetailViewModel = hiltViewModel()
 ) {
     // Controls expansion state of the search bar
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -96,14 +102,21 @@ fun SimpleSearchBar(
                     SongCard(
                         title = song.name,
                         artist = song.artist ?: "Unknown Artist",
-                        modifier = Modifier
-                            .clickable {
-                                if (onSongClick != {}) {
-                                    onSongClick(song)
-                                }
-                                expanded = true
-                            },
+                        modifier = Modifier,
                         shape = RoundedCornerShape(0.dp),
+                        onClick = {
+                            if (onSongClick != {}) {
+                                onSongClick(song)
+                            }
+                            expanded = true
+                        },
+                        menuOptions = listOf(
+                            MenuOption("Abspielen", {
+                                playbackViewModel.play(song)
+                            }),
+                            MenuOption("Zu Favoriten hinzufügen", { playlistDetailViewModel.addSongToFavorites(song) }),
+
+                            )
                     )
                 }
                 ListItem(

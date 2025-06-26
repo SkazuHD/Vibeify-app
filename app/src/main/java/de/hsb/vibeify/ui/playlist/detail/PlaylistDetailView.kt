@@ -35,6 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import de.hsb.vibeify.R
 import de.hsb.vibeify.services.PlayerService
+import de.hsb.vibeify.ui.components.MenuOption
 import de.hsb.vibeify.ui.components.SongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 
@@ -53,21 +54,21 @@ fun demoPlayerOnClick(context: android.content.Context) {
 fun PlaylistDetailView(
     modifier: Modifier = Modifier,
     playlistId: String,
-    viewModel: PlaylistDetailViewModel = hiltViewModel(),
+    playlistDetailViewModel: PlaylistDetailViewModel = hiltViewModel(),
     playbackViewModel: PlaybackViewModel = hiltViewModel()
 ) {
     LaunchedEffect(playlistId) {
-        viewModel.loadPlaylist(playlistId)
+        playlistDetailViewModel.loadPlaylist(playlistId)
     }
 
-    val playlistTitle = viewModel.playlistTitle
-    val playlistDescription = viewModel.playlistDescription
-    val playlistImage = viewModel.playlistImage
-    val songs = viewModel.songs
-    val playlistDurationText = viewModel.playlistDurationText
+    val playlistTitle = playlistDetailViewModel.playlistTitle
+    val playlistDescription = playlistDetailViewModel.playlistDescription
+    val playlistImage = playlistDetailViewModel.playlistImage
+    val songs = playlistDetailViewModel.songs
+    val playlistDurationText = playlistDetailViewModel.playlistDurationText
     val context = LocalContext.current
-    val isFavorite = viewModel.isFavorite
-    val isFavoriteAble = viewModel.isFavoriteAble
+    val isFavorite = playlistDetailViewModel.isFavorite
+    val isFavoriteAble = playlistDetailViewModel.isFavoriteAble
 
     //Playlist Header
     Column(modifier = modifier) {
@@ -137,7 +138,7 @@ fun PlaylistDetailView(
                         Box {
                             IconButton(
                                 onClick = {
-                                    viewModel.toggleFavorite(playlistId)
+                                    playlistDetailViewModel.toggleFavorite(playlistId)
                                 },
                                 modifier = Modifier
                                     .align(Alignment.Center)
@@ -157,7 +158,7 @@ fun PlaylistDetailView(
             }
         }
             Box() {
-                if (viewModel.isLoadingSongs){
+                if (playlistDetailViewModel.isLoadingSongs){
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()
                     }
@@ -178,6 +179,13 @@ fun PlaylistDetailView(
                             onClick = {
                                 playbackViewModel.play(it)
                             },
+                            menuOptions = listOf(
+                                MenuOption("Abspielen", {
+                                    playbackViewModel.play(it)
+                                }),
+                                MenuOption("Zu Favoriten hinzufügen", { playlistDetailViewModel.addSongToFavorites(it) }),
+
+                            )
                         )
                     }
 

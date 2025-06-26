@@ -115,4 +115,10 @@ class PlaylistDetailViewModel @Inject constructor(
             isFavorite = !isFavorite
         }
     }
+
+    fun addSongToFavorites(song: Song) {
+        viewModelScope.launch {
+            userRepository.addSongToFavorites(song.id)
+        }
+    }
 }

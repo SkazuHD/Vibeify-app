@@ -71,7 +71,7 @@ class PlaylistDetailViewModel @Inject constructor(
                     songs = songRepository.getSongsByIds(it.songIds)
                 }
                 isFavorite = userRepository.isPlaylistFavorite(playlistId)
-                isFavoriteAble = true
+                isFavoriteAble = userRepository.state.value.currentUser?.id != playlist?.userId
                 isLoadingSongs = false
             }
         }

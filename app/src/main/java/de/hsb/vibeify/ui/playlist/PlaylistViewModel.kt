@@ -10,6 +10,7 @@ import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.UserRepository
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,5 +38,21 @@ class PlaylistViewModel @Inject constructor(
             }
         }
     }
+
+    fun createPlaylist(playlistName: String, description: String) {
+        viewModelScope.launch {
+            val newPlaylist = Playlist(
+                id = UUID.randomUUID().toString(),
+                userId = userRepository.state.value.currentUser?.id ?: "",
+                title = playlistName,
+                description = description,
+                imagePath = null,
+                songIds = emptyList()
+            )
+            playlistRepository.createPlaylist(newPlaylist)
+            userRepository.addPlaylistToFavorites(newPlaylist.id)
+        }
+    }
+
 
 }

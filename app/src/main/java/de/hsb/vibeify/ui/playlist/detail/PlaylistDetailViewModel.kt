@@ -35,7 +35,6 @@ class PlaylistDetailViewModel @Inject constructor(
         private set
     var isFavorite by mutableStateOf(false)
         private set
-
     var isFavoriteAble by mutableStateOf(true)
         private set
     var isLoadingPlayList by mutableStateOf(true)

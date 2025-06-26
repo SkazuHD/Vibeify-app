@@ -144,6 +144,18 @@ class PlayerServiceV2 {
         }
         startPositionTracking()
     }
+    fun play(songs: List<Song>, startIndex: Int = 0) {
+        if (songs.isEmpty()) return
+        _currentSong.value = songs[startIndex]
+        val mediaItems = songs.map { buildMediaItem(it) }
+        withController { controller ->
+            controller.setMediaItems(mediaItems)
+            controller.seekTo(startIndex, 0L)
+            controller.prepare()
+            controller.play()
+        }
+        startPositionTracking()
+    }
 
     fun pause() {
         withController { controller ->

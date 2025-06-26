@@ -56,13 +56,7 @@ class PlaylistDetailViewModel @Inject constructor(
                 playlistImage = likedSongsPlaylist.imagePath ?: R.drawable.ic_launcher_background
                 isLoadingPlayList = false
                 isLoadingSongs = true
-                val loadedSongs = mutableListOf<Song>()
-                for (songId in likedSongsPlaylist.songIds) {
-                    songRepository.getSongById(songId)?.let { song ->
-                        loadedSongs.add(song)
-                    }
-                }
-                songs = loadedSongs
+                songs = songRepository.getSongsByIds(likedSongIds)
                 isFavorite = false
                 isFavoriteAble = false
                 isLoadingSongs = false
@@ -74,13 +68,7 @@ class PlaylistDetailViewModel @Inject constructor(
                     playlistImage = it.imagePath ?: R.drawable.ic_launcher_background
                     isLoadingPlayList = false
                     isLoadingSongs = true
-                    val loadedSongs = mutableListOf<Song>()
-                    for (songId in it.songIds) {
-                        songRepository.getSongById(songId)?.let { song ->
-                            loadedSongs.add(song)
-                        }
-                    }
-                    songs = loadedSongs
+                    songs = songRepository.getSongsByIds(it.songIds)
                 }
                 isFavorite = userRepository.isPlaylistFavorite(playlistId)
                 isFavoriteAble = true

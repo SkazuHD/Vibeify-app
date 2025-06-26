@@ -28,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -65,7 +64,6 @@ fun PlaylistDetailView(
     val playlistImage = playlistDetailViewModel.playlistImage
     val songs = playlistDetailViewModel.songs
     val playlistDurationText = playlistDetailViewModel.playlistDurationText
-    val context = LocalContext.current
     val isFavorite = playlistDetailViewModel.isFavorite
     val isFavoriteAble = playlistDetailViewModel.isFavoriteAble
 
@@ -90,7 +88,7 @@ fun PlaylistDetailView(
                     )
                     IconButton(
                         onClick = {
-                            playbackViewModel.play(songs[0])
+                            playbackViewModel.play(songs)
                         },
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -175,7 +173,7 @@ fun PlaylistDetailView(
                             song = song,
                             songIcon = R.drawable.ic_launcher_foreground,
                             onClick = {
-                                playbackViewModel.play(song)
+                                playbackViewModel.play(songs, songs.indexOf(song))
                             },
                             playbackViewModel = playbackViewModel,
                             playlistDetailViewModel = playlistDetailViewModel

@@ -10,6 +10,7 @@ import com.google.firebase.firestore.FirebaseFirestore as Firestore
 
 interface SongRepository {
     suspend fun getSongById(id: String): Song?
+    suspend fun getSongsByIds(ids: List<String>): List<Song>
     suspend fun getAllSongs(): List<Song>
     suspend fun searchSongs(query: String): List<Song>
     suspend fun createSong(song: Song): Boolean
@@ -26,6 +27,19 @@ class SongRepositoryImpl @Inject constructor() : SongRepository {
     override suspend fun getSongById(id: String): Song? {
         val res = db.collection(collectionName).document(id).get().await()
         return if (res.exists()) res.toObject(Song::class.java) else null
+    }
+
+    override suspend fun getSongsByIds(ids: List<String>): List<Song> {
+        if (ids.isEmpty()) return emptyList()
+        val res = db.collection(collectionName)
+            .whereIn("id", ids)
+            .get()
+            .await()
+
+        if (res.isEmpty) {
+            return emptyList()
+        }
+        return res.documents.mapNotNull { it.toObject(Song::class.java) }
     }
 
     override suspend fun getAllSongs(): List<Song> {

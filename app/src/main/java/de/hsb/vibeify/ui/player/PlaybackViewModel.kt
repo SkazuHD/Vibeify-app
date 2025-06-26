@@ -30,6 +30,11 @@ class PlaybackViewModel @Inject constructor(
             playerServiceV2.play(song)
         }
     }
+    fun play(songs: List<Song>, startIndex: Int = 0) {
+        viewModelScope.launch {
+            playerServiceV2.play(songs, startIndex)
+        }
+    }
     fun resume() {
         playerServiceV2.resume()
     }

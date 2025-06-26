@@ -205,7 +205,7 @@ fun MinimalMusicPlayer(
                         title = song.name,
                         artist = song.artist ?: "Unknown Artist",
                         showMenu = false,
-
+                        songImageUrl = song.imageUrl,
                         )
                 }
             }

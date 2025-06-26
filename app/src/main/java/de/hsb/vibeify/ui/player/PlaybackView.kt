@@ -198,16 +198,15 @@ fun MinimalMusicPlayer(
 
                 nextSongs.value.forEach { song->
                     SongCard(
-                        title = song.name,
-                        artist = song.artist ?: "Unknown Artist",
-                        isSongFavorite = false,
-                        showMenu = false,
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
                             playbackViewModel.play(currentSongList, currentSongList.indexOf(song))
-                        }
+                        },
+                        title = song.name,
+                        artist = song.artist ?: "Unknown Artist",
+                        showMenu = false,
 
-                    )
+                        )
                 }
             }
         }

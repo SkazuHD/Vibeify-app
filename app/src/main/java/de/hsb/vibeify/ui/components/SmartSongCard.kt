@@ -87,6 +87,7 @@ fun SmartSongCard(
         },
         isSongFavorite = isSongFavorite,
         songIcon = songIcon,
+        songImageUrl = song.imageUrl,
         showMenu = showMenu,
         menuOptions = allMenuOptions
     )

@@ -1,6 +1,5 @@
 package de.hsb.vibeify.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,7 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -26,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import de.hsb.vibeify.R
 
 @Composable
@@ -40,7 +39,8 @@ fun SongCard(
     shape: RoundedCornerShape = RoundedCornerShape(8.dp),
     showMenu: Boolean = true,
     menuOptions: List<MenuOption> = emptyList(),
-    onMenuIconClick: (() -> Unit)? = null
+    onMenuIconClick: (() -> Unit)? = null,
+    songImageUrl: String? =null
 ) {
     return Card(
         onClick = { onClick() },
@@ -58,12 +58,14 @@ fun SongCard(
                 .fillMaxWidth(),
         ) {
             Row {
-                Image(
-                    painter = painterResource(id = songIcon),
-                    contentDescription = "Song Icon",
+                AsyncImage(
+                    model = songImageUrl,
+                    contentDescription = "Song Image",
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    error = painterResource(id = R.drawable.ic_launcher_foreground),
                     modifier = Modifier
                         .padding(8.dp)
-                        .width(48.dp)
+                        .size(48.dp)
                         .background(
                             MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
                             shape = shape
@@ -119,11 +121,12 @@ fun SongCardPreview() {
     SongCard(
         title = "Sample Song",
         artist = "Sample Artist",
-        songIcon = R.drawable.ic_launcher_foreground,
         isSongFavorite = true,
+        isSongPlaying = false,
         menuOptions = listOf(
             MenuOption("Zur Playlist hinzufügen", { /* No-op für Preview */ }),
             MenuOption("Song teilen", { /* No-op für Preview */ })
-        )
+        ),
+        songImageUrl = "https://example.com/sample-song-image.jpg"
     )
 }

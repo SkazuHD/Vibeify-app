@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import de.hsb.vibeify.data.model.Song
@@ -21,6 +22,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@UnstableApi
 @Singleton
 class PlayerServiceV2 {
 
@@ -44,6 +46,9 @@ class PlayerServiceV2 {
 
     private val _playerState = MutableStateFlow(Player.STATE_IDLE)
     val playerState: StateFlow<Int> = _playerState
+
+    private val _repeatMode = MutableStateFlow(Player.REPEAT_MODE_OFF)
+    val repeatMode: StateFlow<Int> = _repeatMode
 
     private var positionTrackingJob: Job? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main)
@@ -155,6 +160,16 @@ class PlayerServiceV2 {
             controller.play()
         }
         startPositionTracking()
+    }
+
+    fun changeRepeatMode(mode: Int) {
+        withController { controller ->
+            if (mode !in Player.REPEAT_MODE_OFF..Player.REPEAT_MODE_ALL) {
+                throw IllegalArgumentException("Invalid repeat mode: $mode")
+            }
+            controller.repeatMode = mode
+            _repeatMode.value = mode
+        }
     }
 
     fun pause() {

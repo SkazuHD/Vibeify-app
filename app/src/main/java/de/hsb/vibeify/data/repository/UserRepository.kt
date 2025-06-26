@@ -30,6 +30,8 @@ interface UserRepository {
     suspend fun removeSongFromFavorites(songId: String)
     suspend fun addSongToFavorites(songId: String)
     fun getLikedSongIds(): List<String>
+    suspend fun updateUser(user: User) {
+    }
 
     val state: StateFlow<UserRepositoryState>
 }
@@ -139,5 +141,11 @@ class UserRepositoryImpl @Inject constructor(
         _state.value = _state.value.copy(
             currentUser = user.copy(likedSongs = user.likedSongs + songId)
         )
+    }
+
+    override suspend fun updateUser(user: User) {
+        Log.d("UserRepository", "updateUser called with user: $user")
+        db.collection(collectionName).document(user.id).set(user).await()
+        _state.value = _state.value.copy(currentUser = user)
     }
 }

@@ -31,9 +31,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.services.SearchResult
-import de.hsb.vibeify.ui.components.MenuOption
 import de.hsb.vibeify.ui.components.PlaylistCard
-import de.hsb.vibeify.ui.components.SongCard
+import de.hsb.vibeify.ui.components.SmartSongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailViewModel
 
@@ -99,10 +98,8 @@ fun SimpleSearchBar(
                     trailingContent = { Text("${searchResults.songs.size} results") }
                 )
                 searchResults.songs.forEach { song ->
-                    var isSongFavorite by rememberSaveable { mutableStateOf(playlistDetailViewModel.isSongFavorite(song)) }
-                    SongCard(
-                        title = song.name,
-                        artist = song.artist ?: "Unknown Artist",
+                    SmartSongCard(
+                        song = song,
                         modifier = Modifier,
                         shape = RoundedCornerShape(0.dp),
                         onClick = {
@@ -111,23 +108,8 @@ fun SimpleSearchBar(
                             }
                             expanded = true
                         },
-                        isSongFavorite = isSongFavorite,
-                        menuOptions = listOf(
-                            MenuOption("Abspielen", {
-                                playbackViewModel.play(song)
-                            }),
-                            if (isSongFavorite) {
-                                MenuOption("Aus Favoriten entfernen", {
-                                    playlistDetailViewModel.removeSongFromFavorites(song)
-                                    isSongFavorite = false
-                                })
-                            } else {
-                                MenuOption("Zu Favoriten hinzufügen", {
-                                    playlistDetailViewModel.addSongToFavorites(song)
-                                    isSongFavorite = true
-                                })
-                            },
-                        )
+                        playbackViewModel = playbackViewModel,
+                        playlistDetailViewModel = playlistDetailViewModel
                     )
                 }
                 ListItem(

@@ -18,7 +18,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 
 data class MenuOption(
     val text: String,
-    val onClick: () -> Unit
+    val onClick: () -> Unit,
+    val icon: ImageVector? = null
 )
 
 @Composable
@@ -47,6 +48,14 @@ fun SongCardMenu(
             menuOptions.forEach { option ->
                 DropdownMenuItem(
                     text = { Text(option.text) },
+                    leadingIcon =  {
+                        option.icon?.let {
+                            Icon(
+                                imageVector = it,
+                                contentDescription = null
+                            )
+                        }
+                    },
                     onClick = {
                         option.onClick()
                         expanded = false

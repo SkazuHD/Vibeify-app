@@ -23,10 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -39,8 +35,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.MediaItem
 import de.hsb.vibeify.R
 import de.hsb.vibeify.services.PlayerService
-import de.hsb.vibeify.ui.components.MenuOption
-import de.hsb.vibeify.ui.components.SongCard
+import de.hsb.vibeify.ui.components.SmartSongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 
 fun demoPlayerOnClick(context: android.content.Context) {
@@ -175,32 +170,15 @@ fun PlaylistDetailView(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
 
-                    items(songs) {
-                        var isSongFavorite by rememberSaveable { mutableStateOf(playlistDetailViewModel.isSongFavorite(it)) }
-                        SongCard(
-                            title = it.name,
-                            artist = it.artist ?: "Unknown Artist",
+                    items(songs) { song ->
+                        SmartSongCard(
+                            song = song,
                             songIcon = R.drawable.ic_launcher_foreground,
                             onClick = {
-                                playbackViewModel.play(it)
+                                playbackViewModel.play(song)
                             },
-                            isSongFavorite = isSongFavorite,
-                            menuOptions = listOf(
-                                MenuOption("Abspielen", {
-                                    playbackViewModel.play(it)
-                                }),
-                                if (isSongFavorite) {
-                                    MenuOption("Aus Favoriten entfernen", {
-                                        playlistDetailViewModel.removeSongFromFavorites(it)
-                                        isSongFavorite = false
-                                    })
-                                } else {
-                                    MenuOption("Zu Favoriten hinzufügen", {
-                                        playlistDetailViewModel.addSongToFavorites(it)
-                                        isSongFavorite = true
-                                    })
-                                },
-                            )
+                            playbackViewModel = playbackViewModel,
+                            playlistDetailViewModel = playlistDetailViewModel
                         )
                     }
 

@@ -99,6 +99,7 @@ fun SimpleSearchBar(
                     trailingContent = { Text("${searchResults.songs.size} results") }
                 )
                 searchResults.songs.forEach { song ->
+                    var isSongFavorite by rememberSaveable { mutableStateOf(playlistDetailViewModel.isSongFavorite(song)) }
                     SongCard(
                         title = song.name,
                         artist = song.artist ?: "Unknown Artist",
@@ -110,13 +111,23 @@ fun SimpleSearchBar(
                             }
                             expanded = true
                         },
+                        isSongFavorite = isSongFavorite,
                         menuOptions = listOf(
                             MenuOption("Abspielen", {
                                 playbackViewModel.play(song)
                             }),
-                            MenuOption("Zu Favoriten hinzufügen", { playlistDetailViewModel.addSongToFavorites(song) }),
-
-                            )
+                            if (isSongFavorite) {
+                                MenuOption("Aus Favoriten entfernen", {
+                                    playlistDetailViewModel.removeSongFromFavorites(song)
+                                    isSongFavorite = false
+                                })
+                            } else {
+                                MenuOption("Zu Favoriten hinzufügen", {
+                                    playlistDetailViewModel.addSongToFavorites(song)
+                                    isSongFavorite = true
+                                })
+                            },
+                        )
                     )
                 }
                 ListItem(

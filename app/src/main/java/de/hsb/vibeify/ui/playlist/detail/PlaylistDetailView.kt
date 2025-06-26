@@ -23,6 +23,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -172,6 +176,7 @@ fun PlaylistDetailView(
                 ) {
 
                     items(songs) {
+                        var isSongFavorite by rememberSaveable { mutableStateOf(playlistDetailViewModel.isSongFavorite(it)) }
                         SongCard(
                             title = it.name,
                             artist = it.artist ?: "Unknown Artist",
@@ -179,12 +184,22 @@ fun PlaylistDetailView(
                             onClick = {
                                 playbackViewModel.play(it)
                             },
+                            isSongFavorite = isSongFavorite,
                             menuOptions = listOf(
                                 MenuOption("Abspielen", {
                                     playbackViewModel.play(it)
                                 }),
-                                MenuOption("Zu Favoriten hinzufügen", { playlistDetailViewModel.addSongToFavorites(it) }),
-
+                                if (isSongFavorite) {
+                                    MenuOption("Aus Favoriten entfernen", {
+                                        playlistDetailViewModel.removeSongFromFavorites(it)
+                                        isSongFavorite = false
+                                    })
+                                } else {
+                                    MenuOption("Zu Favoriten hinzufügen", {
+                                        playlistDetailViewModel.addSongToFavorites(it)
+                                        isSongFavorite = true
+                                    })
+                                },
                             )
                         )
                     }

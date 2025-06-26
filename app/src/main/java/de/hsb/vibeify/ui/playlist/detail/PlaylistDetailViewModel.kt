@@ -121,4 +121,14 @@ class PlaylistDetailViewModel @Inject constructor(
             userRepository.addSongToFavorites(song.id)
         }
     }
+
+    fun removeSongFromFavorites(song: Song) {
+        viewModelScope.launch {
+            userRepository.removeSongFromFavorites(song.id)
+        }
+    }
+
+    fun isSongFavorite(song: Song): Boolean {
+        return userRepository.isSongFavorite(song.id)
+    }
 }

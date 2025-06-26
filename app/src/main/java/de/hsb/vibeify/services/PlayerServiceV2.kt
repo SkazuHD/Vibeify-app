@@ -7,7 +7,6 @@ import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import de.hsb.vibeify.data.model.Song
@@ -15,25 +14,29 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@UnstableApi
 @Singleton
 class PlayerServiceV2 {
 
     private var context: Context
     private var wasPlayingBeforeViewChange = false
-    private var currentSongList: List<Song> = emptyList() // Neue Variable für aktuelle Song-Liste
 
     private val controllerReadyActions = mutableListOf<(MediaController) -> Unit>()
     private var mediaController: MediaController? = null
 
-    val _currentSong: MutableStateFlow<Song?> = MutableStateFlow(null)
+    private val _currentSongList = MutableStateFlow( emptyList<Song>())
+    val currentSongList: StateFlow<List<Song>> = _currentSongList
+
+    private val _currentSong: MutableStateFlow<Song?> = MutableStateFlow(null)
     var currentSong: StateFlow<Song?> = _currentSong
 
     private val _isPlaying = MutableStateFlow(false)
@@ -41,6 +44,24 @@ class PlayerServiceV2 {
 
     private val _position = MutableStateFlow(0L)
     val position: StateFlow<Long> = _position
+
+    val upcomingSongs: StateFlow<List<Song>> = combine(
+        currentSongList,
+        currentSong
+    ) { songList, _ ->
+        mediaController?.let { controller ->
+            val currentIndex = controller.currentMediaItemIndex
+            if (currentIndex >= 0 && currentIndex < songList.size - 1) {
+                songList.subList(currentIndex + 1, songList.size)
+            } else {
+                emptyList()
+            }
+        } ?: emptyList()
+    }.stateIn(
+        scope = CoroutineScope(Dispatchers.Main),
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = emptyList()
+    )
 
     private val _duration = MutableStateFlow(1L)
     val duration: StateFlow<Long> = _duration
@@ -146,7 +167,7 @@ class PlayerServiceV2 {
 
     fun play(song: Song) {
         _currentSong.value = song
-        currentSongList = listOf(song)
+        _currentSongList.value = listOf(song)
         val mediaItem = buildMediaItem(song)
         withController { controller ->
             controller.setMediaItem(mediaItem)
@@ -159,7 +180,7 @@ class PlayerServiceV2 {
     fun play(songs: List<Song>, startIndex: Int = 0) {
         if (songs.isEmpty()) return
         _currentSong.value = songs[startIndex]
-        currentSongList = songs
+        _currentSongList.value = songs
         val mediaItems = songs.map { buildMediaItem(it) }
         withController { controller ->
             controller.setMediaItems(mediaItems)
@@ -227,8 +248,8 @@ class PlayerServiceV2 {
 
     private fun updateCurrentSongFromMediaItem(controller: MediaController) {
         val currentIndex = controller.currentMediaItemIndex
-        if (currentIndex >= 0 && currentIndex < currentSongList.size) {
-            _currentSong.value = currentSongList[currentIndex]
+        if (currentIndex >= 0 && currentIndex < currentSongList.value.size) {
+            _currentSong.value = currentSongList.value[currentIndex]
         }
     }
 

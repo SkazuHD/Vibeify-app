@@ -42,6 +42,7 @@ class PlaylistDetailViewModel @Inject constructor(
     var isLoadingSongs by mutableStateOf(true)
         private set
 
+
     fun loadPlaylist(playlistId: String) {
         viewModelScope.launch {
             isLoadingPlayList = true

@@ -23,7 +23,8 @@ class PlaybackViewModel @Inject constructor(
     private val _currentSong = playerServiceV2.currentSong
     val currentSong: StateFlow<Song?> = _currentSong
 
-
+    val upcomingSongs = playerServiceV2.upcomingSongs
+    val currentSongList = playerServiceV2.currentSongList
 
     fun play(song: Song) {
         viewModelScope.launch {
@@ -37,6 +38,13 @@ class PlaybackViewModel @Inject constructor(
     }
     fun resume() {
         playerServiceV2.resume()
+    }
+
+    fun skipToNext() {
+        playerServiceV2.skipToNext()
+    }
+    fun skipToPrevious() {
+        playerServiceV2.skipToPrevious()
     }
 
 

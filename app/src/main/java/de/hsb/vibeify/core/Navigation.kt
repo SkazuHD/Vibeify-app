@@ -155,7 +155,7 @@ fun RootNavHost() {
             }
             composable("playback_view") {
                 de.hsb.vibeify.ui.player.MinimalMusicPlayer(
-                    nextSong = "Next Song"
+                    nextSong = "Current Queue",
                 )
             }
         }

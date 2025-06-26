@@ -42,6 +42,9 @@ class PlaylistDetailViewModel @Inject constructor(
     var isLoadingSongs by mutableStateOf(true)
         private set
 
+    var isPlaylistOwner by mutableStateOf(false)
+        private set
+
 
     fun loadPlaylist(playlistId: String) {
         viewModelScope.launch {
@@ -60,8 +63,10 @@ class PlaylistDetailViewModel @Inject constructor(
                 isFavorite = false
                 isFavoriteAble = false
                 isLoadingSongs = false
+                isPlaylistOwner = true
             } else {
                 val playlist = playlistRepository.getPlaylistById(playlistId)
+                isPlaylistOwner = userRepository.state.value.currentUser?.id == playlist?.userId
                 playlist?.let {
                     playlistTitle = it.title
                     playlistDescription = it.description ?: ""
@@ -71,7 +76,7 @@ class PlaylistDetailViewModel @Inject constructor(
                     songs = songRepository.getSongsByIds(it.songIds)
                 }
                 isFavorite = userRepository.isPlaylistFavorite(playlistId)
-                isFavoriteAble = userRepository.state.value.currentUser?.id != playlist?.userId
+                isFavoriteAble = !isPlaylistOwner
                 isLoadingSongs = false
             }
         }
@@ -118,5 +123,12 @@ class PlaylistDetailViewModel @Inject constructor(
 
     fun isSongFavorite(song: Song): Boolean {
         return userRepository.isSongFavorite(song.id)
+    }
+
+    fun addSongToPlaylist(playlistId: String, song: Song) {
+        viewModelScope.launch {
+            playlistRepository.addSongToPlaylist(playlistId, song.id)
+            songs = songs + song
+        }
     }
 }

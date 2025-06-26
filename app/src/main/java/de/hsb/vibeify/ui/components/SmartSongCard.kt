@@ -4,10 +4,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.LibraryAdd
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -16,6 +18,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.ui.player.PlaybackViewModel
+import de.hsb.vibeify.ui.playlist.AddSongToPlaylistDialog
 import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailViewModel
 
 @Composable
@@ -31,6 +34,7 @@ fun SmartSongCard(
     additionalMenuOptions: List<MenuOption> = emptyList()
 ) {
     var isSongFavorite by rememberSaveable { mutableStateOf(playlistDetailViewModel.isSongFavorite(song)) }
+    var openAddToPlaylistDialog = remember { mutableStateOf(false) }
 
     val baseMenuOptions = listOf(
         MenuOption(text = "Abspielen", icon = Icons.Default.PlayArrow, onClick = {
@@ -50,8 +54,22 @@ fun SmartSongCard(
                 playlistDetailViewModel.addSongToFavorites(song)
                 isSongFavorite = true
             })
-        }
+        },
+        MenuOption(
+            text = "Zu playlist hinzufügen",
+            icon = Icons.Default.LibraryAdd,
+            onClick = {
+                openAddToPlaylistDialog.value = true
+            }
+        )
     )
+    when{
+        openAddToPlaylistDialog.value -> {
+            AddSongToPlaylistDialog(onDismissRequest = {
+                openAddToPlaylistDialog.value = false
+            }, song = song)
+        }
+    }
 
     val allMenuOptions = baseMenuOptions + additionalMenuOptions
 

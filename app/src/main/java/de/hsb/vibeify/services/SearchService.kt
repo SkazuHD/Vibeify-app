@@ -47,7 +47,6 @@ class SearchServiceImpl @Inject constructor(
             val res = SearchResult(
                 songs = songsDeferred.await(),
                 playlists = playlistsDeferred.await(),
-                // Make searchable if enough time is left
                 artists = artistsDeferred.await(),
                 albums = emptyList()
             )
@@ -73,7 +72,7 @@ class SearchServiceImpl @Inject constructor(
         }
 
         val sortedPlaylists = searchResult.playlists.sortedByDescending { playlist ->
-            playlist.title.lowercase().indexOf(lowerQuery)
+            calculatePlaylistRelevanceScore(playlist, lowerQuery)
         }
 
         val sortedArtists = searchResult.artists.sortedByDescending { artist ->
@@ -85,6 +84,34 @@ class SearchServiceImpl @Inject constructor(
             playlists = sortedPlaylists,
             artists = sortedArtists,
         )
+    }
+
+    private fun calculatePlaylistRelevanceScore(playlist: Playlist, lowerQuery: String): Int {
+        val title = playlist.title.lowercase()
+        val description = playlist.description?.lowercase() ?: ""
+        var score = 0
+
+        if (title == lowerQuery) {
+            score += 1000
+        } else if (title.startsWith(lowerQuery)) {
+            score += 800
+        } else if (title.contains(" $lowerQuery")) {
+            score += 600
+        } else if (title.contains(lowerQuery)) {
+            score += 400
+        }
+        if (description.isNotEmpty()) {
+            if (description == lowerQuery) {
+                score += 700
+            } else if (description.startsWith(lowerQuery)) {
+                score += 500
+            } else if (description.contains(" $lowerQuery")) {
+                score += 300
+            } else if (description.contains(lowerQuery)) {
+                score += 200
+            }
+        }
+        return score
     }
 
     private fun calculateArtistRelevanceScore(artist: Artist, lowerQuery: String): Int {
@@ -100,7 +127,6 @@ class SearchServiceImpl @Inject constructor(
         } else if (artistName.contains(lowerQuery)) {
             score += 400
         }
-
         return score
     }
 

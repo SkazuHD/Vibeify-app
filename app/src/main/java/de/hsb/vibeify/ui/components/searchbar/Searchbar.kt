@@ -51,6 +51,15 @@ fun SimpleSearchBar(
     // Controls expansion state of the search bar
     var expanded by rememberSaveable { mutableStateOf(false) }
 
+    // State variables to control which lists show all results
+    var showAllSongs by rememberSaveable { mutableStateOf(false) }
+    var showAllArtists by rememberSaveable { mutableStateOf(false) }
+    var showAllPlaylists by rememberSaveable { mutableStateOf(false) }
+    var showAllAlbums by rememberSaveable { mutableStateOf(false) }
+
+    // Limit for visible results
+    val resultLimit = 3
+
     Box(
         modifier
             .semantics { isTraversalGroup = true }
@@ -66,6 +75,10 @@ fun SimpleSearchBar(
                     onSearch = {
                         onSearch(textFieldState.text.toString())
                         expanded = true
+                        showAllSongs = false
+                        showAllArtists = false
+                        showAllPlaylists = false
+                        showAllAlbums = false
                     },
                     expanded = expanded,
                     onExpandedChange = { expanded = it },
@@ -75,7 +88,6 @@ fun SimpleSearchBar(
             expanded = expanded,
             onExpandedChange = { expanded = it },
         ) {
-            // Display search results in a scrollable column
             Column(Modifier.verticalScroll(rememberScrollState())) {
                 if (
                     searchResults.songs.isEmpty() &&
@@ -96,7 +108,7 @@ fun SimpleSearchBar(
                         headlineContent = { Text("Songs") },
                         trailingContent = { Text("${searchResults.songs.size} results") }
                     )
-                    searchResults.songs.forEach { song ->
+                    searchResults.songs.take(if (showAllSongs) Int.MAX_VALUE else resultLimit).forEach { song ->
                         SmartSongCard(
                             song = song,
                             modifier = Modifier,
@@ -111,6 +123,15 @@ fun SimpleSearchBar(
                             playlistDetailViewModel = playlistDetailViewModel
                         )
                     }
+                    if (!showAllSongs && searchResults.songs.size > resultLimit) {
+                        Text(
+                            text = "Show all ${searchResults.songs.size} songs",
+                            modifier = Modifier
+                                .clickable { showAllSongs = true }
+                                .padding(16.dp),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
 
                 if (searchResults.artists.isNotEmpty()){
@@ -119,11 +140,20 @@ fun SimpleSearchBar(
                         headlineContent = { Text("Artists") },
                         trailingContent = { Text("${searchResults.artists.size} results") }
                     )
-                    searchResults.artists.forEach { artist ->
+                    searchResults.artists.take(if (showAllArtists) Int.MAX_VALUE else resultLimit).forEach { artist ->
                         ListItem(
                             modifier = Modifier,
                             headlineContent = { Text(artist.name) },
                             trailingContent = { Text("View Artist") }
+                        )
+                    }
+                    if (!showAllArtists && searchResults.artists.size > resultLimit) {
+                        Text(
+                            text = "Show all ${searchResults.artists.size} artists",
+                            modifier = Modifier
+                                .clickable { showAllArtists = true }
+                                .padding(16.dp),
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }
@@ -134,7 +164,7 @@ fun SimpleSearchBar(
                         trailingContent = { Text("${searchResults.playlists.size} results") }
                     )
 
-                    searchResults.playlists.forEach { playlist ->
+                    searchResults.playlists.take(if (showAllPlaylists) Int.MAX_VALUE else resultLimit).forEach { playlist ->
                         PlaylistCard(
                             modifier = Modifier
                                 .clickable {
@@ -147,6 +177,15 @@ fun SimpleSearchBar(
                             shape = RoundedCornerShape(0.dp),
                         )
                     }
+                    if (!showAllPlaylists && searchResults.playlists.size > resultLimit) {
+                        Text(
+                            text = "Show all ${searchResults.playlists.size} playlists",
+                            modifier = Modifier
+                                .clickable { showAllPlaylists = true }
+                                .padding(16.dp),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 }
                 if (searchResults.albums.isNotEmpty()) {
                     ListItem(
@@ -154,11 +193,20 @@ fun SimpleSearchBar(
                         headlineContent = { Text("Albums") },
                         trailingContent = { Text("${searchResults.albums.size} results") }
                     )
-                    searchResults.albums.forEach { album ->
+                    searchResults.albums.take(if (showAllAlbums) Int.MAX_VALUE else resultLimit).forEach { album ->
                         ListItem(
                             modifier = Modifier,
                             headlineContent = { Text(album.title) },
                             trailingContent = { Text("View Album") }
+                        )
+                    }
+                    if (!showAllAlbums && searchResults.albums.size > resultLimit) {
+                        Text(
+                            text = "Show all ${searchResults.albums.size} albums",
+                            modifier = Modifier
+                                .clickable { showAllAlbums = true }
+                                .padding(16.dp),
+                            style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }

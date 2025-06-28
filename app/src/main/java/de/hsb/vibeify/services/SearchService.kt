@@ -6,6 +6,8 @@ import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.SongRepository
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
@@ -27,20 +29,34 @@ class SearchServiceImpl @Inject constructor(
     private val songRepository: SongRepository,
     private val playlistRepository: PlaylistRepository
 ) : SearchService{
+    @Volatile
+    private var currentSearchJob: Job? = null
 
     override suspend fun search(query: String): SearchResult = coroutineScope {
-        val songsDeferred = async { songRepository.searchSongs(query) }
-        val playlistsDeferred = async { playlistRepository.searchPlaylists(query) }
+        currentSearchJob?.cancel()
 
-        val res = SearchResult(
-            songs = songsDeferred.await(),
-            playlists = playlistsDeferred.await(),
-            // Make searchable if enough time is left
-            artists = emptyList(),
-            albums = emptyList()
-        )
-        val sortedResult = sortByRelevance(res, query)
-        sortedResult
+        currentSearchJob = coroutineContext[Job]
+
+        try {
+            val songsDeferred = async { songRepository.searchSongs(query) }
+            val playlistsDeferred = async { playlistRepository.searchPlaylists(query) }
+
+            val res = SearchResult(
+                songs = songsDeferred.await(),
+                playlists = playlistsDeferred.await(),
+                // Make searchable if enough time is left
+                artists = emptyList(),
+                albums = emptyList()
+            )
+            val sortedResult = sortByRelevance(res, query)
+            sortedResult
+        } catch (_: CancellationException) {
+            SearchResult()
+        } finally {
+            if (currentSearchJob == coroutineContext[Job]) {
+                currentSearchJob = null
+            }
+        }
     }
 
     fun sortByRelevance(

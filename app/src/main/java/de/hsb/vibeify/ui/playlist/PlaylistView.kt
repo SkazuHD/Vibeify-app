@@ -13,6 +13,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -27,7 +28,7 @@ import de.hsb.vibeify.ui.components.PlaylistCard
 @Composable
 fun PlaylistView(modifier : Modifier = Modifier, navController: NavController, viewModel: PlaylistViewModel = hiltViewModel()) {
 
-    val  playlists = viewModel.playlists
+    val playlists = viewModel.playlists.collectAsState()
     val openDialog = remember { mutableStateOf(false) }
 
     Box(modifier = modifier) {
@@ -69,13 +70,16 @@ fun PlaylistView(modifier : Modifier = Modifier, navController: NavController, v
                     .padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(playlists) {
+                items(
+                    items = playlists.value,
+                    key = { playlist -> playlist.id }
+                ) { playlist ->
                     PlaylistCard(
-                        playlistDescription = it.description ?: "",
-                        playlistName = it.title,
-                        playlistIcon = it.imagePath ?: R.drawable.ic_launcher_foreground,
+                        playlistDescription = playlist.description ?: "",
+                        playlistName = playlist.title,
+                        playlistIcon = playlist.imagePath ?: R.drawable.ic_launcher_foreground,
                         onClick = {
-                            navController.navigate("playlist_detail_view/${it.id}")
+                            navController.navigate("playlist_detail_view/${playlist.id}")
                         }
                     )
                 }

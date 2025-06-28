@@ -13,6 +13,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -25,7 +26,7 @@ import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailViewModel
 @Composable
 fun AddSongToPlaylistDialog(onDismissRequest: () -> Unit, song: Song, playlistViewModel: PlaylistViewModel = hiltViewModel(), playlistDetailViewModel: PlaylistDetailViewModel = hiltViewModel()) {
 
-    val playlists = playlistViewModel.playlists
+    val playlists = playlistViewModel.playlists.collectAsState()
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
@@ -48,7 +49,7 @@ fun AddSongToPlaylistDialog(onDismissRequest: () -> Unit, song: Song, playlistVi
                     textAlign = TextAlign.Center
                 )
                 LazyColumn {
-                    items(items = playlists) { playlist ->
+                    items(items = playlists.value, key = { playlist -> playlist.id }) { playlist ->
                         Button(
                             onClick = {
                                 playlistDetailViewModel.addSongToPlaylist(playlist.id, song)

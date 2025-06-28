@@ -34,7 +34,7 @@ fun SmartSongCard(
     additionalMenuOptions: List<MenuOption> = emptyList()
 ) {
     var isSongFavorite by rememberSaveable { mutableStateOf(playlistDetailViewModel.isSongFavorite(song)) }
-    var openAddToPlaylistDialog = remember { mutableStateOf(false) }
+    val openAddToPlaylistDialog = remember { mutableStateOf(false) }
 
     val baseMenuOptions = listOf(
         MenuOption(text = "Abspielen", icon = Icons.Default.PlayArrow, onClick = {

@@ -4,6 +4,9 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Filter
 import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Playlist
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,9 +45,7 @@ interface PlaylistRepository {
 }
 
 @Singleton
-class PlaylistRepositoryImpl @Inject constructor(
-    private val songRepository: SongRepository
-) : PlaylistRepository {
+class PlaylistRepositoryImpl @Inject constructor() : PlaylistRepository {
 
     private val db = Firestore.getInstance()
     private val collectionName = "playlists"
@@ -97,16 +98,24 @@ class PlaylistRepositoryImpl @Inject constructor(
     override suspend fun getPlaylistsForUser(playlistIds: List<String>): List<Playlist> {
         if (playlistIds.isEmpty()) return emptyList()
 
-        val res = db.collection(collectionName)
-            .whereIn("id", playlistIds)
-            .get()
-            .await()
+        val batchSize = 30
 
-        if (res.isEmpty) {
-            return emptyList()
+        return coroutineScope {
+            playlistIds.chunked(batchSize).map { batch ->
+                async {
+                    val res = db.collection(collectionName)
+                        .whereIn("id", batch)
+                        .get()
+                        .await()
+
+                    if (!res.isEmpty) {
+                        res.documents.mapNotNull { it.toObject(Playlist::class.java) }
+                    } else {
+                        emptyList()
+                    }
+                }
+            }.awaitAll().flatten()
         }
-
-        return res.documents.mapNotNull { it.toObject(Playlist::class.java) }
     }
 
     override suspend fun createPlaylist(playlist: Playlist): Boolean {

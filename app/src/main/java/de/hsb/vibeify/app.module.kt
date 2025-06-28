@@ -35,9 +35,8 @@ object UserModule {
     @Singleton
     @Provides
     fun providePlaylistRepository(
-        songRepository: SongRepository
     ): PlaylistRepository {
-        return PlaylistRepositoryImpl(songRepository)
+        return PlaylistRepositoryImpl()
     }
     @Singleton
     @Provides

@@ -2,6 +2,9 @@ package de.hsb.vibeify.data.repository
 
 import com.google.firebase.firestore.Filter
 import de.hsb.vibeify.data.model.Song
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,15 +33,25 @@ class SongRepositoryImpl @Inject constructor() : SongRepository {
 
     override suspend fun getSongsByIds(ids: List<String>): List<Song> {
         if (ids.isEmpty()) return emptyList()
-        val res = db.collection(collectionName)
-            .whereIn("id", ids)
-            .get()
-            .await()
 
-        if (res.isEmpty) {
-            return emptyList()
+        val batchSize = 30
+
+        return coroutineScope {
+            ids.chunked(batchSize).map { batch ->
+                async {
+                    val res = db.collection(collectionName)
+                        .whereIn("id", batch)
+                        .get()
+                        .await()
+
+                    if (!res.isEmpty) {
+                        res.documents.mapNotNull { it.toObject(Song::class.java) }
+                    } else {
+                        emptyList()
+                    }
+                }
+            }.awaitAll().flatten()
         }
-        return res.documents.mapNotNull { it.toObject(Song::class.java) }
     }
 
     override suspend fun getAllSongs(): List<Song> {

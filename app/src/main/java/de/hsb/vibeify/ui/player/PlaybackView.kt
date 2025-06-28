@@ -85,7 +85,7 @@ fun MinimalMusicPlayer(
             verticalArrangement = Arrangement.Center
         ) {
             AsyncImage(
-                model = currentSong!!.imageUrl,
+                model = currentSong?.imageUrl,
                 contentDescription = "Song Cover",
                 modifier = Modifier
                     .size(220.dp)
@@ -93,13 +93,15 @@ fun MinimalMusicPlayer(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Text(
-                text = currentSong!!.name,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
+            currentSong?.name?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
 
-            currentSong!!.artist?.let {
+            currentSong?.artist?.let {
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodyMedium,

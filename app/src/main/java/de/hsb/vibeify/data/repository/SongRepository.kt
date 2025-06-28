@@ -1,7 +1,6 @@
 package de.hsb.vibeify.data.repository
 
 import com.google.firebase.firestore.Filter
-import com.google.firebase.firestore.Query
 import de.hsb.vibeify.data.model.Song
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -51,6 +50,10 @@ class SongRepositoryImpl @Inject constructor() : SongRepository {
     }
 
     override suspend fun searchSongs(query: String): List<Song> {
+        val capitalizedQuery = query.lowercase().replaceFirstChar {
+            if (it.isLowerCase()) it.titlecase() else it.toString()
+        }
+
         val res = db.collection(collectionName)
             .where(
                 Filter.or(
@@ -59,17 +62,26 @@ class SongRepositoryImpl @Inject constructor() : SongRepository {
                         Filter.lessThanOrEqualTo("name", query + "\uf8ff")
                     ),
                     Filter.and(
+                        Filter.greaterThanOrEqualTo("name", capitalizedQuery),
+                        Filter.lessThanOrEqualTo("name", capitalizedQuery + "\uf8ff")
+                    ),
+                    Filter.and(
                         Filter.greaterThanOrEqualTo("artist", query),
                         Filter.lessThanOrEqualTo("artist", query + "\uf8ff")
                     ),
                     Filter.and(
+                        Filter.greaterThanOrEqualTo("artist", capitalizedQuery),
+                        Filter.lessThanOrEqualTo("artist", capitalizedQuery + "\uf8ff")
+                    ),
+                    Filter.and(
                         Filter.greaterThanOrEqualTo("album", query),
                         Filter.lessThanOrEqualTo("album", query + "\uf8ff")
+                    ),
+                    Filter.and(
+                        Filter.greaterThanOrEqualTo("album", capitalizedQuery),
+                        Filter.lessThanOrEqualTo("album", capitalizedQuery + "\uf8ff")
                     )
                 )
-            ).orderBy(
-                "name",
-                Query.Direction.ASCENDING
             )
             .get()
             .await()

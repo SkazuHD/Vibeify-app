@@ -32,11 +32,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.Player
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import de.hsb.vibeify.R
 
 
 @Composable
@@ -80,10 +83,13 @@ fun StickyBar(navController: NavController, modifier: Modifier = Modifier) {
                     .padding(bottom = 2.dp)
             ) {
 
-                Box(
+                AsyncImage(
+                    model = song?.imageUrl,
+                    contentScale = ContentScale.Crop,
+                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                    contentDescription = "Album Art",
                     modifier = Modifier
                         .size(56.dp)
-                        .background(Color.Gray)
                 )
                 Spacer(modifier = Modifier.width(12.dp))
 

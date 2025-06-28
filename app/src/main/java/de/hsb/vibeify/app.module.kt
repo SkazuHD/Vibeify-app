@@ -7,6 +7,8 @@ import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
 import dagger.hilt.components.SingletonComponent
+import de.hsb.vibeify.data.repository.ArtistRepository
+import de.hsb.vibeify.data.repository.ArtistRepositoryImpl
 import de.hsb.vibeify.data.repository.AuthRepository
 import de.hsb.vibeify.data.repository.FirebaseAuthRepo
 import de.hsb.vibeify.data.repository.FirebaseRepository
@@ -56,6 +58,15 @@ object UserModule {
     ): UserRepository {
         return UserRepositoryImpl(authRepository, firestoreRepo)
     }
+
+    @Singleton
+    @Provides
+    fun provideArtistRepository(
+        songRepository: SongRepository,
+    ): ArtistRepository {
+        return ArtistRepositoryImpl(songRepository)
+    }
+
     @Singleton
     @Provides
     fun providePlayerService(@ApplicationContext context: android.content.Context): PlayerServiceV2 {
@@ -66,9 +77,10 @@ object UserModule {
     @Provides
     fun provideSearchService(
         songRepository: SongRepository,
-        playlistRepository: PlaylistRepository
+        playlistRepository: PlaylistRepository,
+        artistRepository: ArtistRepository
     ): SearchService {
-        return SearchServiceImpl(songRepository, playlistRepository)
+        return SearchServiceImpl(songRepository, playlistRepository, artistRepository)
     }
 }
 

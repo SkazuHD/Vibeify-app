@@ -4,6 +4,7 @@ import de.hsb.vibeify.data.model.Album
 import de.hsb.vibeify.data.model.Artist
 import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.model.Song
+import de.hsb.vibeify.data.repository.ArtistRepository
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.SongRepository
 import kotlinx.coroutines.CancellationException
@@ -27,7 +28,8 @@ interface SearchService {
 
 class SearchServiceImpl @Inject constructor(
     private val songRepository: SongRepository,
-    private val playlistRepository: PlaylistRepository
+    private val playlistRepository: PlaylistRepository,
+    private val artistRepository: ArtistRepository
 ) : SearchService{
     @Volatile
     private var currentSearchJob: Job? = null
@@ -40,12 +42,13 @@ class SearchServiceImpl @Inject constructor(
         try {
             val songsDeferred = async { songRepository.searchSongs(query) }
             val playlistsDeferred = async { playlistRepository.searchPlaylists(query) }
+            val artistsDeferred = async { artistRepository.searchArtists(query) }
 
             val res = SearchResult(
                 songs = songsDeferred.await(),
                 playlists = playlistsDeferred.await(),
                 // Make searchable if enough time is left
-                artists = emptyList(),
+                artists = artistsDeferred.await(),
                 albums = emptyList()
             )
             val sortedResult = sortByRelevance(res, query)
@@ -73,11 +76,34 @@ class SearchServiceImpl @Inject constructor(
             playlist.title.lowercase().indexOf(lowerQuery)
         }
 
+        val sortedArtists = searchResult.artists.sortedByDescending { artist ->
+            calculateArtistRelevanceScore(artist, lowerQuery)
+        }
+
         return searchResult.copy(
             songs = sortedSongs,
-            playlists = sortedPlaylists
+            playlists = sortedPlaylists,
+            artists = sortedArtists,
         )
     }
+
+    private fun calculateArtistRelevanceScore(artist: Artist, lowerQuery: String): Int {
+        val artistName = artist.name.lowercase()
+        var score = 0
+
+        if (artistName == lowerQuery) {
+            score += 1000
+        } else if (artistName.startsWith(lowerQuery)) {
+            score += 800
+        } else if (artistName.contains(" $lowerQuery")) {
+            score += 600
+        } else if (artistName.contains(lowerQuery)) {
+            score += 400
+        }
+
+        return score
+    }
+
 
     private fun calculateSongRelevanceScore(song: Song, lowerQuery: String): Int {
         val songName = song.name.lowercase()

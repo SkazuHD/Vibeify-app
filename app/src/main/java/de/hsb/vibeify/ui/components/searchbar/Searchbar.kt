@@ -90,45 +90,77 @@ fun SimpleSearchBar(
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
-
-
-                ListItem(
-                    modifier = Modifier.semantics { traversalIndex = 1f },
-                    headlineContent = { Text("Songs") },
-                    trailingContent = { Text("${searchResults.songs.size} results") }
-                )
-                searchResults.songs.forEach { song ->
-                    SmartSongCard(
-                        song = song,
-                        modifier = Modifier,
-                        shape = RoundedCornerShape(0.dp),
-                        onClick = {
-                            if (onSongClick != {}) {
-                                onSongClick(song)
-                            }
-                            expanded = true
-                        },
-                        playbackViewModel = playbackViewModel,
-                        playlistDetailViewModel = playlistDetailViewModel
+                if (searchResults.songs.isNotEmpty()){
+                    ListItem(
+                        modifier = Modifier.semantics { traversalIndex = 1f },
+                        headlineContent = { Text("Songs") },
+                        trailingContent = { Text("${searchResults.songs.size} results") }
                     )
-                }
-                ListItem(
-                    modifier = Modifier.semantics { traversalIndex = 2f },
-                    headlineContent = { Text("Playlists") },
-                    trailingContent = { Text("${searchResults.playlists.size} results") }
-                )
-                searchResults.playlists.forEach { playlist ->
-                    PlaylistCard(
-                        modifier = Modifier
-                            .clickable {
-                                onPlaylistClick(playlist)
-                                expanded = false
-                                textFieldState.edit { replace(0, length, "") }
+                    searchResults.songs.forEach { song ->
+                        SmartSongCard(
+                            song = song,
+                            modifier = Modifier,
+                            shape = RoundedCornerShape(0.dp),
+                            onClick = {
+                                if (onSongClick != {}) {
+                                    onSongClick(song)
+                                }
+                                expanded = true
                             },
-                        playlistDescription = playlist.description ?: "No description",
-                        playlistName = playlist.title,
-                        shape = RoundedCornerShape(0.dp),
+                            playbackViewModel = playbackViewModel,
+                            playlistDetailViewModel = playlistDetailViewModel
+                        )
+                    }
+                }
+
+                if (searchResults.artists.isNotEmpty()){
+                    ListItem(
+                        modifier = Modifier.semantics { traversalIndex = 2f },
+                        headlineContent = { Text("Artists") },
+                        trailingContent = { Text("${searchResults.artists.size} results") }
                     )
+                    searchResults.artists.forEach { artist ->
+                        ListItem(
+                            modifier = Modifier,
+                            headlineContent = { Text(artist.name) },
+                            trailingContent = { Text("View Artist") }
+                        )
+                    }
+                }
+                if (searchResults.playlists.isNotEmpty()){
+                    ListItem(
+                        modifier = Modifier.semantics { traversalIndex = 2f },
+                        headlineContent = { Text("Playlists") },
+                        trailingContent = { Text("${searchResults.playlists.size} results") }
+                    )
+
+                    searchResults.playlists.forEach { playlist ->
+                        PlaylistCard(
+                            modifier = Modifier
+                                .clickable {
+                                    onPlaylistClick(playlist)
+                                    expanded = false
+                                    textFieldState.edit { replace(0, length, "") }
+                                },
+                            playlistDescription = playlist.description ?: "No description",
+                            playlistName = playlist.title,
+                            shape = RoundedCornerShape(0.dp),
+                        )
+                    }
+                }
+                if (searchResults.albums.isNotEmpty()) {
+                    ListItem(
+                        modifier = Modifier.semantics { traversalIndex = 3f },
+                        headlineContent = { Text("Albums") },
+                        trailingContent = { Text("${searchResults.albums.size} results") }
+                    )
+                    searchResults.albums.forEach { album ->
+                        ListItem(
+                            modifier = Modifier,
+                            headlineContent = { Text(album.title) },
+                            trailingContent = { Text("View Album") }
+                        )
+                    }
                 }
             }
         }

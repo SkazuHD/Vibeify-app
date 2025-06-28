@@ -23,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -62,8 +63,8 @@ fun PlaylistDetailView(
     val playlistTitle = playlistDetailViewModel.playlistTitle
     val playlistDescription = playlistDetailViewModel.playlistDescription
     val playlistImage = playlistDetailViewModel.playlistImage
-    val songs = playlistDetailViewModel.songs
-    val playlistDurationText = playlistDetailViewModel.playlistDurationText
+    val songs = playlistDetailViewModel.songs.collectAsState()
+    val playlistDurationText = playlistDetailViewModel.playlistDurationText.collectAsState()
     val isFavorite = playlistDetailViewModel.isFavorite
     val isFavoriteAble = playlistDetailViewModel.isFavoriteAble
 
@@ -88,7 +89,7 @@ fun PlaylistDetailView(
                     )
                     IconButton(
                         onClick = {
-                            playbackViewModel.play(songs)
+                            playbackViewModel.play(songs.value)
                         },
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -118,12 +119,12 @@ fun PlaylistDetailView(
                     )
                     Row {
                         Text(
-                            text = "${songs.size} Songs",
+                            text = "${songs.value.size} Songs",
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(start = 16.dp, top = 8.dp)
                         )
                         Text(
-                            text = playlistDurationText,
+                            text = playlistDurationText.value,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(start = 8.dp, top = 8.dp)
                         )
@@ -168,12 +169,12 @@ fun PlaylistDetailView(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
 
-                    items(songs) { song ->
+                    items(songs.value) { song ->
                         SmartSongCard(
                             song = song,
                             songIcon = R.drawable.ic_launcher_foreground,
                             onClick = {
-                                playbackViewModel.play(songs, songs.indexOf(song))
+                                playbackViewModel.play(songs.value, songs.value.indexOf(song))
                             },
                             playbackViewModel = playbackViewModel,
                             playlistDetailViewModel = playlistDetailViewModel

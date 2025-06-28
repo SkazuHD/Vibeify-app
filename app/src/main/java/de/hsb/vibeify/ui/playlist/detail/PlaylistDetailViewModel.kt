@@ -14,6 +14,12 @@ import de.hsb.vibeify.data.repository.LIKED_SONGS_PLAYLIST_ID
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.SongRepository
 import de.hsb.vibeify.data.repository.UserRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,10 +35,28 @@ class PlaylistDetailViewModel @Inject constructor(
         private set
     var playlistImage by mutableIntStateOf(R.drawable.ic_launcher_background)
         private set
-    var songs by mutableStateOf(
-        listOf<Song>()
+    private val _songs = MutableStateFlow<List<Song>>(emptyList())
+    val songs: StateFlow<List<Song>> = _songs.asStateFlow()
+
+    val playlistDurationText: StateFlow<String> = songs.map { songList ->
+        val playlistDuration = songList.sumOf { it.duration }
+        val playlistDurationMinutes = playlistDuration / 60
+        val playlistDurationSeconds = playlistDuration % 60
+        when {
+            playlistDurationMinutes >= 60 -> {
+                val hours = playlistDurationMinutes / 60
+                val minutes = playlistDurationMinutes % 60
+                "$hours Stunden und $minutes Minuten"
+            }
+            playlistDurationMinutes > 0 -> "$playlistDurationMinutes Minuten und $playlistDurationSeconds Sekunden"
+            else -> "$playlistDurationSeconds Sekunden"
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = "0 Sekunden"
     )
-        private set
+
     var isFavorite by mutableStateOf(false)
         private set
     var isFavoriteAble by mutableStateOf(true)
@@ -59,44 +83,29 @@ class PlaylistDetailViewModel @Inject constructor(
                 playlistImage = likedSongsPlaylist.imagePath ?: R.drawable.ic_launcher_background
                 isLoadingPlayList = false
                 isLoadingSongs = true
-                songs = songRepository.getSongsByIds(likedSongIds)
+
+                _songs.value = songRepository.getSongsByIds(likedSongIds)
+                isLoadingSongs = false
                 isFavorite = false
                 isFavoriteAble = false
-                isLoadingSongs = false
                 isPlaylistOwner = true
             } else {
                 val playlist = playlistRepository.getPlaylistById(playlistId)
                 isPlaylistOwner = userRepository.state.value.currentUser?.id == playlist?.userId
-                playlist?.let {
-                    playlistTitle = it.title
-                    playlistDescription = it.description ?: ""
-                    playlistImage = it.imagePath ?: R.drawable.ic_launcher_background
+                playlist?.let { playlistData ->
+                    playlistTitle = playlistData.title
+                    playlistDescription = playlistData.description ?: ""
+                    playlistImage = playlistData.imagePath ?: R.drawable.ic_launcher_background
                     isLoadingPlayList = false
                     isLoadingSongs = true
-                    songs = songRepository.getSongsByIds(it.songIds)
+                    _songs.value = songRepository.getSongsByIds(playlistData.songIds)
+                    isLoadingSongs = false
                 }
                 isFavorite = userRepository.isPlaylistFavorite(playlistId)
                 isFavoriteAble = !isPlaylistOwner
-                isLoadingSongs = false
             }
         }
     }
-
-    val playlistDurationText: String
-        get() {
-            val playlistDuration = songs.sumOf { it.duration }
-            val playlistDurationMinutes = playlistDuration / 60
-            val playlistDurationSeconds = playlistDuration % 60
-            return when {
-                playlistDurationMinutes >= 60 -> {
-                    val hours = playlistDurationMinutes / 60
-                    val minutes = playlistDurationMinutes % 60
-                    "$hours Stunden und $minutes Minuten"
-                }
-                playlistDurationMinutes > 0 -> "$playlistDurationMinutes Minuten und $playlistDurationSeconds Sekunden"
-                else -> "$playlistDurationSeconds Sekunden"
-            }
-        }
 
     fun toggleFavorite(playlistId: String) {
         viewModelScope.launch {
@@ -128,7 +137,7 @@ class PlaylistDetailViewModel @Inject constructor(
     fun addSongToPlaylist(playlistId: String, song: Song) {
         viewModelScope.launch {
             playlistRepository.addSongToPlaylist(playlistId, song.id)
-            songs = songs + song
+            _songs.value = _songs.value + song
         }
     }
 }

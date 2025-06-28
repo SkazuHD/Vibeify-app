@@ -3,8 +3,10 @@ package de.hsb.vibeify.core
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -98,8 +100,8 @@ fun RootNavHost() {
     val currentRoute = navBackStackEntry?.destination?.route
 
     Scaffold(
-        modifier = Modifier.fillMaxSize().systemBarsPadding(),
-        contentWindowInsets = NavigationBarDefaults.windowInsets,
+        modifier = Modifier.fillMaxSize(),
+        contentWindowInsets = WindowInsets.systemBars,
         topBar = {
             val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
             AppHeader(scrollBehavior, modifier = Modifier)

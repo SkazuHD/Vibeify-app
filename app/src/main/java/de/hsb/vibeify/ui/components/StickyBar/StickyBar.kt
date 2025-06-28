@@ -33,12 +33,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.Player
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import de.hsb.vibeify.R
 
 
@@ -84,7 +87,15 @@ fun StickyBar(navController: NavController, modifier: Modifier = Modifier) {
             ) {
 
                 AsyncImage(
-                    model = song?.imageUrl,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(song!!.imageUrl)
+                        .crossfade(true)
+                        .placeholder(R.drawable.ic_launcher_foreground)
+                        .error(R.drawable.ic_launcher_foreground)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
+                        .diskCachePolicy(CachePolicy.ENABLED)
+                        .networkCachePolicy(CachePolicy.ENABLED)
+                        .build(),
                     contentScale = ContentScale.Crop,
                     placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
                     contentDescription = "Album Art",

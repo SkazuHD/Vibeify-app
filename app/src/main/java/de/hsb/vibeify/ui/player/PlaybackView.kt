@@ -33,9 +33,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
+import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.ui.components.SongCard
 
@@ -85,7 +89,15 @@ fun MinimalMusicPlayer(
             verticalArrangement = Arrangement.Center
         ) {
             AsyncImage(
-                model = currentSong?.imageUrl,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(currentSong?.imageUrl)
+                    .crossfade(true)
+                    .placeholder(R.drawable.ic_launcher_foreground)
+                    .error(R.drawable.ic_launcher_foreground)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .networkCachePolicy(CachePolicy.ENABLED)
+                    .build(),
                 contentDescription = "Song Cover",
                 modifier = Modifier
                     .size(220.dp)

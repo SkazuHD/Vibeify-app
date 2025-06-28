@@ -33,36 +33,44 @@ fun SmartSongCard(
     playlistDetailViewModel: PlaylistDetailViewModel = hiltViewModel(),
     additionalMenuOptions: List<MenuOption> = emptyList()
 ) {
-    var isSongFavorite by rememberSaveable { mutableStateOf(playlistDetailViewModel.isSongFavorite(song)) }
+    val isSongFavoriteInitial = remember(song.id) {
+        playlistDetailViewModel.isSongFavorite(song)
+    }
+    var isSongFavorite by rememberSaveable(song.id) {
+        mutableStateOf(isSongFavoriteInitial)
+    }
     val openAddToPlaylistDialog = remember { mutableStateOf(false) }
 
-    val baseMenuOptions = listOf(
-        MenuOption(text = "Abspielen", icon = Icons.Default.PlayArrow, onClick = {
-            playbackViewModel.play(song)
-        }),
-        if (isSongFavorite) {
-            MenuOption(text = "Aus Favoriten entfernen",
-                icon = Icons.Default.Favorite,
-                onClick= {
-                playlistDetailViewModel.removeSongFromFavorites(song)
-                isSongFavorite = false
-            },
-               )
+    val baseMenuOptions = remember(isSongFavorite, song.id) {
+        listOf(
+            MenuOption(text = "Abspielen", icon = Icons.Default.PlayArrow, onClick = {
+                playbackViewModel.play(song)
+            }),
+            if (isSongFavorite) {
+                MenuOption(text = "Aus Favoriten entfernen",
+                    icon = Icons.Default.Favorite,
+                    onClick= {
+                    playlistDetailViewModel.removeSongFromFavorites(song)
+                    isSongFavorite = false
+                },
+                   )
 
-        } else {
-            MenuOption(text = "Zu Favoriten hinzufügen", icon = Icons.Default.FavoriteBorder, onClick = {
-                playlistDetailViewModel.addSongToFavorites(song)
-                isSongFavorite = true
-            })
-        },
-        MenuOption(
-            text = "Zu playlist hinzufügen",
-            icon = Icons.Default.LibraryAdd,
-            onClick = {
-                openAddToPlaylistDialog.value = true
-            }
+            } else {
+                MenuOption(text = "Zu Favoriten hinzufügen", icon = Icons.Default.FavoriteBorder, onClick = {
+                    playlistDetailViewModel.addSongToFavorites(song)
+                    isSongFavorite = true
+                })
+            },
+            MenuOption(
+                text = "Zu playlist hinzufügen",
+                icon = Icons.Default.LibraryAdd,
+                onClick = {
+                    openAddToPlaylistDialog.value = true
+                }
+            )
         )
-    )
+    }
+
     when{
         openAddToPlaylistDialog.value -> {
             AddSongToPlaylistDialog(onDismissRequest = {
@@ -71,7 +79,9 @@ fun SmartSongCard(
         }
     }
 
-    val allMenuOptions = baseMenuOptions + additionalMenuOptions
+    val allMenuOptions = remember(baseMenuOptions, additionalMenuOptions) {
+        baseMenuOptions + additionalMenuOptions
+    }
 
     SongCard(
         title = song.name,

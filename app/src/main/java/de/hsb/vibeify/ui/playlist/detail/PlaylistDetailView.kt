@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -63,10 +64,11 @@ fun PlaylistDetailView(
     val playlistTitle = playlistDetailViewModel.playlistTitle
     val playlistDescription = playlistDetailViewModel.playlistDescription
     val playlistImage = playlistDetailViewModel.playlistImage
-    val songs = playlistDetailViewModel.songs.collectAsState()
-    val playlistDurationText = playlistDetailViewModel.playlistDurationText.collectAsState()
+    val songs by playlistDetailViewModel.songs.collectAsState()
+    val playlistDurationText by playlistDetailViewModel.playlistDurationText.collectAsState()
     val isFavorite = playlistDetailViewModel.isFavorite
     val isFavoriteAble = playlistDetailViewModel.isFavoriteAble
+    val isLoadingSongs = playlistDetailViewModel.isLoadingSongs
 
     //Playlist Header
     Column(modifier = modifier) {
@@ -89,7 +91,7 @@ fun PlaylistDetailView(
                     )
                     IconButton(
                         onClick = {
-                            playbackViewModel.play(songs.value)
+                            playbackViewModel.play(songs)
                         },
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -119,12 +121,12 @@ fun PlaylistDetailView(
                     )
                     Row {
                         Text(
-                            text = "${songs.value.size} Songs",
+                            text = "${songs.size} Songs",
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(start = 16.dp, top = 8.dp)
                         )
                         Text(
-                            text = playlistDurationText.value,
+                            text = playlistDurationText,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(start = 8.dp, top = 8.dp)
                         )
@@ -155,36 +157,37 @@ fun PlaylistDetailView(
 
             }
         }
-            Box() {
-                if (playlistDetailViewModel.isLoadingSongs){
-                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                    return
-                }
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
 
-                    items(songs.value) { song ->
-                        SmartSongCard(
-                            song = song,
-                            songIcon = R.drawable.ic_launcher_foreground,
-                            onClick = {
-                                playbackViewModel.play(songs.value, songs.value.indexOf(song))
-                            },
-                            playbackViewModel = playbackViewModel,
-                            playlistDetailViewModel = playlistDetailViewModel
-                        )
-                    }
-
+        // Content area - optimized for performance
+        if (isLoadingSongs) {
+            Box(
+                modifier = Modifier.fillMaxWidth().padding(32.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(
+                    items = songs,
+                    key = { song -> song.id } // Important: Add key for performance
+                ) { song ->
+                    SmartSongCard(
+                        song = song,
+                        songIcon = R.drawable.ic_launcher_foreground,
+                        onClick = {
+                            playbackViewModel.play(songs, songs.indexOf(song))
+                        },
+                        playbackViewModel = playbackViewModel,
+                        playlistDetailViewModel = playlistDetailViewModel
+                    )
                 }
             }
-
-
+        }
     }
-
 }

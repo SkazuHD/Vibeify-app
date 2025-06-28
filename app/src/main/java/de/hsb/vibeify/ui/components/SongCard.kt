@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -40,76 +41,72 @@ fun SongCard(
     showMenu: Boolean = true,
     menuOptions: List<MenuOption> = emptyList(),
     onMenuIconClick: (() -> Unit)? = null,
-    songImageUrl: String? =null
+    songImageUrl: String? = null
 ) {
-    return Card(
-        onClick = { onClick() },
-        modifier = modifier
-            .fillMaxWidth(),
+    val cardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+
+    Card(
+        onClick = onClick,
+        modifier = modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = shape,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        colors = cardColors
     ) {
-        Box(
+        Row(
             modifier = Modifier
-                .wrapContentSize()
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row {
-                AsyncImage(
-                    model = songImageUrl,
-                    contentDescription = "Song Image",
-                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                    error = painterResource(id = R.drawable.ic_launcher_foreground),
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .size(48.dp)
-                        .background(
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                            shape = shape
-                        )
-                )
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                ) {
-                    Row (
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start)
-                    ){
-                        Text(
-                            text = title,
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        )
-                        if (isSongFavorite) {
-                            Icon(
-                                imageVector = Icons.Default.Favorite,
-                                contentDescription = "Favorite Icon",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-                    Text(
-                        text = artist,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 2.dp)
+            AsyncImage(
+                model = songImageUrl,
+                contentDescription = "Song Image",
+                placeholder = painterResource(id = songIcon),
+                error = painterResource(id = songIcon),
+                modifier = Modifier
+                    .size(48.dp)
+                    .background(
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                        shape = shape
                     )
-                }
+            )
 
-                if (showMenu) {
-                    Spacer(
-                        modifier = Modifier.weight(1f) // Spacer to push the menu to the right
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1
                     )
-                    SongCardMenu(
-                        modifier = Modifier.padding(end = 8.dp),
-                        menuOptions = menuOptions,
-                        onMenuIconClick = onMenuIconClick
-                    )
+                    if (isSongFavorite) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "Favorite Icon",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
+                Text(
+                    text = artist,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+
+            if (showMenu) {
+                SongCardMenu(
+                    menuOptions = menuOptions,
+                    onMenuIconClick = onMenuIconClick
+                )
             }
         }
     }

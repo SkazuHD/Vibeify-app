@@ -15,10 +15,31 @@ import androidx.media3.session.SessionError
 import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
+import dagger.hilt.android.AndroidEntryPoint
+import de.hsb.vibeify.data.repository.PlaylistRepository
+import de.hsb.vibeify.data.repository.SongRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import javax.inject.Inject
 
 
+@AndroidEntryPoint
 class MediaService : MediaLibraryService() {
     private var mediaLibrarySession: MediaLibrarySession? = null
+
+    // Injiziere die Repositories
+    @Inject
+    lateinit var songRepository: SongRepository
+
+    @Inject
+    lateinit var playlistRepository: PlaylistRepository
+
+    @Inject
+    lateinit var playerServiceV2: PlayerServiceV2
+
+    // Coroutine Scope für asynchrone Operationen
+    private val serviceScope = CoroutineScope(Dispatchers.IO)
 
     // Implementiere vollständige Callback-Funktionalität
     private val callback = object : MediaLibrarySession.Callback {
@@ -197,36 +218,142 @@ class MediaService : MediaLibraryService() {
     }
 
     private fun loadSongs(): ImmutableList<MediaItem> {
-        // TODO: Hier würdest du deine Songs aus der Datenbank/Repository laden
-        // Für jetzt gebe ich eine leere Liste zurück
-        return ImmutableList.of()
+        return try {
+            val songs = runBlocking {
+                songRepository.getAllSongs()
+            }
+            ImmutableList.copyOf(songs.map { song ->
+                playerServiceV2.buildMediaItem(song)
+            })
+        } catch (e: Exception) {
+            ImmutableList.of()
+        }
     }
 
     private fun loadAlbums(): ImmutableList<MediaItem> {
-        // TODO: Hier würdest du deine Alben aus der Datenbank/Repository laden
-        return ImmutableList.of()
+        return try {
+            val songs = runBlocking {
+                songRepository.getAllSongs()
+            }
+            // Gruppiere Songs nach Album
+            val albums = songs.groupBy { it.album }.map { (albumName, albumSongs) ->
+                MediaItem.Builder()
+                    .setMediaId("album_$albumName")
+                    .setMediaMetadata(
+                        MediaMetadata.Builder()
+                            .setIsBrowsable(true)
+                            .setIsPlayable(false)
+                            .setTitle(albumName)
+                            .setArtist(albumSongs.firstOrNull()?.artist ?: "Unknown Artist")
+                            .setTotalTrackCount(albumSongs.size)
+                            .build()
+                    )
+                    .build()
+            }
+            ImmutableList.copyOf(albums)
+        } catch (e: Exception) {
+            ImmutableList.of()
+        }
     }
 
     private fun loadArtists(): ImmutableList<MediaItem> {
-        // TODO: Hier würdest du deine Künstler aus der Datenbank/Repository laden
-        return ImmutableList.of()
+        return try {
+            val songs = runBlocking {
+                songRepository.getAllSongs()
+            }
+            // Gruppiere Songs nach Künstler
+            val artists = songs.groupBy { it.artist }.map { (artistName, artistSongs) ->
+                MediaItem.Builder()
+                    .setMediaId("artist_$artistName")
+                    .setMediaMetadata(
+                        MediaMetadata.Builder()
+                            .setIsBrowsable(true)
+                            .setIsPlayable(false)
+                            .setTitle(artistName)
+                            .setTotalTrackCount(artistSongs.size)
+                            .build()
+                    )
+                    .build()
+            }
+            ImmutableList.copyOf(artists)
+        } catch (e: Exception) {
+            ImmutableList.of()
+        }
     }
 
     private fun loadPlaylists(): ImmutableList<MediaItem> {
-        // TODO: Hier würdest du deine Playlists aus der Datenbank/Repository laden
-        return ImmutableList.of()
+        return try {
+            val playlists = runBlocking {
+                playlistRepository.getAllPlaylists()
+            }
+            ImmutableList.copyOf(playlists.map { playlist ->
+                MediaItem.Builder()
+                    .setMediaId("playlist_${playlist.id}")
+                    .setMediaMetadata(
+                        MediaMetadata.Builder()
+                            .setIsBrowsable(true)
+                            .setIsPlayable(false)
+                            .setTitle(playlist.title)
+                            .setDescription(playlist.description)
+                            .setTotalTrackCount(playlist.songIds.size)
+                            .build()
+                    )
+                    .build()
+            })
+        } catch (e: Exception) {
+            ImmutableList.of()
+        }
     }
 
     private fun findItemById(mediaId: String): MediaItem? {
-        // TODO: Hier würdest du ein spezifisches Item anhand der mediaId aus der Datenbank laden
-        return null
+        return try {
+            when {
+                mediaId.startsWith("playlist_") -> {
+                    val playlistId = mediaId.removePrefix("playlist_")
+                    val playlist = runBlocking {
+                        playlistRepository.getPlaylistById(playlistId)
+                    }
+                    playlist?.let {
+                        MediaItem.Builder()
+                            .setMediaId(mediaId)
+                            .setMediaMetadata(
+                                MediaMetadata.Builder()
+                                    .setIsBrowsable(true)
+                                    .setIsPlayable(false)
+                                    .setTitle(it.title)
+                                    .setDescription(it.description)
+                                    .build()
+                            )
+                            .build()
+                    }
+                }
+                mediaId.startsWith("album_") || mediaId.startsWith("artist_") -> {
+                    // Für Album/Artist Items - diese werden dynamisch erstellt
+                    null
+                }
+                else -> {
+                    // Regulärer Song - verwende PlayerServiceV2.buildMediaItem
+                    val song = runBlocking {
+                        songRepository.getSongById(mediaId)
+                    }
+                    song?.let { playerServiceV2.buildMediaItem(it) }
+                }
+            }
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun loadFullMediaItem(mediaId: String): MediaItem {
-        // TODO: Hier würdest du das vollständige MediaItem mit URI und Metadaten laden
-        // Für jetzt gebe ich ein Basis-Item zurück
-        return MediaItem.Builder()
-            .setMediaId(mediaId)
-            .build()
+        return try {
+            val song = runBlocking {
+                songRepository.getSongById(mediaId)
+            }
+            song?.let {
+                playerServiceV2.buildMediaItem(it)
+            } ?: MediaItem.Builder().setMediaId(mediaId).build()
+        } catch (e: Exception) {
+            MediaItem.Builder().setMediaId(mediaId).build()
+        }
     }
 }

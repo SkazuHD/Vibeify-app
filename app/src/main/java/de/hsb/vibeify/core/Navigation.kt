@@ -147,13 +147,13 @@ fun RootNavHost() {
                 }
             }
             composable(
-                "playlist_detail_view/{playlistId}",
+                route = Destinations.PlaylistDetailView.route,
                 arguments = listOf(navArgument("playlistId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val playlistId = backStackEntry.arguments?.getString("playlistId") ?: ""
                 PlaylistDetailView(modifier = Modifier, playlistId = playlistId)
             }
-            composable("playback_view") {
+            composable(Destinations.PlaybackView.route) {
                 de.hsb.vibeify.ui.player.MinimalMusicPlayer(
                     nextSong = "Current Queue",
                 )

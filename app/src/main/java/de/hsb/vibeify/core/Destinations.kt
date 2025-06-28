@@ -17,6 +17,8 @@ enum class Destinations(val route: String) {
      SearchView("search_view"),
      ProfileView("profile_view/{userId}"),
 
+    PlaybackView("playback_view"),
+
 }
 
 enum class NavbarDestinations(

@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -33,7 +34,7 @@ class PlayerServiceV2 {
     private val controllerReadyActions = mutableListOf<(MediaController) -> Unit>()
     private var mediaController: MediaController? = null
 
-    private val _currentSongList = MutableStateFlow( emptyList<Song>())
+    private val _currentSongList = MutableStateFlow(emptyList<Song>())
     val currentSongList: StateFlow<List<Song>> = _currentSongList
 
     private val _currentPlaylistId = MutableStateFlow<String?>(null)
@@ -57,35 +58,14 @@ class PlayerServiceV2 {
 
     val upcomingSongs: StateFlow<List<Song>> = combine(
         currentSongList,
-        currentSong,
-        playbackMode
-    ) { songList, _, mode ->
+        currentSong
+    ) { songList, _ ->
         mediaController?.let { controller ->
             val currentIndex = controller.currentMediaItemIndex
-            when (mode) {
-                PlaybackMode.SHUFFLE -> {
-                    if (currentIndex >= 0 && currentIndex < songList.size) {
-                        songList.toMutableList()
-                            .apply { removeAt(currentIndex) }
-                            .shuffled()
-                    } else {
-                        emptyList()
-                    }
-                }
-                PlaybackMode.NONE -> {
-                    if (currentIndex >= 0 && currentIndex < songList.size - 1) {
-                        songList.subList(currentIndex + 1, songList.size)
-                    } else {
-                        emptyList()
-                    }
-                }
-                PlaybackMode.NONE -> {
-                    if (currentIndex >= 0 && currentIndex < songList.size - 1) {
-                        songList.subList(currentIndex + 1, songList.size)
-                    } else {
-                        emptyList()
-                    }
-                }
+            if (currentIndex >= 0 && currentIndex < songList.size - 1) {
+                songList.subList(currentIndex + 1, songList.size)
+            } else {
+                emptyList()
             }
         } ?: emptyList()
     }.stateIn(
@@ -93,6 +73,7 @@ class PlayerServiceV2 {
         started = SharingStarted.WhileSubscribed(),
         initialValue = emptyList()
     )
+
 
     private val _duration = MutableStateFlow(1L)
     val duration: StateFlow<Long> = _duration

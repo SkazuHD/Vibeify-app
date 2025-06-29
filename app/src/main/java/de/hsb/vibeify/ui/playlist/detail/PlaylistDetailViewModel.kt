@@ -81,27 +81,10 @@ class PlaylistDetailViewModel @Inject constructor(
         }
     }
 
-    fun toggleFavorite(playlistId: String) {
+    fun togglePlaylistFavorite(playlistId: String) {
         viewModelScope.launch {
              isFavorite = playlistService.togglePlaylistFavorite(playlistId)
         }
-    }
-
-    fun addSongToFavorites(song: Song) {
-        viewModelScope.launch {
-            userRepository.addSongToFavorites(song.id)
-            _songs.value = _songs.value + song
-        }
-    }
-
-    fun removeSongFromFavorites(song: Song) {
-        viewModelScope.launch {
-            userRepository.removeSongFromFavorites(song.id)
-        }
-    }
-
-    fun isSongFavorite(song: Song): Boolean {
-        return userRepository.isSongFavorite(song.id)
     }
 
     fun addSongToPlaylist(playlistId: String, song: Song) {

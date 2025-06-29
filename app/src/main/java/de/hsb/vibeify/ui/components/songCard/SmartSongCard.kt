@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -19,7 +18,6 @@ import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 import de.hsb.vibeify.ui.playlist.AddSongToPlaylistDialog
-import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailViewModel
 
 @Composable
 fun SmartSongCard(
@@ -30,16 +28,18 @@ fun SmartSongCard(
     songIcon: Int = R.drawable.ic_launcher_foreground,
     showMenu: Boolean = true,
     playbackViewModel: PlaybackViewModel = hiltViewModel(),
-    playlistDetailViewModel: PlaylistDetailViewModel = hiltViewModel(),
+    smartSongCardViewModel: SmartSongCardViewModel = hiltViewModel(),
     additionalMenuOptions: List<MenuOption> = emptyList()
 ) {
     val isSongFavoriteInitial = remember(song.id) {
-        playlistDetailViewModel.isSongFavorite(song)
+        smartSongCardViewModel.isSongFavorite(song)
     }
-    var isSongFavorite by rememberSaveable(song.id) {
+    var isSongFavorite by remember(song.id) {
         mutableStateOf(isSongFavoriteInitial)
     }
-    val openAddToPlaylistDialog = remember { mutableStateOf(false) }
+    var openAddToPlaylistDialog by remember(song.id) {
+        mutableStateOf(false)
+    }
 
     val baseMenuOptions = remember(isSongFavorite, song.id) {
         listOf(
@@ -51,7 +51,7 @@ fun SmartSongCard(
                     text = "Aus Favoriten entfernen",
                     icon = Icons.Default.Favorite,
                     onClick = {
-                        playlistDetailViewModel.removeSongFromFavorites(song)
+                        smartSongCardViewModel.removeSongFromFavorites(song)
                         isSongFavorite = false
                     },
                 )
@@ -61,7 +61,7 @@ fun SmartSongCard(
                     text = "Zu Favoriten hinzufügen",
                     icon = Icons.Default.FavoriteBorder,
                     onClick = {
-                        playlistDetailViewModel.addSongToFavorites(song)
+                        smartSongCardViewModel.addSongToFavorites(song)
                         isSongFavorite = true
                     })
             },
@@ -69,16 +69,16 @@ fun SmartSongCard(
                 text = "Zu playlist hinzufügen",
                 icon = Icons.Default.LibraryAdd,
                 onClick = {
-                    openAddToPlaylistDialog.value = true
+                    openAddToPlaylistDialog = true
                 }
             )
         )
     }
 
     when{
-        openAddToPlaylistDialog.value -> {
+        openAddToPlaylistDialog -> {
             AddSongToPlaylistDialog(onDismissRequest = {
-                openAddToPlaylistDialog.value = false
+                openAddToPlaylistDialog = false
             }, song = song)
         }
     }

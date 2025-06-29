@@ -120,7 +120,6 @@ fun SimpleSearchBar(
                                 expanded = true
                             },
                             playbackViewModel = playbackViewModel,
-                            playlistDetailViewModel = playlistDetailViewModel
                         )
                     }
                     if (!showAllSongs && searchResults.songs.size > resultLimit) {

@@ -127,7 +127,7 @@ fun PlaylistDetailView(
                         Box {
                             IconButton(
                                 onClick = {
-                                    playlistDetailViewModel.toggleFavorite(playlistId)
+                                    playlistDetailViewModel.togglePlaylistFavorite(playlistId)
                                 },
                                 modifier = Modifier
                                     .align(Alignment.Center)
@@ -185,7 +185,6 @@ fun PlaylistDetailView(
                             )
                         ),
                         playbackViewModel = playbackViewModel,
-                        playlistDetailViewModel = playlistDetailViewModel
                     )
                 }
             }

@@ -71,37 +71,11 @@ fun MainView(
                         .padding(16.dp),
                 )
             } else {
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    maxItemsInEachRow = 2
-                ) {
-                    recentActivityItems.value.forEach { activityItem ->
-                        when (activityItem) {
-                            is RecentActivityItem.SongActivity -> {
-                                SmartSongCard(
-                                    song = activityItem.song,
-                                    showMenu = false,
-                                    modifier = Modifier.weight(1f)
-                                )
-                            }
-
-                            is RecentActivityItem.PlaylistActivity -> {
-                                PlaylistCard(
-                                    playlistName = activityItem.playlist.title,
-                                    playlistDescription = activityItem.playlist.description ?: "",
-                                    playlistIcon = activityItem.playlist.imagePath
-                                        ?: R.drawable.ic_launcher_foreground,
-                                    modifier = Modifier.weight(1f),
-                                    onClick = {
-                                        navController.navigate("playlist_detail_view/${activityItem.playlist.id}")
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
+                RecentActivityGrid(
+                    recentActivityItems = recentActivityItems.value,
+                    navController = navController,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
         item {
@@ -124,4 +98,43 @@ fun MainView(
         }
     }
 
+}
+
+@Composable
+fun RecentActivityGrid(
+    recentActivityItems: List<RecentActivityItem>,
+    navController: NavController,
+    modifier: Modifier = Modifier
+) {
+    FlowRow(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        maxItemsInEachRow = 2
+    ) {
+        recentActivityItems.forEach { activityItem ->
+            when (activityItem) {
+                is RecentActivityItem.SongActivity -> {
+                    SmartSongCard(
+                        song = activityItem.song,
+                        showMenu = false,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                is RecentActivityItem.PlaylistActivity -> {
+                    PlaylistCard(
+                        playlistName = activityItem.playlist.title,
+                        playlistDescription = activityItem.playlist.description ?: "",
+                        playlistIcon = activityItem.playlist.imagePath
+                            ?: R.drawable.ic_launcher_foreground,
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            navController.navigate("playlist_detail_view/${activityItem.playlist.id}")
+                        }
+                    )
+                }
+            }
+        }
+    }
 }

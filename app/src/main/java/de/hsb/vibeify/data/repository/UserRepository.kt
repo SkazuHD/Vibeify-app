@@ -1,6 +1,7 @@
 package de.hsb.vibeify.data.repository
 
 import android.util.Log
+import androidx.core.net.toUri
 import com.google.firebase.firestore.FieldValue
 import de.hsb.vibeify.data.model.RecentActivity
 import de.hsb.vibeify.data.model.User
@@ -38,6 +39,8 @@ interface UserRepository {
     suspend fun updateUser(user: User) {
     }
 
+    fun uploadPhoto(imageUrl: String)
+
     suspend fun addRecentActivity(activity: RecentActivity)
     val state: StateFlow<UserRepositoryState>
 }
@@ -45,6 +48,7 @@ interface UserRepository {
 @Singleton
 class UserRepositoryImpl @Inject constructor(
     private val authRepository: AuthRepository,
+    private val context: android.content.Context,
 ) : UserRepository {
 
     private val db = Firestore.getInstance()
@@ -74,7 +78,7 @@ class UserRepositoryImpl @Inject constructor(
                                 id = authState.currentUser.uid,
                                 email = authState.currentUser.email ?: "unknown",
                                 name = authState.currentUser.displayName ?: "unknown",
-                                imageUrl = authState.currentUser.photoUrl?.toString() ?: "unknown",
+                                imageUrl = authState.currentUser.photoUrl?.toString() ?: "",
                             )
                         )
                         _state.value = UserRepositoryState(currentUser = user)
@@ -183,6 +187,13 @@ class UserRepositoryImpl @Inject constructor(
         Log.d("UserRepository", "updateUser called with user: $user")
         db.collection(collectionName).document(user.id).set(user).await()
         _state.value = _state.value.copy(currentUser = user)
+    }
+
+    override fun uploadPhoto(imageUrl: String) {
+        val uri = try { imageUrl.toUri() } catch (e: Exception) { null }
+        val inputStream = context.contentResolver.openInputStream(uri!!)
+        val bytes = inputStream?.readBytes()
+        inputStream?.close()
     }
 
     override suspend fun addRecentActivity(activity: RecentActivity) {

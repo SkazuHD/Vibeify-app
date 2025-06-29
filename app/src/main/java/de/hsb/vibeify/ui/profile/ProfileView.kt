@@ -74,7 +74,8 @@ fun ProfileView(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hil
                         ) {
                             Text(
                                 text = if (user.name.isBlank()) user.email else user.name,
-                                modifier = Modifier.padding(bottom = 8.dp)
+                                modifier = Modifier.padding(bottom = 8.dp),
+                                fontSize = 24.sp,
                             )
 
                         }

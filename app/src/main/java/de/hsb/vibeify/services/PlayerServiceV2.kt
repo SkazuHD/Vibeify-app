@@ -284,5 +284,24 @@ class PlayerServiceV2 {
         positionTrackingJob = null
     }
 
+    enum class PlaybackMode {
+        SHUFFLE, LOOP, NONE
+    }
+
+    private val _playbackMode = MutableStateFlow(PlaybackMode.NONE)
+    val playbackMode: StateFlow<PlaybackMode> = _playbackMode
+
+    fun togglePlaybackMode() {
+        _playbackMode.value = when (_playbackMode.value) {
+            PlaybackMode.NONE -> PlaybackMode.SHUFFLE
+            PlaybackMode.SHUFFLE -> PlaybackMode.LOOP
+            PlaybackMode.LOOP -> PlaybackMode.NONE
+        }
+    }
+
+    fun getPlaybackMode(): PlaybackMode {
+        return _playbackMode.value
+    }
+
 
 }

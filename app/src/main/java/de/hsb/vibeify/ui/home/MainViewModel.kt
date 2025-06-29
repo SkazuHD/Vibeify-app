@@ -22,13 +22,12 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
 
     val recentActivityItems = MutableStateFlow<List<RecentActivityItem>>(emptyList())
-    val isLoading = MutableStateFlow(false)
+    val isLoading = MutableStateFlow(true)
 
     init {
         viewModelScope.launch {
             userRepository.state.map { it.currentUser }.distinctUntilChanged().collect { user ->
                 if (user != null) {
-                    isLoading.value = true
                     loadRecentActivities(user.recentActivities)
                 } else {
                     recentActivityItems.value = emptyList()
@@ -40,7 +39,8 @@ class MainViewModel @Inject constructor(
 
     private suspend fun loadRecentActivities(activities: List<RecentActivity>) {
         Log.d("MainViewModel", "Loading recent activities: ${activities.size} activities found")
-        val sortedActivities = activities.sortedByDescending { it.timestamp }.take(8)
+        val sortedActivities =
+            activities.sortedByDescending { it.timestamp }.distinctBy { it.id }.take(8)
         val activityItems = mutableListOf<RecentActivityItem>()
 
         for (activity in sortedActivities) {

@@ -128,7 +128,7 @@ fun PlaylistDetailView(
 
                     }
                 }
-                if(isFavoriteAble){
+                if (isFavoriteAble) {
                     Column {
                         Box {
                             IconButton(
@@ -148,14 +148,14 @@ fun PlaylistDetailView(
                             }
                         }
                     }
-                }else if(isPlaylistOwner && playlistId != LIKED_SONGS_PLAYLIST_ID) {
+                } else if (isPlaylistOwner && playlistId != LIKED_SONGS_PLAYLIST_ID) {
                     OptionsMenu(
                         menuOptions = listOf(
                             MenuOption(
                                 text = "Delete Playlist",
                                 icon = Icons.Default.Remove,
                                 onClick = {
-                                   val res = playlistDetailViewModel.removePlaylist(playlistId)
+                                    val res = playlistDetailViewModel.removePlaylist(playlistId)
                                     Log.d("PlaylistDetailView", "Playlist removed: $res")
                                     if (
                                         res
@@ -173,7 +173,9 @@ fun PlaylistDetailView(
         }
         if (isLoadingSongs) {
             Box(
-                modifier = Modifier.fillMaxWidth().padding(32.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator()
@@ -187,7 +189,6 @@ fun PlaylistDetailView(
             ) {
                 items(
                     items = songs,
-                    key = { song -> song.id }
                 ) { song ->
                     val songCardAdditionalMenuOptions = if (isPlaylistOwner) {
                         listOf(
@@ -195,7 +196,10 @@ fun PlaylistDetailView(
                                 text = "Remove from this playlist",
                                 icon = Icons.Default.Remove,
                                 onClick = {
-                                    playlistDetailViewModel.removeSongFromPlaylist(playlistId, song = song)
+                                    playlistDetailViewModel.removeSongFromPlaylist(
+                                        playlistId,
+                                        song = song
+                                    )
                                 }
                             )
                         )

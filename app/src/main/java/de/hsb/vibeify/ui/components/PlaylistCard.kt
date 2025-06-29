@@ -1,6 +1,7 @@
 package de.hsb.vibeify.ui.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -53,7 +54,6 @@ fun PlaylistCard(
         ) {
             Row {
 
-
                 Image(
                     painter = painterResource(playlistIcon),
                     contentDescription = "Playlist Icon",
@@ -67,21 +67,37 @@ fun PlaylistCard(
                 Column(
                     modifier = modifier
                         .align(Alignment.CenterVertically)
+                        .weight(1f)
                 )
                 {
                     Text(
                         text = playlistDescription,
                         style = MaterialTheme.typography.bodySmall,
-                        modifier = modifier.padding(top = 4.dp)
+                        modifier = modifier
+                            .padding(top = 4.dp)
+                            .basicMarquee(
+                                iterations = Int.MAX_VALUE,
+                                repeatDelayMillis = 3500,
+                                initialDelayMillis = 3000,
+                                velocity = 28.dp
+                            ),
+                        maxLines = 1,
                     )
                     Text(
                         text = playlistName,
                         style = MaterialTheme.typography.bodyLarge,
-                        modifier = modifier.padding(top = 4.dp)
+                        modifier = modifier
+                            .padding(top = 4.dp)
+                            .basicMarquee(
+                                iterations = Int.MAX_VALUE,
+                                repeatDelayMillis = 3500,
+                                initialDelayMillis = 3000,
+                                velocity = 28.dp
+                            ),
+                        maxLines = 1,
                     )
 
                 }
-                Spacer(modifier = modifier.weight(1f))
 
                 Column(
                     modifier = modifier

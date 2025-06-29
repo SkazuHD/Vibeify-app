@@ -29,10 +29,14 @@ data class PlaylistDetailData(
 
 interface PlaylistService {
     suspend fun getUserPlaylists(userId: String?): List<Playlist>
+
+    suspend fun getPlaylistCreatedByUser(userId: String): List<Playlist>
+
+    suspend fun getPlaylistsCreatedByCurrentUser(): List<Playlist>
     suspend fun getPlaylistDetail(playlistId: String): PlaylistDetailData?
     suspend fun createPlaylist(title: String, description: String, userId: String): Playlist
 
-    suspend fun removePlaylist(playlistId: String) : Boolean
+    suspend fun removePlaylist(playlistId: String): Boolean
     suspend fun togglePlaylistFavorite(playlistId: String): Boolean
     suspend fun addSongToPlaylist(playlistId: String, songId: String)
     suspend fun removeSongFromPlaylist(playlistId: String, songId: String)
@@ -51,7 +55,8 @@ class PlaylistServiceImpl @Inject constructor(
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
 
-    override val playlists = MutableStateFlow( emptyList<Playlist>())
+    override val playlists = MutableStateFlow(emptyList<Playlist>())
+
     init {
 
         scope.launch {
@@ -78,6 +83,20 @@ class PlaylistServiceImpl @Inject constructor(
             } else {
                 emptyList()
             }
+        } else {
+            emptyList()
+        }
+    }
+
+    override suspend fun getPlaylistCreatedByUser(userId: String): List<Playlist> {
+        return playlistRepository.getPlaylistsByUserId(userId)
+
+    }
+
+    override suspend fun getPlaylistsCreatedByCurrentUser(): List<Playlist> {
+        val currentUser = userRepository.state.value.currentUser
+        return if (currentUser != null) {
+            playlistRepository.getPlaylistsByUserId(currentUser.id)
         } else {
             emptyList()
         }
@@ -118,7 +137,11 @@ class PlaylistServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun createPlaylist(title: String, description: String, userId: String): Playlist {
+    override suspend fun createPlaylist(
+        title: String,
+        description: String,
+        userId: String
+    ): Playlist {
         val newPlaylist = Playlist(
             id = UUID.randomUUID().toString(),
             userId = userId,
@@ -137,7 +160,7 @@ class PlaylistServiceImpl @Inject constructor(
         val isRemoved = playlistRepository.deletePlaylist(playlistId)
         if (isRemoved) {
             userRepository.removePlaylistFromFavorites(playlistId)
-            playlists .value = playlists.value.filter { it.id != playlistId }
+            playlists.value = playlists.value.filter { it.id != playlistId }
         }
         return isRemoved
     }
@@ -158,7 +181,12 @@ class PlaylistServiceImpl @Inject constructor(
     }
 
     override suspend fun removeSongFromPlaylist(playlistId: String, songId: String) {
-        playlistRepository.removeSongFromPlaylist(playlistId, songId)
+        if (playlistId == LIKED_SONGS_PLAYLIST_ID) {
+            userRepository.removeSongFromFavorites(songId)
+        } else {
+            playlistRepository.removeSongFromPlaylist(playlistId, songId)
+
+        }
     }
 
     override fun getPlaylistDurationText(songs: List<Song>): String {
@@ -172,6 +200,7 @@ class PlaylistServiceImpl @Inject constructor(
                 val minutes = playlistDurationMinutes % 60
                 "$hours Stunden und $minutes Minuten"
             }
+
             playlistDurationMinutes > 0 -> "$playlistDurationMinutes Minuten und $playlistDurationSeconds Sekunden"
             else -> "$playlistDurationSeconds Sekunden"
         }

@@ -21,12 +21,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.hsb.vibeify.data.model.Song
-import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailViewModel
 
 @Composable
-fun AddSongToPlaylistDialog(onDismissRequest: () -> Unit, song: Song, playlistViewModel: PlaylistViewModel = hiltViewModel(), playlistDetailViewModel: PlaylistDetailViewModel = hiltViewModel()) {
+fun AddSongToPlaylistDialog(
+    onDismissRequest: () -> Unit,
+    song: Song,
+    addSongToPlaylistViewModel: AddSongToPlaylistViewModel = hiltViewModel()
+) {
 
-    val playlists = playlistViewModel.playlists.collectAsState()
+    val playlists = addSongToPlaylistViewModel.playlists.collectAsState()
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
@@ -52,7 +55,7 @@ fun AddSongToPlaylistDialog(onDismissRequest: () -> Unit, song: Song, playlistVi
                     items(items = playlists.value, key = { playlist -> playlist.id }) { playlist ->
                         Button(
                             onClick = {
-                                playlistDetailViewModel.addSongToPlaylist(playlist.id, song)
+                                addSongToPlaylistViewModel.addSongToPlaylist(playlist.id, song.id)
                                 onDismissRequest()
                             },
                             modifier = Modifier.fillMaxWidth()

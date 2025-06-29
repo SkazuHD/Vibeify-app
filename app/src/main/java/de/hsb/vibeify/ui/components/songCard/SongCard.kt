@@ -1,6 +1,7 @@
 package de.hsb.vibeify.ui.components.songCard
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -92,7 +93,13 @@ fun SongCard(
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleMedium,
-                        maxLines = 1
+                        maxLines = 1,
+                        modifier = Modifier.basicMarquee(
+                            iterations = Int.MAX_VALUE,
+                            repeatDelayMillis = 3500,
+                            initialDelayMillis = 3000,
+                            velocity = 28.dp
+                        )
                     )
                     if (isSongFavorite) {
                         Icon(
@@ -107,7 +114,14 @@ fun SongCard(
                     text = artist,
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
-                    modifier = Modifier.padding(top = 2.dp)
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .basicMarquee(
+                            iterations = Int.MAX_VALUE,
+                            repeatDelayMillis = 3500,
+                            initialDelayMillis = 3000,
+                            velocity = 28.dp
+                        )
                 )
             }
 

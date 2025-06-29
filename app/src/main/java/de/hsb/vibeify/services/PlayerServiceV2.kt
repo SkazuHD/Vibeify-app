@@ -48,16 +48,44 @@ class PlayerServiceV2 {
     private val _position = MutableStateFlow(0L)
     val position: StateFlow<Long> = _position
 
+    enum class PlaybackMode {
+        SHUFFLE, LOOP, NONE
+    }
+
+    private val _playbackMode = MutableStateFlow(PlaybackMode.NONE)
+    val playbackMode: StateFlow<PlaybackMode> = _playbackMode
+
     val upcomingSongs: StateFlow<List<Song>> = combine(
         currentSongList,
-        currentSong
-    ) { songList, _ ->
+        currentSong,
+        playbackMode
+    ) { songList, _, mode ->
         mediaController?.let { controller ->
             val currentIndex = controller.currentMediaItemIndex
-            if (currentIndex >= 0 && currentIndex < songList.size - 1) {
-                songList.subList(currentIndex + 1, songList.size)
-            } else {
-                emptyList()
+            when (mode) {
+                PlaybackMode.SHUFFLE -> {
+                    if (currentIndex >= 0 && currentIndex < songList.size) {
+                        songList.toMutableList()
+                            .apply { removeAt(currentIndex) }
+                            .shuffled()
+                    } else {
+                        emptyList()
+                    }
+                }
+                PlaybackMode.NONE -> {
+                    if (currentIndex >= 0 && currentIndex < songList.size - 1) {
+                        songList.subList(currentIndex + 1, songList.size)
+                    } else {
+                        emptyList()
+                    }
+                }
+                PlaybackMode.NONE -> {
+                    if (currentIndex >= 0 && currentIndex < songList.size - 1) {
+                        songList.subList(currentIndex + 1, songList.size)
+                    } else {
+                        emptyList()
+                    }
+                }
             }
         } ?: emptyList()
     }.stateIn(
@@ -284,18 +312,24 @@ class PlayerServiceV2 {
         positionTrackingJob = null
     }
 
-    enum class PlaybackMode {
-        SHUFFLE, LOOP, NONE
-    }
-
-    private val _playbackMode = MutableStateFlow(PlaybackMode.NONE)
-    val playbackMode: StateFlow<PlaybackMode> = _playbackMode
 
     fun togglePlaybackMode() {
-        _playbackMode.value = when (_playbackMode.value) {
-            PlaybackMode.NONE -> PlaybackMode.SHUFFLE
-            PlaybackMode.SHUFFLE -> PlaybackMode.LOOP
-            PlaybackMode.LOOP -> PlaybackMode.NONE
+        withController { controller ->
+            _playbackMode.value = when (_playbackMode.value) {
+                PlaybackMode.NONE -> {
+                    controller.shuffleModeEnabled = true
+                    PlaybackMode.SHUFFLE
+                }
+                PlaybackMode.SHUFFLE -> {
+                    controller.shuffleModeEnabled = false
+                    controller.repeatMode = Player.REPEAT_MODE_ONE
+                    PlaybackMode.LOOP
+                }
+                PlaybackMode.LOOP -> {
+                    controller.repeatMode = Player.REPEAT_MODE_OFF
+                    PlaybackMode.NONE
+                }
+            }
         }
     }
 

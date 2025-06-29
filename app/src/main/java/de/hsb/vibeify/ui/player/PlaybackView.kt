@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.outlined.Loop
 import androidx.compose.material.icons.outlined.Shuffle
@@ -165,65 +166,73 @@ fun MinimalMusicPlayer(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                IconButton(onClick = {
-                    playbackViewModel.skipToPrevious()
-                }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Voriger Song",
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                IconButton(onClick = {
-                    if (isPlaying) {
-                        playbackViewModel.pause()
-                    } else {
-                        playbackViewModel.resume()
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    IconButton(onClick = {
+                        playbackViewModel.skipToPrevious()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Voriger Song",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(40.dp)
+                        )
                     }
-                }) {
-                    Icon(
-                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isPlaying) "Pause" else "Play",
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(48.dp)
-                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    IconButton(onClick = {
+                        if (isPlaying) {
+                            playbackViewModel.pause()
+                        } else {
+                            playbackViewModel.resume()
+                        }
+                    }) {
+                        Icon(
+                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            contentDescription = if (isPlaying) "Pause" else "Play",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    IconButton(onClick = {
+                        playbackViewModel.skipToNext()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Nächster Song",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.width(16.dp))
-                IconButton(onClick = {
-                    playbackViewModel.skipToNext()
-                }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "Nächster Song",
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                IconButton(onClick = { playbackViewModel.togglePlaybackMode() }) {
+
+                IconButton(
+                    onClick = { playbackViewModel.togglePlaybackMode() },
+                    modifier = Modifier.align(Alignment.CenterEnd).padding(end = 55.dp)
+                ) {
                     when (playbackMode) {
-                        de.hsb.vibeify.services.PlayerServiceV2.PlaybackMode.SHUFFLE -> Icon(
+                        PlaybackViewModel.PlaybackMode.SHUFFLE -> Icon(
                             imageVector = Icons.Filled.Shuffle,
                             contentDescription = "Shuffle",
                             tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(32.dp)
                         )
-                        de.hsb.vibeify.services.PlayerServiceV2.PlaybackMode.LOOP -> Icon(
+                        PlaybackViewModel.PlaybackMode.LOOP -> Icon(
                             imageVector = Icons.Filled.Loop,
                             contentDescription = "Loop",
                             tint = MaterialTheme.colorScheme.secondary,
                             modifier = Modifier.size(32.dp)
                         )
-                        de.hsb.vibeify.services.PlayerServiceV2.PlaybackMode.NONE -> Icon(
-                            imageVector = Icons.Outlined.Shuffle,
+                        PlaybackViewModel.PlaybackMode.NONE -> Icon(
+                            imageVector = Icons.Filled.Shuffle,
                             contentDescription = "Kein Shuffle",
-                            tint = MaterialTheme.colorScheme.secondary,
+                            tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                             modifier = Modifier.size(32.dp)
                         )
                     }

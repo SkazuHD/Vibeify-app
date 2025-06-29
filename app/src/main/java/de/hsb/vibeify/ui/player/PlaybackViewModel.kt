@@ -5,6 +5,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.services.PlayerServiceV2
 import jakarta.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
@@ -28,7 +29,24 @@ class PlaybackViewModel @Inject constructor(
     val upcomingSongs = playerServiceV2.upcomingSongs
     val currentSongList = playerServiceV2.currentSongList
 
-    val playbackMode: StateFlow<PlayerServiceV2.PlaybackMode> = playerServiceV2.playbackMode
+    enum class PlaybackMode {
+        SHUFFLE, LOOP, NONE
+    }
+
+    private val _playbackMode = MutableStateFlow(PlaybackMode.NONE)
+    val playbackMode: StateFlow<PlaybackMode> = _playbackMode
+
+    init {
+        viewModelScope.launch {
+            playerServiceV2.playbackMode.collect { serviceMode ->
+                _playbackMode.value = when (serviceMode) {
+                    PlayerServiceV2.PlaybackMode.SHUFFLE -> PlaybackMode.SHUFFLE
+                    PlayerServiceV2.PlaybackMode.LOOP -> PlaybackMode.LOOP
+                    PlayerServiceV2.PlaybackMode.NONE -> PlaybackMode.NONE
+                }
+            }
+        }
+    }
 
     fun play(song: Song) {
         viewModelScope.launch {

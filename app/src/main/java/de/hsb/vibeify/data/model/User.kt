@@ -11,8 +11,8 @@ data class User(
 )
 
 data class RecentActivity(
-    val type: String,
-    val id: String,
+    val type: String = TYPE_SONG,
+    val id: String = "",
     val timestamp: Long = System.currentTimeMillis()
 ) {
     companion object {

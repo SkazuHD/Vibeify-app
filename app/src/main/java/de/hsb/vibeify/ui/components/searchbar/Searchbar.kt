@@ -32,7 +32,7 @@ import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.services.SearchResult
 import de.hsb.vibeify.ui.components.PlaylistCard
-import de.hsb.vibeify.ui.components.SmartSongCard
+import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailViewModel
 

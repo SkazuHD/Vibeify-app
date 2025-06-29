@@ -41,7 +41,7 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Song
-import de.hsb.vibeify.ui.components.SongCard
+import de.hsb.vibeify.ui.components.songCard.SongCard
 
 
 val fakeSong = Song(

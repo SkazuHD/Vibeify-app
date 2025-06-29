@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.components
+package de.hsb.vibeify.ui.components.songCard
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -47,19 +47,23 @@ fun SmartSongCard(
                 playbackViewModel.play(song)
             }),
             if (isSongFavorite) {
-                MenuOption(text = "Aus Favoriten entfernen",
+                MenuOption(
+                    text = "Aus Favoriten entfernen",
                     icon = Icons.Default.Favorite,
-                    onClick= {
-                    playlistDetailViewModel.removeSongFromFavorites(song)
-                    isSongFavorite = false
-                },
-                   )
+                    onClick = {
+                        playlistDetailViewModel.removeSongFromFavorites(song)
+                        isSongFavorite = false
+                    },
+                )
 
             } else {
-                MenuOption(text = "Zu Favoriten hinzufügen", icon = Icons.Default.FavoriteBorder, onClick = {
-                    playlistDetailViewModel.addSongToFavorites(song)
-                    isSongFavorite = true
-                })
+                MenuOption(
+                    text = "Zu Favoriten hinzufügen",
+                    icon = Icons.Default.FavoriteBorder,
+                    onClick = {
+                        playlistDetailViewModel.addSongToFavorites(song)
+                        isSongFavorite = true
+                    })
             },
             MenuOption(
                 text = "Zu playlist hinzufügen",

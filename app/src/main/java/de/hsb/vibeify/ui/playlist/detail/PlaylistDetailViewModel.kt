@@ -140,4 +140,10 @@ class PlaylistDetailViewModel @Inject constructor(
             _songs.value = _songs.value + song
         }
     }
+    fun removeSongFromPlaylist(playlistId: String, song: Song) {
+        viewModelScope.launch {
+            playlistRepository.removeSongFromPlaylist(playlistId, song.id)
+            _songs.value = _songs.value.filter { it.id != song.id }
+        }
+    }
 }

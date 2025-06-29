@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,22 +34,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media3.common.MediaItem
 import de.hsb.vibeify.R
-import de.hsb.vibeify.services.PlayerService
-import de.hsb.vibeify.ui.components.SmartSongCard
+import de.hsb.vibeify.ui.components.songCard.MenuOption
+import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel
-
-fun demoPlayerOnClick(context: android.content.Context) {
-    println("Player clicked - demo action")
-    val player = PlayerService.getInstance(context)
-    val mediaitem = MediaItem.fromUri("https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3")
-    player.setMediaItem(mediaitem)
-    player.prepare()
-    player.playWhenReady = true
-    player.play()
-
-}
 
 @Composable
 fun PlaylistDetailView(
@@ -183,6 +172,18 @@ fun PlaylistDetailView(
                         onClick = {
                             playbackViewModel.play(songs, songs.indexOf(song))
                         },
+                        additionalMenuOptions =  listOf(
+                            MenuOption(
+                                text = "Remove from this playlist",
+                                icon = Icons.Default.Remove,
+                                onClick = {
+                                    playlistDetailViewModel.removeSongFromPlaylist(
+                                        playlistId,
+                                        song
+                                    )
+                                }
+                            )
+                        ),
                         playbackViewModel = playbackViewModel,
                         playlistDetailViewModel = playlistDetailViewModel
                     )

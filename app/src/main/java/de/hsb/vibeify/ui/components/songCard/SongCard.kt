@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.components
+package de.hsb.vibeify.ui.components.songCard
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

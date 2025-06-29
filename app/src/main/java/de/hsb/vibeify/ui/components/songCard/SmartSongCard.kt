@@ -24,13 +24,15 @@ import de.hsb.vibeify.ui.playlist.AddSongToPlaylistDialog
 fun SmartSongCard(
     song: Song,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
     shape: RoundedCornerShape = RoundedCornerShape(8.dp),
     songIcon: Int = R.drawable.ic_launcher_foreground,
     showMenu: Boolean = true,
-    playbackViewModel: PlaybackViewModel = hiltViewModel(),
+    additionalMenuOptions: List<MenuOption> = emptyList(),
     smartSongCardViewModel: SmartSongCardViewModel = hiltViewModel(),
-    additionalMenuOptions: List<MenuOption> = emptyList()
+    playbackViewModel: PlaybackViewModel = hiltViewModel(),
+    onClick: () -> Unit = {
+        playbackViewModel.play(song)
+    },
 ) {
     val isSongFavoriteInitial = remember(song.id) {
         smartSongCardViewModel.isSongFavorite(song)
@@ -94,11 +96,7 @@ fun SmartSongCard(
         modifier = modifier,
         shape = shape,
         onClick = {
-            if (onClick != {}) {
-                onClick()
-            } else {
-                playbackViewModel.play(song)
-            }
+            onClick()
         },
         isSongFavorite = isSongFavorite,
         songIcon = songIcon,

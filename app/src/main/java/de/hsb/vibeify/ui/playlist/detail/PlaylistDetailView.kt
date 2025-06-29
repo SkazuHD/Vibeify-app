@@ -36,7 +36,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import de.hsb.vibeify.R
 import de.hsb.vibeify.data.repository.LIKED_SONGS_PLAYLIST_ID
 import de.hsb.vibeify.ui.components.MenuOption
 import de.hsb.vibeify.ui.components.OptionsMenu
@@ -205,12 +204,11 @@ fun PlaylistDetailView(
                     }
                     SmartSongCard(
                         song = song,
-                        songIcon = R.drawable.ic_launcher_foreground,
+                        playbackViewModel = playbackViewModel,
                         onClick = {
                             playbackViewModel.play(songs, songs.indexOf(song), playlistId)
                         },
-                        additionalMenuOptions = songCardAdditionalMenuOptions,
-                        playbackViewModel = playbackViewModel
+                        additionalMenuOptions = songCardAdditionalMenuOptions
                     )
                 }
 

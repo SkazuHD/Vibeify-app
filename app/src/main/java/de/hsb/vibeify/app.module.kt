@@ -11,8 +11,6 @@ import de.hsb.vibeify.data.repository.ArtistRepository
 import de.hsb.vibeify.data.repository.ArtistRepositoryImpl
 import de.hsb.vibeify.data.repository.AuthRepository
 import de.hsb.vibeify.data.repository.FirebaseAuthRepo
-import de.hsb.vibeify.data.repository.FirebaseRepository
-import de.hsb.vibeify.data.repository.FirestoreRepo
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.PlaylistRepositoryImpl
 import de.hsb.vibeify.data.repository.SongRepository
@@ -49,16 +47,10 @@ object UserModule {
     }
     @Singleton
     @Provides
-    fun provideFirebaseRepo(): FirestoreRepo {
-        return FirebaseRepository()
-    }
-    @Singleton
-    @Provides
     fun provideUserRepository(
         authRepository: AuthRepository,
-        firestoreRepo: FirestoreRepo,
     ): UserRepository {
-        return UserRepositoryImpl(authRepository, firestoreRepo)
+        return UserRepositoryImpl(authRepository)
     }
 
     @Singleton

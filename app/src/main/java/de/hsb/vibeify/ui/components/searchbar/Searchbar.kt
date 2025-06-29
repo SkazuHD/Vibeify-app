@@ -111,7 +111,7 @@ fun SimpleSearchBar(
                     searchResults.songs.take(if (showAllSongs) Int.MAX_VALUE else resultLimit).forEach { song ->
                         SmartSongCard(
                             song = song,
-                            modifier = Modifier,
+                            playbackViewModel = playbackViewModel,
                             shape = RoundedCornerShape(0.dp),
                             onClick = {
                                 if (onSongClick != {}) {
@@ -119,7 +119,6 @@ fun SimpleSearchBar(
                                 }
                                 expanded = true
                             },
-                            playbackViewModel = playbackViewModel,
                         )
                     }
                     if (!showAllSongs && searchResults.songs.size > resultLimit) {

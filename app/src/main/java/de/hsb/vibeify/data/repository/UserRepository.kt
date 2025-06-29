@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -23,6 +24,10 @@ data class UserRepositoryState(
 )
 
 interface UserRepository {
+
+    suspend fun getUsers(): List<User>
+    suspend fun insertUser(user: User): User?
+    suspend fun getUserById(userId: String): User?
     fun isPlaylistFavorite(playlistId: String): Boolean
     suspend fun removePlaylistFromFavorites(playlistId: String)
     suspend fun addPlaylistToFavorites(playlistId: String)
@@ -39,13 +44,16 @@ interface UserRepository {
 
 @Singleton
 class UserRepositoryImpl @Inject constructor(
-    authRepository: AuthRepository, firestoreRepository: FirestoreRepo,
+    private val authRepository: AuthRepository,
 ) : UserRepository {
 
     private val db = Firestore.getInstance()
     private val collectionName = "users"
-
     private val _state = MutableStateFlow(UserRepositoryState())
+
+    companion object {
+        private const val MAX_RECENT_ACTIVITIES = 20
+    }
 
     override val state: StateFlow<UserRepositoryState> = _state
 
@@ -59,35 +67,58 @@ class UserRepositoryImpl @Inject constructor(
                 if (authState.currentUser == null) {
                     _state.value = UserRepositoryState(currentUser = null)
                 } else {
-                    var maybeUser =
-                        firestoreRepository.getUserById(authState.currentUser.uid).await()
-                    Log.d(
-                        "UserRepository",
-                        "User query result: ${maybeUser.documents.size} documents found."
-                    )
-                    if (maybeUser.isEmpty) {
-                        var docRef = firestoreRepository.insertUser(
+                    var user = getUserById(authState.currentUser.uid)
+                    if (user == null) {
+                        var user = insertUser(
                             User(
                                 id = authState.currentUser.uid,
                                 email = authState.currentUser.email ?: "unknown",
                                 name = authState.currentUser.displayName ?: "unknown",
                                 imageUrl = authState.currentUser.photoUrl?.toString() ?: "unknown",
                             )
-                        ).await()
-                        val userSnapshot = docRef.documents.firstOrNull()
-                        var user = userSnapshot?.toObject(User::class.java)
-
+                        )
                         _state.value = UserRepositoryState(currentUser = user)
                     } else {
-                        val userSnapshot = maybeUser.documents.firstOrNull()
-                        val user = userSnapshot?.toObject(User::class.java)
                         _state.value = UserRepositoryState(currentUser = user)
                     }
-
                 }
-
             }
         }
+    }
+
+    override suspend fun getUsers(): List<User> {
+        val res = db.collection(collectionName).get()
+            .addOnSuccessListener { querySnapshot ->
+                println("Users retrieved successfully: ${querySnapshot.documents.size} users found.")
+            }
+            .addOnFailureListener { e ->
+                println("Error retrieving users: $e")
+            }.await()
+        return res.toObjects(User::class.java)
+    }
+
+    override suspend fun getUserById(userId: String): User? {
+        val res = db.collection(collectionName).whereEqualTo("id", userId).get()
+            .addOnSuccessListener { querySnapshot ->
+                println("Users retrieved successfully")
+            }
+            .addOnFailureListener { e ->
+                println("Error retrieving users: $e")
+            }.await()
+        return res.firstOrNull()?.toObject(User::class.java)
+    }
+
+
+    override suspend fun insertUser(user: User): User? {
+        Log.d("FirestoreRepository", "insertUser called for user: ${user.id}, ${user.email}")
+        db.collection("users").document(user.id).set(user)
+            .addOnSuccessListener { _ ->
+                Log.d("FirestoreRepository", "User added with ID: ${user.id}")
+            }
+            .addOnFailureListener { e ->
+                Log.e("FirestoreRepository", "Error adding user: $e")
+            }.await()
+        return getUserById(user.id)
     }
 
     override fun getLikedSongIds(): List<String> {
@@ -98,14 +129,15 @@ class UserRepositoryImpl @Inject constructor(
     override fun isPlaylistFavorite(playlistId: String): Boolean {
         if (_state.value.currentUser == null) {
             return false
-        }else{
+        } else {
             return _state.value.currentUser?.playlists?.contains(playlistId) == true
         }
     }
 
     override suspend fun removePlaylistFromFavorites(playlistId: String) {
         val user = _state.value.currentUser ?: return
-        db.collection(collectionName).document(user.id).update("playlists", FieldValue.arrayRemove(playlistId)).await()
+        db.collection(collectionName).document(user.id)
+            .update("playlists", FieldValue.arrayRemove(playlistId)).await()
         _state.value = _state.value.copy(
             currentUser = user.copy(playlists = user.playlists.filter { it != playlistId })
         )
@@ -113,7 +145,8 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun addPlaylistToFavorites(playlistId: String) {
         val user = _state.value.currentUser ?: return
-        db.collection(collectionName).document(user.id).update("playlists", FieldValue.arrayUnion(playlistId)).await()
+        db.collection(collectionName).document(user.id)
+            .update("playlists", FieldValue.arrayUnion(playlistId)).await()
         _state.value = _state.value.copy(
             currentUser = user.copy(playlists = user.playlists + playlistId)
         )
@@ -130,7 +163,8 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun removeSongFromFavorites(songId: String) {
         val user = _state.value.currentUser ?: return
-        db.collection(collectionName).document(user.id).update("likedSongs", FieldValue.arrayRemove(songId)).await()
+        db.collection(collectionName).document(user.id)
+            .update("likedSongs", FieldValue.arrayRemove(songId)).await()
         _state.value = _state.value.copy(
             currentUser = user.copy(likedSongs = user.likedSongs.filter { it != songId })
         )
@@ -138,7 +172,8 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun addSongToFavorites(songId: String) {
         val user = _state.value.currentUser ?: return
-        db.collection(collectionName).document(user.id).update("likedSongs", FieldValue.arrayUnion(songId)).await()
+        db.collection(collectionName).document(user.id)
+            .update("likedSongs", FieldValue.arrayUnion(songId)).await()
         _state.value = _state.value.copy(
             currentUser = user.copy(likedSongs = user.likedSongs + songId)
         )
@@ -151,16 +186,23 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun addRecentActivity(activity: RecentActivity) {
-        Log.d("UserRepository", "addRecentActivity called with activity: $activity")
-        val user = _state.value.currentUser ?: return
-        db.collection(collectionName).document(user.id).update(
-            "recentActivities", FieldValue.arrayUnion(activity)
-        ).await()
-        _state.value = _state.value.copy(
-            currentUser = user.copy(
-                recentActivities = user.recentActivities + activity
-            )
-        )
+        _state.update { currentState ->
+            Log.d("UserRepository", "addRecentActivity called with activity: $activity")
+            val user = currentState.currentUser ?: return@update currentState
 
+            val updatedActivities = (user.recentActivities + activity)
+                .sortedByDescending { it.timestamp }
+                .take(MAX_RECENT_ACTIVITIES)
+
+            db.collection(collectionName).document(user.id).update(
+                "recentActivities", updatedActivities
+            ).await()
+
+            currentState.copy(
+                currentUser = currentState.currentUser.copy(
+                    recentActivities = updatedActivities
+                )
+            )
+        }
     }
 }

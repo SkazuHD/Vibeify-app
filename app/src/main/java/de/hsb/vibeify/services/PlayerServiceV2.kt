@@ -24,6 +24,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.compareTo
+import kotlin.text.compareTo
+import kotlin.text.get
 
 @Singleton
 class PlayerServiceV2 {

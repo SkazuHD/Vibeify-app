@@ -121,10 +121,9 @@ fun RootNavHost() {
                         NavigationBarItem(
                             selected = selectedDestination == index,
                             onClick = {
-                                if (currentRoute == "playback_view" || selectedDestination != index) {
-                                    navController.navigate(route = destination.route)
-                                    selectedDestination = index
-                                }
+                                navController.navigate(route = destination.route)
+                                selectedDestination = index
+
                             },
                             icon = {
                                 Icon(

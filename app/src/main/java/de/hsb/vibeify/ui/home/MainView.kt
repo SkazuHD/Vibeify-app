@@ -73,8 +73,8 @@ fun MainView(
             } else {
                 FlowRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                     maxItemsInEachRow = 2
                 ) {
                     recentActivityItems.value.forEach { activityItem ->
@@ -90,8 +90,7 @@ fun MainView(
                             is RecentActivityItem.PlaylistActivity -> {
                                 PlaylistCard(
                                     playlistName = activityItem.playlist.title,
-                                    playlistDescription = activityItem.playlist.description
-                                        ?: "Playlist von Vibeify",
+                                    playlistDescription = activityItem.playlist.description ?: "",
                                     playlistIcon = activityItem.playlist.imagePath
                                         ?: R.drawable.ic_launcher_foreground,
                                     modifier = Modifier.weight(1f),

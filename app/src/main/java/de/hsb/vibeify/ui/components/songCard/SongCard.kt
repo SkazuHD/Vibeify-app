@@ -45,7 +45,8 @@ fun SongCard(
     onMenuIconClick: (() -> Unit)? = null,
     songImageUrl: String? = null
 ) {
-    val cardColors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    val cardColors =
+        CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
 
     Card(
         onClick = onClick,

@@ -2,13 +2,11 @@ package de.hsb.vibeify.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
@@ -44,76 +42,61 @@ fun PlaylistCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         )
     ) {
-        Box(
-            modifier = modifier
-                .padding(8.dp)
-                .fillMaxWidth(),
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row {
+            Image(
+                painter = painterResource(playlistIcon),
+                contentDescription = "Playlist Icon",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(shape),
+            )
 
-                Image(
-                    painter = painterResource(playlistIcon),
-                    contentDescription = "Playlist Icon",
-                    modifier = modifier
-                        .padding(end = 8.dp)
-                        .width(48.dp)
-                        .align(Alignment.CenterVertically)
-                        .clip(shape),
-                    )
-
-                Column(
-                    modifier = modifier
-                        .align(Alignment.CenterVertically)
-                        .weight(1f)
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 12.dp)
+            ) {
+                Text(
+                    text = playlistDescription,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier
+                        .basicMarquee(
+                            iterations = Int.MAX_VALUE,
+                            repeatDelayMillis = 3500,
+                            initialDelayMillis = 3000,
+                            velocity = 28.dp
+                        ),
+                    maxLines = 1,
                 )
-                {
-                    Text(
-                        text = playlistDescription,
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = modifier
-                            .padding(top = 4.dp)
-                            .basicMarquee(
-                                iterations = Int.MAX_VALUE,
-                                repeatDelayMillis = 3500,
-                                initialDelayMillis = 3000,
-                                velocity = 28.dp
-                            ),
-                        maxLines = 1,
-                    )
-                    Text(
-                        text = playlistName,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = modifier
-                            .padding(top = 4.dp)
-                            .basicMarquee(
-                                iterations = Int.MAX_VALUE,
-                                repeatDelayMillis = 3500,
-                                initialDelayMillis = 3000,
-                                velocity = 28.dp
-                            ),
-                        maxLines = 1,
-                    )
-
-                }
-
-                Column(
-                    modifier = modifier
-                        .align(Alignment.CenterVertically)
-                        .padding(start = 8.dp)
+                Text(
+                    text = playlistName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .basicMarquee(
+                            iterations = Int.MAX_VALUE,
+                            repeatDelayMillis = 3500,
+                            initialDelayMillis = 3000,
+                            velocity = 28.dp
+                        ),
+                    maxLines = 1,
                 )
-                {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Play Icon",
-                        modifier = modifier
-                            .width(24.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
             }
+
+            Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Play Icon",
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

@@ -8,6 +8,8 @@ import de.hsb.vibeify.data.model.RecentActivity
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.SongRepository
 import de.hsb.vibeify.data.repository.UserRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -26,7 +28,6 @@ class MainViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-
             launch {
                 userRepository.state.map { it.currentUser }.distinctUntilChanged().collect { user ->
                     if (user != null) {
@@ -45,31 +46,46 @@ class MainViewModel @Inject constructor(
         Log.d("MainViewModel", "Loading recent activities: ${activities.size} activities found")
         val sortedActivities =
             activities.sortedByDescending { it.timestamp }.distinctBy { it.id }.take(8)
-        val activityItems = mutableListOf<RecentActivityItem>()
 
-        for (activity in sortedActivities) {
+        val songIds = sortedActivities.filter { it.type == RecentActivity.TYPE_SONG }.map { it.id }
+        val playlistIds =
+            sortedActivities.filter { it.type == RecentActivity.TYPE_PLAYLIST }.map { it.id }
+
+        val (songs, playlists) = coroutineScope {
+            val songsDeferred = async {
+                if (songIds.isNotEmpty()) songRepository.getSongsByIds(songIds) else emptyList()
+            }
+            val playlistsDeferred = async {
+                if (playlistIds.isNotEmpty()) playlistRepository.getPlaylistsForUser(playlistIds) else emptyList()
+            }
+
+            Pair(songsDeferred.await(), playlistsDeferred.await())
+        }
+
+        val songMap = songs.associateBy { it.id }
+        val playlistMap = playlists.associateBy { it.id }
+
+        val activityItems = sortedActivities.mapNotNull { activity ->
             when (activity.type) {
                 RecentActivity.TYPE_SONG -> {
-                    songRepository.getSongById(activity.id)?.let { song ->
-                        activityItems.add(
-                            RecentActivityItem.SongActivity(
-                                recentActivity = activity,
-                                song = song
-                            )
+                    songMap[activity.id]?.let { song ->
+                        RecentActivityItem.SongActivity(
+                            recentActivity = activity,
+                            song = song
                         )
                     }
                 }
 
                 RecentActivity.TYPE_PLAYLIST -> {
-                    playlistRepository.getPlaylistById(activity.id)?.let { playlist ->
-                        activityItems.add(
-                            RecentActivityItem.PlaylistActivity(
-                                recentActivity = activity,
-                                playlist = playlist
-                            )
+                    playlistMap[activity.id]?.let { playlist ->
+                        RecentActivityItem.PlaylistActivity(
+                            recentActivity = activity,
+                            playlist = playlist
                         )
                     }
                 }
+
+                else -> null
             }
         }
 

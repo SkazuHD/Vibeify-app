@@ -26,14 +26,18 @@ class MainViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            userRepository.state.map { it.currentUser }.distinctUntilChanged().collect { user ->
-                if (user != null) {
-                    loadRecentActivities(user.recentActivities)
-                } else {
-                    recentActivityItems.value = emptyList()
+
+            launch {
+                userRepository.state.map { it.currentUser }.distinctUntilChanged().collect { user ->
+                    if (user != null) {
+                        loadRecentActivities(user.recentActivities)
+                    } else {
+                        recentActivityItems.value = emptyList()
+                    }
+                    isLoading.value = false
                 }
-                isLoading.value = false
             }
+
         }
     }
 

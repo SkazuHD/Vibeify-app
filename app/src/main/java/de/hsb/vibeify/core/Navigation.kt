@@ -62,7 +62,9 @@ fun AppRouter(authViewModel: AuthViewModel = hiltViewModel()) {
     when (destination) {
         "loading" -> {
             Surface(
-                modifier = Modifier.fillMaxSize().systemBarsPadding(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding(),
                 color = MaterialTheme.colorScheme.surface,
                 tonalElevation = 1.dp
             ) {
@@ -74,9 +76,11 @@ fun AppRouter(authViewModel: AuthViewModel = hiltViewModel()) {
                 }
             }
         }
+
         "auth" -> {
             AuthNavHost()
         }
+
         "root" -> {
             RootNavHost()
         }
@@ -117,8 +121,10 @@ fun RootNavHost() {
                         NavigationBarItem(
                             selected = selectedDestination == index,
                             onClick = {
-                                navController.navigate(route = destination.route)
-                                selectedDestination = index
+                                if (currentRoute == "playback_view" || selectedDestination != index) {
+                                    navController.navigate(route = destination.route)
+                                    selectedDestination = index
+                                }
                             },
                             icon = {
                                 Icon(
@@ -141,9 +147,21 @@ fun RootNavHost() {
             NavbarDestinations.entries.forEach { destination ->
                 composable(destination.route) {
                     when (destination) {
-                        NavbarDestinations.SONGS -> MainView(modifier = Modifier, navController = navController)
-                        NavbarDestinations.PLAYLISTS -> PlaylistView(modifier = Modifier, navController = navController)
-                        NavbarDestinations.SEARCH -> SearchView(modifier = Modifier, navController = navController)
+                        NavbarDestinations.SONGS -> MainView(
+                            modifier = Modifier,
+                            navController = navController
+                        )
+
+                        NavbarDestinations.PLAYLISTS -> PlaylistView(
+                            modifier = Modifier,
+                            navController = navController
+                        )
+
+                        NavbarDestinations.SEARCH -> SearchView(
+                            modifier = Modifier,
+                            navController = navController
+                        )
+
                         NavbarDestinations.PROFILE -> ProfileView(navController = navController)
                     }
                 }
@@ -153,7 +171,11 @@ fun RootNavHost() {
                 arguments = listOf(navArgument("playlistId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val playlistId = backStackEntry.arguments?.getString("playlistId") ?: ""
-                PlaylistDetailView(modifier = Modifier, playlistId = playlistId, navController = navController)
+                PlaylistDetailView(
+                    modifier = Modifier,
+                    playlistId = playlistId,
+                    navController = navController
+                )
             }
             composable(Destinations.PlaybackView.route) {
                 de.hsb.vibeify.ui.player.MinimalMusicPlayer(

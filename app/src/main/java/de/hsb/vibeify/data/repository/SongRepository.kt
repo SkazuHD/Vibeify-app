@@ -18,6 +18,7 @@ interface SongRepository {
     suspend fun createSong(song: Song): Boolean
     suspend fun updateSong(song: Song): Boolean
     suspend fun deleteSong(id: String): Boolean
+    suspend fun getRandomSongs(limit: Int): List<Song>
 }
 
 @Singleton
@@ -119,5 +120,23 @@ class SongRepositoryImpl @Inject constructor() : SongRepository {
     override suspend fun deleteSong(id: String): Boolean {
         db.collection(collectionName).document(id).delete().await()
         return true
+    }
+
+    override suspend fun getRandomSongs(limit: Int): List<Song> {
+
+
+        val res = db.collection(collectionName)
+            .get()
+            .await()
+
+        if (res.isEmpty) {
+            return emptyList()
+        }
+
+        val songs =
+            res.documents.mapNotNull { it.toObject(Song::class.java) }.shuffled().take(limit)
+
+
+        return songs.shuffled().take(limit)
     }
 }

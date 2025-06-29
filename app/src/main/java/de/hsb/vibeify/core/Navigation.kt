@@ -153,7 +153,7 @@ fun RootNavHost() {
                 arguments = listOf(navArgument("playlistId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val playlistId = backStackEntry.arguments?.getString("playlistId") ?: ""
-                PlaylistDetailView(modifier = Modifier, playlistId = playlistId)
+                PlaylistDetailView(modifier = Modifier, playlistId = playlistId, navController = navController)
             }
             composable(Destinations.PlaybackView.route) {
                 de.hsb.vibeify.ui.player.MinimalMusicPlayer(

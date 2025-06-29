@@ -1,5 +1,6 @@
 package de.hsb.vibeify.ui.playlist.detail
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,15 +35,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import de.hsb.vibeify.R
 import de.hsb.vibeify.ui.components.songCard.MenuOption
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
+import de.hsb.vibeify.ui.components.songCard.SongCardMenu
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 
 @Composable
 fun PlaylistDetailView(
     modifier: Modifier = Modifier,
     playlistId: String,
+    navController: NavController,
     playlistDetailViewModel: PlaylistDetailViewModel = hiltViewModel(),
     playbackViewModel: PlaybackViewModel = hiltViewModel()
 ) {
@@ -56,6 +60,7 @@ fun PlaylistDetailView(
     val songs by playlistDetailViewModel.songs.collectAsState()
     val playlistDurationText by playlistDetailViewModel.playlistDurationText.collectAsState()
     val isFavorite = playlistDetailViewModel.isFavorite
+    val isPlaylistOwner = playlistDetailViewModel.isPlaylistOwner
     val isFavoriteAble = playlistDetailViewModel.isFavoriteAble
     val isLoadingSongs = playlistDetailViewModel.isLoadingSongs
 
@@ -142,6 +147,25 @@ fun PlaylistDetailView(
                             }
                         }
                     }
+                }else if(isPlaylistOwner){
+                    SongCardMenu(
+                        menuOptions = listOf(
+                            MenuOption(
+                                text = "Delete Playlist",
+                                icon = Icons.Default.Remove,
+                                onClick = {
+                                   val res = playlistDetailViewModel.removePlaylist(playlistId)
+                                    Log.d("PlaylistDetailView", "Playlist removed: $res")
+                                    if (
+                                        res
+                                    ) {
+                                        navController.popBackStack()
+                                    }
+
+                                }
+                            )
+                        )
+                    )
                 }
 
             }

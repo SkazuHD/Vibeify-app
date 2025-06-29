@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Song
-import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.services.PlaylistService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,7 +23,6 @@ import javax.inject.Inject
 @HiltViewModel
 class PlaylistDetailViewModel @Inject constructor(
     private val playlistService: PlaylistService,
-    private val userRepository: UserRepository
 ) : ViewModel() {
     var playlistTitle by mutableStateOf("")
         private set
@@ -98,5 +96,12 @@ class PlaylistDetailViewModel @Inject constructor(
             playlistService.removeSongFromPlaylist(playlistId, song.id)
             _songs.value = _songs.value.filter { it.id != song.id }
         }
+    }
+
+    fun removePlaylist(playlistId: String) : Boolean {
+        viewModelScope.launch {
+            playlistService.removePlaylist(playlistId)
+        }
+        return true
     }
 }

@@ -6,6 +6,13 @@ import de.hsb.vibeify.data.repository.LIKED_SONGS_PLAYLIST_ID
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.SongRepository
 import de.hsb.vibeify.data.repository.UserRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -24,10 +31,14 @@ interface PlaylistService {
     suspend fun getUserPlaylists(userId: String?): List<Playlist>
     suspend fun getPlaylistDetail(playlistId: String): PlaylistDetailData?
     suspend fun createPlaylist(title: String, description: String, userId: String): Playlist
+
+    suspend fun removePlaylist(playlistId: String) : Boolean
     suspend fun togglePlaylistFavorite(playlistId: String): Boolean
     suspend fun addSongToPlaylist(playlistId: String, songId: String)
     suspend fun removeSongFromPlaylist(playlistId: String, songId: String)
     fun getPlaylistDurationText(songs: List<Song>): String
+
+    val playlists: MutableStateFlow<List<Playlist>>
 }
 
 @Singleton
@@ -36,6 +47,26 @@ class PlaylistServiceImpl @Inject constructor(
     private val songRepository: SongRepository,
     private val userRepository: UserRepository
 ) : PlaylistService {
+
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+
+    override val playlists = MutableStateFlow( emptyList<Playlist>())
+    init {
+
+        scope.launch {
+            userRepository.state
+                .map { it.currentUser?.id }
+                .distinctUntilChanged()
+                .collect { userId ->
+                    if (userId == null) {
+                        playlists.value = emptyList()
+                    } else {
+                        playlists.value = getUserPlaylists(userId)
+                    }
+                }
+        }
+    }
 
     override suspend fun getUserPlaylists(userId: String?): List<Playlist> {
         return if (userId != null) {
@@ -98,7 +129,17 @@ class PlaylistServiceImpl @Inject constructor(
         )
         playlistRepository.createPlaylist(newPlaylist)
         userRepository.addPlaylistToFavorites(newPlaylist.id)
+        playlists.value = playlists.value + newPlaylist
         return newPlaylist
+    }
+
+    override suspend fun removePlaylist(playlistId: String): Boolean {
+        val isRemoved = playlistRepository.deletePlaylist(playlistId)
+        if (isRemoved) {
+            userRepository.removePlaylistFromFavorites(playlistId)
+            playlists .value = playlists.value.filter { it.id != playlistId }
+        }
+        return isRemoved
     }
 
     override suspend fun togglePlaylistFavorite(playlistId: String): Boolean {

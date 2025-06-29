@@ -3,8 +3,8 @@ package de.hsb.vibeify.ui.components
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.hsb.vibeify.data.manager.RandomSongManager
 import de.hsb.vibeify.data.model.Song
-import de.hsb.vibeify.data.repository.SongRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,11 +13,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SurpriseCardViewModel @Inject constructor(
-    private val songRepository: SongRepository
+    private val randomSongManager: RandomSongManager
 ) : ViewModel() {
 
-    private val _randomSong = songRepository.currentRandomSong
-    val randomSong: StateFlow<Song?> = _randomSong
+    val randomSong: StateFlow<Song?> = randomSongManager.currentRandomSong
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -30,7 +29,7 @@ class SurpriseCardViewModel @Inject constructor(
             _isLoading.value = true
             _errorMessage.value = null
             try {
-                songRepository.refreshRandomSong()
+                randomSongManager.refreshRandomSong()
             } catch (e: Exception) {
                 _errorMessage.value = "Failed to load random song"
             } finally {

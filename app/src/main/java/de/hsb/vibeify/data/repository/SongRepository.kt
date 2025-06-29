@@ -5,9 +5,6 @@ import de.hsb.vibeify.data.model.Song
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,8 +19,6 @@ interface SongRepository {
     suspend fun updateSong(song: Song): Boolean
     suspend fun deleteSong(id: String): Boolean
     suspend fun getRandomSongs(limit: Int): List<Song>
-    suspend fun refreshRandomSong(): Song?
-    val currentRandomSong: StateFlow<Song?>
 }
 
 @Singleton
@@ -31,9 +26,6 @@ class SongRepositoryImpl @Inject constructor() : SongRepository {
 
     private val db = Firestore.getInstance()
     private val collectionName = "songs"
-
-    private val _currentRandomSong = MutableStateFlow<Song?>(null)
-    override val currentRandomSong: StateFlow<Song?> = _currentRandomSong
 
     override suspend fun getSongById(id: String): Song? {
         val res = db.collection(collectionName).document(id).get().await()
@@ -146,20 +138,5 @@ class SongRepositoryImpl @Inject constructor() : SongRepository {
 
 
         return songs.shuffled().take(limit)
-    }
-
-
-    override suspend fun refreshRandomSong(): Song? {
-        _currentRandomSong.update { currentRandomSong ->
-            val res = db.collection(collectionName)
-                .get()
-                .await()
-
-            if (res.isEmpty) {
-                return null
-            }
-            res.documents.mapNotNull { it.toObject(Song::class.java) }.shuffled().first()
-        }
-        return _currentRandomSong.value
     }
 }

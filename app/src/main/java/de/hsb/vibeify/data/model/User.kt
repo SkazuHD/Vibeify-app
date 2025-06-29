@@ -7,7 +7,8 @@ data class User(
     var imageUrl: String? = "",
     var playlists: List<String> = emptyList(),
     var likedSongs: List<String> = emptyList(),
-    var recentActivities: List<RecentActivity> = emptyList()
+    var recentActivities: List<RecentActivity> = emptyList(),
+    var recentSearches: List<String> = emptyList(),
 )
 
 data class RecentActivity(

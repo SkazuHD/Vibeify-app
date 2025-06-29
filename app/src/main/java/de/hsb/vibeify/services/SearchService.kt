@@ -7,10 +7,13 @@ import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.repository.ArtistRepository
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.SongRepository
+import de.hsb.vibeify.data.repository.UserRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 data class SearchResult(
@@ -29,10 +32,17 @@ interface SearchService {
 class SearchServiceImpl @Inject constructor(
     private val songRepository: SongRepository,
     private val playlistRepository: PlaylistRepository,
-    private val artistRepository: ArtistRepository
-) : SearchService{
+    private val artistRepository: ArtistRepository,
+    private val userRepository: UserRepository,
+) : SearchService {
     @Volatile
     private var currentSearchJob: Job? = null
+
+    val recentSearchQueries = userRepository.state.map {
+        it.currentUser
+    }.distinctUntilChanged().map { user ->
+        user?.recentSearches
+    }
 
     override suspend fun search(query: String): SearchResult = coroutineScope {
         currentSearchJob?.cancel()
@@ -140,14 +150,11 @@ class SearchServiceImpl @Inject constructor(
 
         if (songName == lowerQuery) {
             score += 1000
-        }
-        else if (songName.startsWith(lowerQuery)) {
+        } else if (songName.startsWith(lowerQuery)) {
             score += 800
-        }
-        else if (songName.contains(" $lowerQuery")) {
+        } else if (songName.contains(" $lowerQuery")) {
             score += 600
-        }
-        else if (songName.contains(lowerQuery)) {
+        } else if (songName.contains(lowerQuery)) {
             score += 400
         }
 

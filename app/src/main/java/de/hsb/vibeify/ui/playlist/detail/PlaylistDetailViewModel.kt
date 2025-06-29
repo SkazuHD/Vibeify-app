@@ -10,10 +10,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Song
-import de.hsb.vibeify.data.repository.LIKED_SONGS_PLAYLIST_ID
-import de.hsb.vibeify.data.repository.PlaylistRepository
-import de.hsb.vibeify.data.repository.SongRepository
 import de.hsb.vibeify.data.repository.UserRepository
+import de.hsb.vibeify.services.PlaylistService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -25,8 +23,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PlaylistDetailViewModel @Inject constructor(
-    private val playlistRepository: PlaylistRepository,
-    private val songRepository: SongRepository,
+    private val playlistService: PlaylistService,
     private val userRepository: UserRepository
 ) : ViewModel() {
     var playlistTitle by mutableStateOf("")
@@ -39,17 +36,10 @@ class PlaylistDetailViewModel @Inject constructor(
     val songs: StateFlow<List<Song>> = _songs.asStateFlow()
 
     val playlistDurationText: StateFlow<String> = songs.map { songList ->
-        val playlistDuration = songList.sumOf { it.duration }
-        val playlistDurationMinutes = playlistDuration / 60
-        val playlistDurationSeconds = playlistDuration % 60
-        when {
-            playlistDurationMinutes >= 60 -> {
-                val hours = playlistDurationMinutes / 60
-                val minutes = playlistDurationMinutes % 60
-                "$hours Stunden und $minutes Minuten"
-            }
-            playlistDurationMinutes > 0 -> "$playlistDurationMinutes Minuten und $playlistDurationSeconds Sekunden"
-            else -> "$playlistDurationSeconds Sekunden"
+        if (songList.isEmpty()) {
+            "0 Sekunden"
+        } else {
+            playlistService.getPlaylistDurationText(songList)
         }
     }.stateIn(
         scope = viewModelScope,
@@ -73,54 +63,34 @@ class PlaylistDetailViewModel @Inject constructor(
     fun loadPlaylist(playlistId: String) {
         viewModelScope.launch {
             isLoadingPlayList = true
-            if (playlistId == LIKED_SONGS_PLAYLIST_ID) {
-                val likedSongIds = userRepository.getLikedSongIds()
-                Log.d("PlaylistDetailViewModel", "Liked song IDs: $likedSongIds")
-                val likedSongsPlaylist = playlistRepository.getLikedSongsPlaylist(likedSongIds)
-
-                playlistTitle = likedSongsPlaylist.title
-                playlistDescription = likedSongsPlaylist.description ?: ""
-                playlistImage = likedSongsPlaylist.imagePath ?: R.drawable.ic_launcher_background
+            val playsListData = playlistService.getPlaylistDetail(playlistId)
+            playsListData.let {
+                Log.d("PlaylistDetailViewModel", "Loaded playlist data: $it")
+                playlistTitle = it?.title ?: ""
+                playlistDescription = it?.description ?: ""
+                playlistImage = it?.imagePath ?: R.drawable.ic_launcher_background
                 isLoadingPlayList = false
                 isLoadingSongs = true
 
-                _songs.value = songRepository.getSongsByIds(likedSongIds)
+                _songs.value = it?.songs ?: emptyList()
                 isLoadingSongs = false
-                isFavorite = false
-                isFavoriteAble = false
-                isPlaylistOwner = true
-            } else {
-                val playlist = playlistRepository.getPlaylistById(playlistId)
-                isPlaylistOwner = userRepository.state.value.currentUser?.id == playlist?.userId
-                playlist?.let { playlistData ->
-                    playlistTitle = playlistData.title
-                    playlistDescription = playlistData.description ?: ""
-                    playlistImage = playlistData.imagePath ?: R.drawable.ic_launcher_background
-                    isLoadingPlayList = false
-                    isLoadingSongs = true
-                    _songs.value = songRepository.getSongsByIds(playlistData.songIds)
-                    isLoadingSongs = false
-                }
-                isFavorite = userRepository.isPlaylistFavorite(playlistId)
-                isFavoriteAble = !isPlaylistOwner
+                isFavorite = it?.isFavorite ?:  false
+                isFavoriteAble = it?.isFavoriteAble ?:  true
+                isPlaylistOwner = it?.isOwner ?:  false
             }
         }
     }
 
     fun toggleFavorite(playlistId: String) {
         viewModelScope.launch {
-            if (isFavorite) {
-                userRepository.removePlaylistFromFavorites(playlistId)
-            } else {
-                userRepository.addPlaylistToFavorites(playlistId)
-            }
-            isFavorite = !isFavorite
+             isFavorite = playlistService.togglePlaylistFavorite(playlistId)
         }
     }
 
     fun addSongToFavorites(song: Song) {
         viewModelScope.launch {
             userRepository.addSongToFavorites(song.id)
+            _songs.value = _songs.value + song
         }
     }
 
@@ -136,13 +106,13 @@ class PlaylistDetailViewModel @Inject constructor(
 
     fun addSongToPlaylist(playlistId: String, song: Song) {
         viewModelScope.launch {
-            playlistRepository.addSongToPlaylist(playlistId, song.id)
+            playlistService.addSongToPlaylist(playlistId, song.id)
             _songs.value = _songs.value + song
         }
     }
     fun removeSongFromPlaylist(playlistId: String, song: Song) {
         viewModelScope.launch {
-            playlistRepository.removeSongFromPlaylist(playlistId, song.id)
+            playlistService.removeSongFromPlaylist(playlistId, song.id)
             _songs.value = _songs.value.filter { it.id != song.id }
         }
     }

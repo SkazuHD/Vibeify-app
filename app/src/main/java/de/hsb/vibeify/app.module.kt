@@ -21,6 +21,7 @@ import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.data.repository.UserRepositoryImpl
 import de.hsb.vibeify.services.MediaService
 import de.hsb.vibeify.services.PlayerServiceV2
+import de.hsb.vibeify.services.PlaylistService
 import de.hsb.vibeify.services.SearchService
 import de.hsb.vibeify.services.SearchServiceImpl
 import javax.inject.Singleton
@@ -81,6 +82,16 @@ object UserModule {
         artistRepository: ArtistRepository
     ): SearchService {
         return SearchServiceImpl(songRepository, playlistRepository, artistRepository)
+    }
+
+    @Singleton
+    @Provides
+    fun providePlaylistService(
+        playlistRepository: PlaylistRepository,
+        userRepository: UserRepository,
+        songRepository: SongRepository
+    ): PlaylistService {
+        return de.hsb.vibeify.services.PlaylistServiceImpl(playlistRepository,  songRepository, userRepository)
     }
 }
 

@@ -4,21 +4,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.data.model.Playlist
-import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.UserRepository
+import de.hsb.vibeify.services.PlaylistService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
 class PlaylistViewModel @Inject constructor(
-    private val playlistRepository: PlaylistRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val playlistService: PlaylistService
 ) : ViewModel() {
 
     private val _playlists = MutableStateFlow(emptyList<Playlist>())
@@ -36,32 +35,17 @@ class PlaylistViewModel @Inject constructor(
     }
 
     private suspend fun loadPlaylists(userId: String?) {
-        if (userId != null) {
-            val currentUser = userRepository.state.value.currentUser
-            if (currentUser != null) {
-                val userPlaylists = playlistRepository.getPlaylistsForUser(currentUser.playlists)
-                val likedSongsPlaylist = playlistRepository.getLikedSongsPlaylist(emptyList())
-                _playlists.value = listOf(likedSongsPlaylist) + userPlaylists
-            }
-        } else {
-            _playlists.value = emptyList()
-        }
+        _playlists.value = playlistService.getUserPlaylists(userId)
     }
 
     fun createPlaylist(playlistName: String, description: String) {
         viewModelScope.launch {
-            val newPlaylist = Playlist(
-                id = UUID.randomUUID().toString(),
-                userId = userRepository.state.value.currentUser?.id ?: "",
+            playlistService.createPlaylist(
                 title = playlistName,
                 description = description,
-                imagePath = null,
-                songIds = emptyList()
+                userId = userRepository.state.value.currentUser?.id ?: "",
             )
-            playlistRepository.createPlaylist(newPlaylist)
-            userRepository.addPlaylistToFavorites(newPlaylist.id)
 
-            // Refresh playlists after creation
             loadPlaylists(userRepository.state.value.currentUser?.id)
         }
     }

@@ -1,0 +1,1 @@
+``openapi-generator-cli generate -i app/src/main/java/de/hsb/vibeify/api/openapi.json -g kotlin --library jvm-retrofit2 --package-name de.hsb.vibeify.api.generated -o app/src/main/java/de/hsb/vibeify/api/retrofit2``

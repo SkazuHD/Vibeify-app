@@ -37,9 +37,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import de.hsb.vibeify.R
-import de.hsb.vibeify.ui.components.songCard.MenuOption
+import de.hsb.vibeify.data.repository.LIKED_SONGS_PLAYLIST_ID
+import de.hsb.vibeify.ui.components.MenuOption
+import de.hsb.vibeify.ui.components.OptionsMenu
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
-import de.hsb.vibeify.ui.components.songCard.SongCardMenu
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 
 @Composable
@@ -147,8 +148,8 @@ fun PlaylistDetailView(
                             }
                         }
                     }
-                }else if(isPlaylistOwner){
-                    SongCardMenu(
+                }else if(isPlaylistOwner && playlistId != LIKED_SONGS_PLAYLIST_ID) {
+                    OptionsMenu(
                         menuOptions = listOf(
                             MenuOption(
                                 text = "Delete Playlist",
@@ -170,8 +171,6 @@ fun PlaylistDetailView(
 
             }
         }
-
-        // Content area - optimized for performance
         if (isLoadingSongs) {
             Box(
                 modifier = Modifier.fillMaxWidth().padding(32.dp),
@@ -188,7 +187,7 @@ fun PlaylistDetailView(
             ) {
                 items(
                     items = songs,
-                    key = { song -> song.id } // Important: Add key for performance
+                    key = { song -> song.id }
                 ) { song ->
                     SmartSongCard(
                         song = song,

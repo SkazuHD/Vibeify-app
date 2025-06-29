@@ -26,6 +26,8 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import de.hsb.vibeify.R
+import de.hsb.vibeify.ui.components.MenuOption
+import de.hsb.vibeify.ui.components.OptionsMenu
 
 @Composable
 fun SongCard(
@@ -110,7 +112,7 @@ fun SongCard(
             }
 
             if (showMenu) {
-                SongCardMenu(
+                OptionsMenu(
                     menuOptions = menuOptions,
                     onMenuIconClick = onMenuIconClick
                 )

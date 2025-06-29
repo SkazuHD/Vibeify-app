@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.components.songCard
+package de.hsb.vibeify.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
@@ -23,7 +23,7 @@ data class MenuOption(
 )
 
 @Composable
-fun SongCardMenu(
+fun OptionsMenu(
     modifier: Modifier = Modifier,
     menuIcon: ImageVector = Icons.Default.MoreVert,
     menuIconContentDescription: String = "Weitere Optionen",

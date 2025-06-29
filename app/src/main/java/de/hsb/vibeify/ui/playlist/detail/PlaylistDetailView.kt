@@ -85,7 +85,7 @@ fun PlaylistDetailView(
                     )
                     IconButton(
                         onClick = {
-                            playbackViewModel.play(songs)
+                            playbackViewModel.play(songs, 0, playlistId)
                         },
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -194,7 +194,7 @@ fun PlaylistDetailView(
                         song = song,
                         songIcon = R.drawable.ic_launcher_foreground,
                         onClick = {
-                            playbackViewModel.play(songs, songs.indexOf(song))
+                            playbackViewModel.play(songs, songs.indexOf(song), playlistId)
                         },
                         additionalMenuOptions =  listOf(
                             MenuOption(

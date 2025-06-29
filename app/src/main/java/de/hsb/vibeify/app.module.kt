@@ -19,6 +19,7 @@ import de.hsb.vibeify.data.repository.SongRepository
 import de.hsb.vibeify.data.repository.SongRepositoryImpl
 import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.data.repository.UserRepositoryImpl
+import de.hsb.vibeify.services.AnalyticsService
 import de.hsb.vibeify.services.MediaService
 import de.hsb.vibeify.services.PlayerServiceV2
 import de.hsb.vibeify.services.PlaylistService
@@ -55,7 +56,7 @@ object UserModule {
     @Provides
     fun provideUserRepository(
         authRepository: AuthRepository,
-        firestoreRepo: FirestoreRepo
+        firestoreRepo: FirestoreRepo,
     ): UserRepository {
         return UserRepositoryImpl(authRepository, firestoreRepo)
     }
@@ -92,6 +93,15 @@ object UserModule {
         songRepository: SongRepository
     ): PlaylistService {
         return de.hsb.vibeify.services.PlaylistServiceImpl(playlistRepository,  songRepository, userRepository)
+    }
+
+    @Singleton
+    @Provides
+    fun provideAnalyticsService(
+        userRepository: UserRepository,
+        playerServiceV2: PlayerServiceV2
+    ): AnalyticsService {
+        return AnalyticsService(userRepository, playerServiceV2)
     }
 }
 

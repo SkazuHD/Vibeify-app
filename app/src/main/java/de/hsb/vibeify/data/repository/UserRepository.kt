@@ -2,6 +2,7 @@ package de.hsb.vibeify.data.repository
 
 import android.util.Log
 import com.google.firebase.firestore.FieldValue
+import de.hsb.vibeify.data.model.RecentActivity
 import de.hsb.vibeify.data.model.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,7 +14,6 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.google.firebase.firestore.FirebaseFirestore as Firestore
-
 
 
 data class UserRepositoryState(
@@ -33,12 +33,13 @@ interface UserRepository {
     suspend fun updateUser(user: User) {
     }
 
+    suspend fun addRecentActivity(activity: RecentActivity)
     val state: StateFlow<UserRepositoryState>
 }
 
 @Singleton
 class UserRepositoryImpl @Inject constructor(
-    authRepository: AuthRepository, firestoreRepository: FirestoreRepo
+    authRepository: AuthRepository, firestoreRepository: FirestoreRepo,
 ) : UserRepository {
 
     private val db = Firestore.getInstance()
@@ -147,5 +148,19 @@ class UserRepositoryImpl @Inject constructor(
         Log.d("UserRepository", "updateUser called with user: $user")
         db.collection(collectionName).document(user.id).set(user).await()
         _state.value = _state.value.copy(currentUser = user)
+    }
+
+    override suspend fun addRecentActivity(activity: RecentActivity) {
+        Log.d("UserRepository", "addRecentActivity called with activity: $activity")
+        val user = _state.value.currentUser ?: return
+        db.collection(collectionName).document(user.id).update(
+            "recentActivities", FieldValue.arrayUnion(activity)
+        ).await()
+        _state.value = _state.value.copy(
+            currentUser = user.copy(
+                recentActivities = user.recentActivities + activity
+            )
+        )
+
     }
 }

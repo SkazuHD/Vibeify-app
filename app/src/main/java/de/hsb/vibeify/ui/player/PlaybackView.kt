@@ -214,7 +214,7 @@ fun MinimalMusicPlayer(
                     SongCard(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
-                            playbackViewModel.play(currentSongList, currentSongList.indexOf(song))
+                            playbackViewModel.play(currentSongList, currentSongList.indexOf(song), playbackViewModel.currentPlaylistId.value)
                         },
                         title = song.name,
                         artist = song.artist ?: "Unknown Artist",

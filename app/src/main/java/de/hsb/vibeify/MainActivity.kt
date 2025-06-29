@@ -12,11 +12,16 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import dagger.hilt.android.AndroidEntryPoint
 import de.hsb.vibeify.core.AppRouter
 import de.hsb.vibeify.core.ui.theme.VibeifyTheme
+import de.hsb.vibeify.services.AnalyticsService
 import de.hsb.vibeify.ui.login.LoginViewModel
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var analyticsService: AnalyticsService
     private val loginViewModel: LoginViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()

@@ -18,6 +18,5 @@ data class RecentActivity(
     companion object {
         const val TYPE_SONG = "song"
         const val TYPE_PLAYLIST = "playlist"
-        const val TYPE_ARTIST = "artist"
     }
 }

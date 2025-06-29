@@ -36,6 +36,9 @@ class PlayerServiceV2 {
     private val _currentSongList = MutableStateFlow( emptyList<Song>())
     val currentSongList: StateFlow<List<Song>> = _currentSongList
 
+    private val _currentPlaylistId = MutableStateFlow<String?>(null)
+    val currentPlaylistId: StateFlow<String?> = _currentPlaylistId
+
     private val _currentSong: MutableStateFlow<Song?> = MutableStateFlow(null)
     var currentSong: StateFlow<Song?> = _currentSong
 
@@ -177,10 +180,11 @@ class PlayerServiceV2 {
         startPositionTracking()
     }
 
-    fun play(songs: List<Song>, startIndex: Int = 0) {
+    fun play(songs: List<Song>, startIndex: Int = 0, playlistId : String? = null) {
         if (songs.isEmpty()) return
         _currentSong.value = songs[startIndex]
         _currentSongList.value = songs
+        _currentPlaylistId.value = playlistId
         val mediaItems = songs.map { buildMediaItem(it) }
         withController { controller ->
             controller.setMediaItems(mediaItems)

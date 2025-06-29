@@ -75,7 +75,7 @@ fun MainView(
                 }
             } else {
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 180.dp)
+                    columns = GridCells.Adaptive(minSize = 175.dp)
                 ) {
                     items(recentActivityItems.value.size) { index ->
                         val activityItem = recentActivityItems.value[index]

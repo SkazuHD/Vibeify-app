@@ -34,17 +34,20 @@ object UserModule {
     fun provideAuthRepository(): AuthRepository {
         return FirebaseAuthRepo()
     }
+
     @Singleton
     @Provides
     fun providePlaylistRepository(
     ): PlaylistRepository {
         return PlaylistRepositoryImpl()
     }
+
     @Singleton
     @Provides
     fun provideSongRepository(): SongRepository {
         return SongRepositoryImpl()
     }
+
     @Singleton
     @Provides
     fun provideUserRepository(
@@ -73,9 +76,15 @@ object UserModule {
     fun provideSearchService(
         songRepository: SongRepository,
         playlistRepository: PlaylistRepository,
-        artistRepository: ArtistRepository
+        artistRepository: ArtistRepository,
+        userRepository: UserRepository
     ): SearchService {
-        return SearchServiceImpl(songRepository, playlistRepository, artistRepository)
+        return SearchServiceImpl(
+            songRepository,
+            playlistRepository,
+            artistRepository,
+            userRepository
+        )
     }
 
     @Singleton
@@ -85,7 +94,11 @@ object UserModule {
         userRepository: UserRepository,
         songRepository: SongRepository
     ): PlaylistService {
-        return de.hsb.vibeify.services.PlaylistServiceImpl(playlistRepository,  songRepository, userRepository)
+        return de.hsb.vibeify.services.PlaylistServiceImpl(
+            playlistRepository,
+            songRepository,
+            userRepository
+        )
     }
 
     @Singleton

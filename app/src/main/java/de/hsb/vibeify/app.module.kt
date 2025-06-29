@@ -49,8 +49,9 @@ object UserModule {
     @Provides
     fun provideUserRepository(
         authRepository: AuthRepository,
+        @ApplicationContext context: android.content.Context
     ): UserRepository {
-        return UserRepositoryImpl(authRepository)
+        return UserRepositoryImpl(authRepository, context)
     }
 
     @Singleton

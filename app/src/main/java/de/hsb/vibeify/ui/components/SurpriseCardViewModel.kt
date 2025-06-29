@@ -16,8 +16,8 @@ class SurpriseCardViewModel @Inject constructor(
     private val songRepository: SongRepository
 ) : ViewModel() {
 
-    private val _randomSong = MutableStateFlow<Song?>(null)
-    val randomSong: StateFlow<Song?> = _randomSong.asStateFlow()
+    private val _randomSong = songRepository.currentRandomSong
+    val randomSong: StateFlow<Song?> = _randomSong
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -30,10 +30,8 @@ class SurpriseCardViewModel @Inject constructor(
             _isLoading.value = true
             _errorMessage.value = null
             try {
-                val songs = songRepository.getRandomSongs(1)
-                _randomSong.value = songs.firstOrNull()
+                songRepository.refreshRandomSong()
             } catch (e: Exception) {
-                _randomSong.value = null
                 _errorMessage.value = "Failed to load random song"
             } finally {
                 _isLoading.value = false

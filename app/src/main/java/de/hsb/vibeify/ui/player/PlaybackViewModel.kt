@@ -28,6 +28,8 @@ class PlaybackViewModel @Inject constructor(
     val upcomingSongs = playerServiceV2.upcomingSongs
     val currentSongList = playerServiceV2.currentSongList
 
+    val playbackMode: StateFlow<PlayerServiceV2.PlaybackMode> = playerServiceV2.playbackMode
+
     fun play(song: Song) {
         viewModelScope.launch {
             playerServiceV2.play(song)
@@ -56,6 +58,10 @@ class PlaybackViewModel @Inject constructor(
 
     fun seekTo(pos: Long) {
         playerServiceV2.seekTo(pos)
+    }
+
+    fun togglePlaybackMode() {
+        playerServiceV2.togglePlaybackMode()
     }
 
     override fun onCleared() {

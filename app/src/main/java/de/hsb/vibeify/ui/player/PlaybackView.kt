@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +19,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Loop
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.outlined.Loop
+import androidx.compose.material.icons.outlined.Shuffle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -64,6 +70,7 @@ fun MinimalMusicPlayer(
     val currentSong by playbackViewModel.currentSong.collectAsState()
     val nextSongs =playbackViewModel.upcomingSongs.collectAsState()
     val currentSongList by playbackViewModel.currentSongList.collectAsState()
+    val playbackMode by playbackViewModel.playbackMode.collectAsState()
 
 
     var sliderPosition by remember { mutableStateOf(0f) }
@@ -79,9 +86,10 @@ fun MinimalMusicPlayer(
     }
 
     Box(
-        modifier = Modifier
+    modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.background)
+            .padding(top = 80.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -197,6 +205,29 @@ fun MinimalMusicPlayer(
                         modifier = Modifier.size(40.dp)
                     )
                 }
+                Spacer(modifier = Modifier.width(16.dp))
+                IconButton(onClick = { playbackViewModel.togglePlaybackMode() }) {
+                    when (playbackMode) {
+                        de.hsb.vibeify.services.PlayerServiceV2.PlaybackMode.SHUFFLE -> Icon(
+                            imageVector = Icons.Filled.Shuffle,
+                            contentDescription = "Shuffle",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        de.hsb.vibeify.services.PlayerServiceV2.PlaybackMode.LOOP -> Icon(
+                            imageVector = Icons.Filled.Loop,
+                            contentDescription = "Loop",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(32.dp)
+                        )
+                        de.hsb.vibeify.services.PlayerServiceV2.PlaybackMode.NONE -> Icon(
+                            imageVector = Icons.Outlined.Shuffle,
+                            contentDescription = "Kein Shuffle",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -237,4 +268,3 @@ fun formatTime(ms: Long): String {
     else
         "%d:%02d".format(minutes, seconds)
 }
-

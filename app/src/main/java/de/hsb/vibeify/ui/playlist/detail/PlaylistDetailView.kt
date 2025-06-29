@@ -65,6 +65,7 @@ fun PlaylistDetailView(
     val isFavoriteAble = playlistDetailViewModel.isFavoriteAble
     val isLoadingSongs = playlistDetailViewModel.isLoadingSongs
 
+
     //Playlist Header
     Column(modifier = modifier) {
         Box(modifier = Modifier.fillMaxWidth())
@@ -189,27 +190,30 @@ fun PlaylistDetailView(
                     items = songs,
                     key = { song -> song.id }
                 ) { song ->
+                    val songCardAdditionalMenuOptions = if (isPlaylistOwner) {
+                        listOf(
+                            MenuOption(
+                                text = "Remove from this playlist",
+                                icon = Icons.Default.Remove,
+                                onClick = {
+                                    playlistDetailViewModel.removeSongFromPlaylist(playlistId, song = song)
+                                }
+                            )
+                        )
+                    } else {
+                        emptyList()
+                    }
                     SmartSongCard(
                         song = song,
                         songIcon = R.drawable.ic_launcher_foreground,
                         onClick = {
                             playbackViewModel.play(songs, songs.indexOf(song), playlistId)
                         },
-                        additionalMenuOptions =  listOf(
-                            MenuOption(
-                                text = "Remove from this playlist",
-                                icon = Icons.Default.Remove,
-                                onClick = {
-                                    playlistDetailViewModel.removeSongFromPlaylist(
-                                        playlistId,
-                                        song
-                                    )
-                                }
-                            )
-                        ),
-                        playbackViewModel = playbackViewModel,
+                        additionalMenuOptions = songCardAdditionalMenuOptions,
+                        playbackViewModel = playbackViewModel
                     )
                 }
+
             }
         }
     }

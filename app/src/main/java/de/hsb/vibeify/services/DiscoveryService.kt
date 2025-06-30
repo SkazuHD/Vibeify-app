@@ -1,25 +1,29 @@
-package de.hsb.vibeify.ui.search
+package de.hsb.vibeify.services
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
+import de.hsb.vibeify.data.model.Genre
 import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.SongRepository
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
+import javax.inject.Singleton
 
-@HiltViewModel
-class DiscoveryViewModel @Inject constructor(
+
+@Singleton
+class DiscoveryService @Inject constructor(
     private val songRepository: SongRepository,
     private val playlistRepository: PlaylistRepository
-) : ViewModel() {
-
+) {
     var trendingSongs = mutableStateOf<List<Song>>(emptyList())
         private set
 
@@ -29,42 +33,38 @@ class DiscoveryViewModel @Inject constructor(
     var randomSongs = mutableStateOf<List<Song>>(emptyList())
         private set
 
-    // StateFlow für reactive Genre-Updates
-    val availableGenres: StateFlow<List<String>> = songRepository.availableGenresFlow
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyList()
-        )
-
-    val genreStatistics: StateFlow<Map<String, Int>> = songRepository.genreStatisticsFlow
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = emptyMap()
-        )
+    private val _genreList = MutableStateFlow<List<Genre>>(emptyList())
+    val genreList: StateFlow<List<Genre>> = _genreList.asStateFlow()
 
     var isLoading = mutableStateOf(false)
         private set
+
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     init {
         loadDiscoveryContent()
     }
 
     private fun loadDiscoveryContent() {
-        viewModelScope.launch {
+        scope.launch {
             isLoading.value = true
             try {
-                // Lade verschiedene Inhalte für die Discovery-Seite
                 loadTrendingSongs()
                 loadFeaturedPlaylists()
                 loadRandomSongs()
                 loadGenres()
+
             } catch (e: Exception) {
-                // Handle error
             } finally {
                 isLoading.value = false
             }
+        }
+    }
+
+
+    fun refreshContent() {
+        scope.launch {
+            loadDiscoveryContent()
         }
     }
 
@@ -97,8 +97,7 @@ class DiscoveryViewModel @Inject constructor(
 
     private suspend fun loadGenres() {
         try {
-            songRepository.getAvailableGenres()
-            songRepository.getGenreStatistics()
+            getGenreList()
         } catch (e: Exception) {
         }
     }
@@ -111,10 +110,28 @@ class DiscoveryViewModel @Inject constructor(
         }
     }
 
-    fun refreshContent() {
-        viewModelScope.launch {
-            songRepository.refreshGenreCache()
-            loadDiscoveryContent()
-        }
+    suspend fun getGenreList(): List<Genre> {
+        val allSongs = songRepository.getAllSongs()
+        val genres = allSongs.mapNotNull { it.genre }
+            .distinct()
+            .filter { it.isNotBlank() }
+            .sorted().map {
+                Genre(
+                    id = UUID.randomUUID().toString(),
+                    name = it,
+                    description = "Genre: $it",
+                    count = allSongs.count { song -> song.genre == it },
+                    imageUrl = null
+                )
+            }
+
+        _genreList.value = genres
+        Log.d(
+            "DiscoveryService",
+            "Loaded genres: ${genres} genres found"
+        )
+        return genres
+
+
     }
 }

@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.search
+package de.hsb.vibeify.ui.search.discovery
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -39,9 +38,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import de.hsb.vibeify.data.model.Genre
 import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.ui.components.LoadingIndicator
+import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 import kotlin.random.Random
 
 @Composable
@@ -56,9 +57,7 @@ fun DiscoverySection(
     val featuredPlaylists by discoveryViewModel.featuredPlaylists
     val randomSongs by discoveryViewModel.randomSongs
 
-    // StateFlow-basierte Genre-Daten
     val availableGenres by discoveryViewModel.availableGenres.collectAsState()
-    val genreStatistics by discoveryViewModel.genreStatistics.collectAsState()
 
     val isLoading by discoveryViewModel.isLoading
 
@@ -74,7 +73,6 @@ fun DiscoverySection(
             modifier = modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Header mit Refresh Button
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -97,7 +95,6 @@ fun DiscoverySection(
                 }
             }
 
-            // Trending Songs Sektion
             if (trendingSongs.isNotEmpty()) {
                 item {
                     SectionHeader(title = "🔥 Trending Songs")
@@ -116,7 +113,6 @@ fun DiscoverySection(
                 }
             }
 
-            // Genres Sektion - nutzt jetzt StateFlow-basierte Daten
             if (availableGenres.isNotEmpty()) {
                 item {
                     SectionHeader(title = "🎵 Browse Genres")
@@ -124,7 +120,6 @@ fun DiscoverySection(
                 item {
                     GenreGrid(
                         genres = availableGenres,
-                        genreStatistics = genreStatistics,
                         onGenreClick = onGenreClick
                     )
                 }
@@ -153,7 +148,7 @@ fun DiscoverySection(
                     SectionHeader(title = "🎲 Surprise Selection")
                 }
                 items(randomSongs) { song ->
-                    RandomSongItem(
+                    SmartSongCard(
                         song = song,
                         onClick = { onSongClick(song) }
                     )
@@ -228,8 +223,7 @@ private fun TrendingSongCard(
 
 @Composable
 private fun GenreGrid(
-    genres: List<String>,
-    genreStatistics: Map<String, Int>,
+    genres: List<Genre>,
     onGenreClick: (String) -> Unit
 ) {
     Column {
@@ -241,9 +235,9 @@ private fun GenreGrid(
             ) {
                 genreRow.forEach { genre ->
                     GenreChip(
-                        genre = genre,
-                        count = genreStatistics[genre] ?: 0,
-                        onClick = { onGenreClick(genre) },
+                        genre = genre.name,
+                        count = genre.count ?: 0,
+                        onClick = { onGenreClick(genre.name) },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -326,63 +320,6 @@ private fun PlaylistDiscoveryCard(
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
-        }
-    }
-}
-
-@Composable
-private fun RandomSongItem(
-    song: Song,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Song Icon
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(
-                        Color.hsv(Random.nextFloat() * 360f, 0.5f, 0.7f),
-                        CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "♫",
-                    fontSize = 20.sp,
-                    color = Color.White
-                )
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = song.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = "${song.artist} • ${song.album ?: "Album unbekannt"}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
         }
     }
 }

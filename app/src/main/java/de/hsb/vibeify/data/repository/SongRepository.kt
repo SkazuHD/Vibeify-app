@@ -5,9 +5,6 @@ import de.hsb.vibeify.data.model.Song
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,16 +19,8 @@ interface SongRepository {
     suspend fun updateSong(song: Song): Boolean
     suspend fun deleteSong(id: String): Boolean
     suspend fun getRandomSongs(limit: Int): List<Song>
-
-    // Genre-spezifische Methoden mit Caching
-    suspend fun getAvailableGenres(): List<String>
     suspend fun getSongsByGenre(genre: String): List<Song>
-    suspend fun getGenreStatistics(): Map<String, Int>
-    suspend fun refreshGenreCache()
 
-    // StateFlow für reactive UI
-    val availableGenresFlow: StateFlow<List<String>>
-    val genreStatisticsFlow: StateFlow<Map<String, Int>>
 }
 
 @Singleton
@@ -40,13 +29,6 @@ class SongRepositoryImpl @Inject constructor() : SongRepository {
     private val db = Firestore.getInstance()
     private val collectionName = "songs"
 
-    // Cache für Genres
-    private val _availableGenresFlow = MutableStateFlow<List<String>>(emptyList())
-    override val availableGenresFlow: StateFlow<List<String>> = _availableGenresFlow.asStateFlow()
-
-    private val _genreStatisticsFlow = MutableStateFlow<Map<String, Int>>(emptyMap())
-    override val genreStatisticsFlow: StateFlow<Map<String, Int>> =
-        _genreStatisticsFlow.asStateFlow()
 
     private var genreCacheLastUpdated: Long = 0
     private val cacheDurationMs = 5 * 60 * 1000L // 5 Minuten Cache
@@ -168,35 +150,6 @@ class SongRepositoryImpl @Inject constructor() : SongRepository {
         return allSongs.shuffled().take(limit)
     }
 
-    // Genre-spezifische Implementierungen mit Caching
-    override suspend fun getAvailableGenres(): List<String> {
-        // Verwende Cache wenn verfügbar und gültig
-        if (_availableGenresFlow.value.isNotEmpty() && isCacheValid()) {
-            return _availableGenresFlow.value
-        }
-
-        return try {
-            val allSongs = getAllSongs()
-            val genres = allSongs.mapNotNull { it.genre }
-                .distinct()
-                .filter { it.isNotBlank() }
-                .sorted()
-
-            // Update Cache und StateFlow
-            _availableGenresFlow.value = genres
-            genreCacheLastUpdated = System.currentTimeMillis()
-
-            genres
-        } catch (e: Exception) {
-            // Fallback zu Standard-Genres
-            val fallbackGenres = listOf(
-                "Rock", "Pop", "Hip-Hop", "Jazz", "Classical",
-                "Electronic", "Country", "R&B", "Reggae", "Blues"
-            )
-            _availableGenresFlow.value = fallbackGenres
-            fallbackGenres
-        }
-    }
 
     override suspend fun getSongsByGenre(genre: String): List<Song> {
         return try {
@@ -215,32 +168,5 @@ class SongRepositoryImpl @Inject constructor() : SongRepository {
         }
     }
 
-    override suspend fun getGenreStatistics(): Map<String, Int> {
-        // Verwende Cache wenn verfügbar und gültig
-        if (_genreStatisticsFlow.value.isNotEmpty() && isCacheValid()) {
-            return _genreStatisticsFlow.value
-        }
 
-        return try {
-            val allSongs = getAllSongs()
-            val statistics = allSongs.groupBy { it.genre ?: "Unbekannt" }
-                .mapValues { it.value.size }
-                .toSortedMap()
-
-            // Update Cache und StateFlow
-            _genreStatisticsFlow.value = statistics
-            genreCacheLastUpdated = System.currentTimeMillis()
-
-            statistics
-        } catch (e: Exception) {
-            emptyMap()
-        }
-    }
-
-    override suspend fun refreshGenreCache() {
-        genreCacheLastUpdated = 0 // Cache invalidieren
-        // Neulade die Daten
-        getAvailableGenres()
-        getGenreStatistics()
-    }
 }

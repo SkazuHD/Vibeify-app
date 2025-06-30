@@ -15,6 +15,7 @@ import androidx.navigation.NavController
 import de.hsb.vibeify.ui.components.searchbar.SearchbarViewModel
 import de.hsb.vibeify.ui.components.searchbar.SimpleSearchBar
 import de.hsb.vibeify.ui.player.PlaybackViewModel
+import de.hsb.vibeify.ui.search.discovery.DiscoverySection
 
 @Composable
 fun SearchView(
@@ -31,7 +32,7 @@ fun SearchView(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
-            ){
+            ) {
                 SimpleSearchBar(
                     textFieldState = textFieldState,
                     onSearch = { query ->

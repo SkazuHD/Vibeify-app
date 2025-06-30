@@ -3,8 +3,8 @@ package de.hsb.vibeify.ui.components
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import de.hsb.vibeify.data.manager.RandomSongManager
 import de.hsb.vibeify.data.model.Song
+import de.hsb.vibeify.services.RandomSongService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SurpriseCardViewModel @Inject constructor(
-    private val randomSongManager: RandomSongManager
+    private val randomSongManager: RandomSongService
 ) : ViewModel() {
 
     val randomSong: StateFlow<Song?> = randomSongManager.currentRandomSong

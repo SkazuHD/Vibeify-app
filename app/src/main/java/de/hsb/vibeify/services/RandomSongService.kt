@@ -1,4 +1,4 @@
-package de.hsb.vibeify.data.manager
+package de.hsb.vibeify.services
 
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.repository.SongRepository
@@ -9,7 +9,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RandomSongManager @Inject constructor(
+class RandomSongService @Inject constructor(
     private val songRepository: SongRepository
 ) {
     private val _currentRandomSong = MutableStateFlow<Song?>(null)

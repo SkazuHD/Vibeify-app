@@ -29,14 +29,6 @@ class SongRepositoryImpl @Inject constructor() : SongRepository {
     private val db = Firestore.getInstance()
     private val collectionName = "songs"
 
-
-    private var genreCacheLastUpdated: Long = 0
-    private val cacheDurationMs = 5 * 60 * 1000L // 5 Minuten Cache
-
-    private fun isCacheValid(): Boolean {
-        return System.currentTimeMillis() - genreCacheLastUpdated < cacheDurationMs
-    }
-
     override suspend fun getSongById(id: String): Song? {
         val res = db.collection(collectionName).document(id).get().await()
         return if (res.exists()) res.toObject(Song::class.java) else null

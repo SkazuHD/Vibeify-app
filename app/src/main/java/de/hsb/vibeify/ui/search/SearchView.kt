@@ -28,6 +28,7 @@ fun SearchView(
     val textFieldState = remember { TextFieldState("") }
     val searchResults by vm.searchResults
     val recentSearches = vm.recentSearches.collectAsState(initial = emptyList())
+    val isLoading by vm.isLoading.collectAsState(initial = false)
 
     Box(modifier = modifier) {
         Column {
@@ -42,6 +43,7 @@ fun SearchView(
                     },
                     searchResults = searchResults,
                     recentSearches = recentSearches.value,
+                    isLoading = isLoading,
                     onPlaylistClick = { playlist ->
                         navController?.navigate("playlist_detail_view/${playlist.id}")
                         vm.clearSearchResults()
@@ -53,23 +55,26 @@ fun SearchView(
                         navController?.navigate("playlist_detail_view/genre_${genre.name}")
                         vm.clearSearchResults()
                     },
+                    onClose = {
+                        textFieldState.edit { replace(0, length, "") }
+                        vm.clearSearchResults()
 
-                    )
-            }
-
-            if (searchResults.songs.isEmpty() && searchResults.playlists.isEmpty()) {
-                DiscoverySection(
-                    onSongClick = { song ->
-                        vm2.play(song)
-                    },
-                    onPlaylistClick = { playlist ->
-                        navController?.navigate("playlist_detail_view/${playlist.id}")
-                    },
-                    onGenreClick = { genre ->
-                        navController?.navigate("playlist_detail_view/genre_$genre")
                     }
                 )
             }
+
+            DiscoverySection(
+                onSongClick = { song ->
+                    vm2.play(song)
+                },
+                onPlaylistClick = { playlist ->
+                    navController?.navigate("playlist_detail_view/${playlist.id}")
+                },
+                onGenreClick = { genre ->
+                    navController?.navigate("playlist_detail_view/genre_$genre")
+                }
+            )
+
         }
     }
 }

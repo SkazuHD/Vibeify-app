@@ -47,7 +47,7 @@ class SearchServiceImpl @Inject constructor(
     override val recentSearchQueries = userRepository.state.map {
         it.currentUser
     }.distinctUntilChanged().map { it ->
-        it?.recentSearches
+        it?.recentSearches?.take(5)
     }
 
     override suspend fun search(query: String): SearchResult = coroutineScope {

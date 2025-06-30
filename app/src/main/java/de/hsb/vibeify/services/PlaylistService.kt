@@ -58,12 +58,9 @@ class PlaylistServiceImpl @Inject constructor(
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-
     override val playlists = MutableStateFlow(emptyList<Playlist>())
 
-
     init {
-
         scope.launch {
             userRepository.state
                 .map { it.currentUser?.id }

@@ -8,6 +8,7 @@ import de.hsb.vibeify.data.model.RecentActivity
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.SongRepository
 import de.hsb.vibeify.data.repository.UserRepository
+import de.hsb.vibeify.services.PlaylistService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val playlistRepository: PlaylistRepository,
+    private val playlistService: PlaylistService,
     private val songRepository: SongRepository
 ) : ViewModel() {
 
@@ -56,7 +58,7 @@ class MainViewModel @Inject constructor(
                 if (songIds.isNotEmpty()) songRepository.getSongsByIds(songIds) else emptyList()
             }
             val playlistsDeferred = async {
-                if (playlistIds.isNotEmpty()) playlistRepository.getPlaylistsForUser(playlistIds) else emptyList()
+                if (playlistIds.isNotEmpty()) playlistService.getPlaylistsByIds(playlistIds) else emptyList()
             }
 
             Pair(songsDeferred.await(), playlistsDeferred.await())

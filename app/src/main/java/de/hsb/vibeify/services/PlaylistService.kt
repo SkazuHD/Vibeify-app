@@ -28,6 +28,8 @@ data class PlaylistDetailData(
 )
 
 interface PlaylistService {
+
+    suspend fun getPlaylistsByIds(playlistIds: List<String>): List<Playlist>
     suspend fun getUserPlaylists(userId: String?): List<Playlist>
 
     suspend fun getPlaylistCreatedByUser(userId: String): List<Playlist>
@@ -42,7 +44,7 @@ interface PlaylistService {
     suspend fun removeSongFromPlaylist(playlistId: String, songId: String)
     fun getPlaylistDurationText(songs: List<Song>): String
 
-    suspend fun getGenreAsPlaylist(genreName: String): PlaylistDetailData?
+    suspend fun getGenreAsPlaylistDetail(genreName: String): PlaylistDetailData?
     val playlists: MutableStateFlow<List<Playlist>>
 }
 
@@ -58,6 +60,7 @@ class PlaylistServiceImpl @Inject constructor(
 
 
     override val playlists = MutableStateFlow(emptyList<Playlist>())
+
 
     init {
 
@@ -79,7 +82,7 @@ class PlaylistServiceImpl @Inject constructor(
         return if (userId != null) {
             val currentUser = userRepository.state.value.currentUser
             if (currentUser != null) {
-                val userPlaylists = playlistRepository.getPlaylistsForUser(currentUser.playlists)
+                val userPlaylists = playlistRepository.getPlaylistsByIds(currentUser.playlists)
                 val likedSongsPlaylist = playlistRepository.getLikedSongsPlaylist(emptyList())
                 listOf(likedSongsPlaylist) + userPlaylists
             } else {
@@ -121,7 +124,7 @@ class PlaylistServiceImpl @Inject constructor(
             )
         } else if (playlistId.startsWith("genre_")) {
             val genreName = playlistId.removePrefix("genre_")
-            getGenreAsPlaylist(genreName)
+            getGenreAsPlaylistDetail(genreName)
         } else {
             val playlist = playlistRepository.getPlaylistById(playlistId)
             playlist?.let { playlistData ->
@@ -140,6 +143,22 @@ class PlaylistServiceImpl @Inject constructor(
                 )
             }
         }
+    }
+
+    override suspend fun getPlaylistsByIds(playlistIds: List<String>): List<Playlist> {
+        val genrePlaylists = playlistIds.filter { it.startsWith("genre_") }
+            .map { it.removePrefix("genre_") }
+            .mapNotNull { getGenreAsPlaylist(it) }
+        val otherPlaylists =
+            playlistRepository.getPlaylistsByIds(playlistIds.filterNot { it.startsWith("genre_") })
+        //Sort to original order
+        val sortedPlaylists = playlistIds.mapNotNull { id ->
+            when {
+                id.startsWith("genre_") -> genrePlaylists.find { it.id == "genre_$id" }
+                else -> otherPlaylists.find { it.id == id }
+            }
+        }
+        return sortedPlaylists
     }
 
     override suspend fun createPlaylist(
@@ -211,7 +230,21 @@ class PlaylistServiceImpl @Inject constructor(
         }
     }
 
-    override suspend fun getGenreAsPlaylist(genreName: String): PlaylistDetailData? {
+    suspend fun getGenreAsPlaylist(genreName: String): Playlist? {
+        val genreList = discoveryService.getGenreList()
+        val genre = genreList.find { it.name.equals(genreName, ignoreCase = true) }
+        return genre?.let {
+            Playlist(
+                id = "genre_${it.name}",
+                userId = "system",
+                title = it.name,
+                description = it.description ?: "Alle Songs im Genre ${it.name}",
+                songIds = emptyList()
+            )
+        }
+    }
+
+    override suspend fun getGenreAsPlaylistDetail(genreName: String): PlaylistDetailData? {
         return try {
             val songs = discoveryService.getSongsByGenre(genreName)
             if (songs.isNotEmpty()) {

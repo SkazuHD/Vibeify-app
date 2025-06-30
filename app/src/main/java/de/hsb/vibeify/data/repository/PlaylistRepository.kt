@@ -19,28 +19,36 @@ interface PlaylistRepository {
     suspend fun getAllPlaylists(): List<Playlist> {
         return emptyList()
     }
+
     suspend fun searchPlaylists(query: String): List<Playlist> {
         return emptyList()
     }
+
     suspend fun getPlaylistsByUserId(userId: String): List<Playlist> {
         return emptyList()
     }
+
     suspend fun createPlaylist(playlist: Playlist): Boolean {
         return false
     }
+
     suspend fun updatePlaylist(playlist: Playlist): Boolean {
         return false
     }
+
     suspend fun deletePlaylist(id: String): Boolean {
         return false
     }
+
     suspend fun addSongToPlaylist(playlistId: String, songId: String): Boolean {
         return false
     }
+
     suspend fun removeSongFromPlaylist(playlistId: String, songId: String): Boolean {
         return false
     }
-    suspend fun getPlaylistsForUser(playlistIds: List<String>): List<Playlist>
+
+    suspend fun getPlaylistsByIds(playlistIds: List<String>): List<Playlist>
     suspend fun getLikedSongsPlaylist(likedSongIds: List<String>): Playlist
 }
 
@@ -72,11 +80,11 @@ class PlaylistRepositoryImpl @Inject constructor() : PlaylistRepository {
         val res = db.collection(collectionName).limit(
             10
         ).where(
-                Filter.and(
-                    Filter.greaterThanOrEqualTo("title", query),
-                    Filter.lessThanOrEqualTo("title", query + "\uf8ff"),
-                )
+            Filter.and(
+                Filter.greaterThanOrEqualTo("title", query),
+                Filter.lessThanOrEqualTo("title", query + "\uf8ff"),
             )
+        )
             .get()
             .await()
 
@@ -95,7 +103,7 @@ class PlaylistRepositoryImpl @Inject constructor() : PlaylistRepository {
         return res.documents.mapNotNull { it.toObject(Playlist::class.java) }
     }
 
-    override suspend fun getPlaylistsForUser(playlistIds: List<String>): List<Playlist> {
+    override suspend fun getPlaylistsByIds(playlistIds: List<String>): List<Playlist> {
         if (playlistIds.isEmpty()) return emptyList()
 
         val batchSize = 30
@@ -134,12 +142,14 @@ class PlaylistRepositoryImpl @Inject constructor() : PlaylistRepository {
     }
 
     override suspend fun addSongToPlaylist(playlistId: String, songId: String): Boolean {
-        db.collection(collectionName).document(playlistId).update("songIds", FieldValue.arrayUnion(songId)).await()
+        db.collection(collectionName).document(playlistId)
+            .update("songIds", FieldValue.arrayUnion(songId)).await()
         return true
     }
 
     override suspend fun removeSongFromPlaylist(playlistId: String, songId: String): Boolean {
-        db.collection(collectionName).document(playlistId).update("songIds", FieldValue.arrayRemove(songId)).await()
+        db.collection(collectionName).document(playlistId)
+            .update("songIds", FieldValue.arrayRemove(songId)).await()
         return true
     }
 

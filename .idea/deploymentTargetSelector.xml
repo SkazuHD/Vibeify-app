@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="Vibeify.app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-06-29T22:30:29.675596Z">
+        <DropdownSelection timestamp="2025-06-30T17:55:25.747180Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CWA2ZQBLV" />

@@ -6,7 +6,13 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.database.StandaloneDatabaseProvider
+import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.session.LibraryResult
 import androidx.media3.session.MediaLibraryService
@@ -21,6 +27,7 @@ import de.hsb.vibeify.data.repository.SongRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import java.io.File
 import javax.inject.Inject
 
 
@@ -28,7 +35,6 @@ import javax.inject.Inject
 class MediaService : MediaLibraryService() {
     private var mediaLibrarySession: MediaLibrarySession? = null
 
-    // Injiziere die Repositories
     @Inject
     lateinit var songRepository: SongRepository
 
@@ -38,13 +44,11 @@ class MediaService : MediaLibraryService() {
     @Inject
     lateinit var playerServiceV2: PlayerServiceV2
 
-    // Coroutine Scope für asynchrone Operationen
+
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
-    // Implementiere vollständige Callback-Funktionalität
     private val callback = object : MediaLibrarySession.Callback {
 
-        // Wird aufgerufen, wenn ein Client eine Verbindung zur Session anfordert
         override fun onConnect(
             session: MediaSession,
             controller: MediaSession.ControllerInfo
@@ -52,14 +56,12 @@ class MediaService : MediaLibraryService() {
             val connectionResult = super.onConnect(session, controller)
             val availableSessionCommands = connectionResult.availableSessionCommands.buildUpon()
 
-            // Füge verfügbare Session-Commands hinzu
             return MediaSession.ConnectionResult.accept(
                 availableSessionCommands.build(),
                 connectionResult.availablePlayerCommands
             )
         }
 
-        // Wird aufgerufen, um die Root-Bibliothek zu erhalten
         override fun onGetLibraryRoot(
             session: MediaLibrarySession,
             browser: MediaSession.ControllerInfo,
@@ -90,7 +92,6 @@ class MediaService : MediaLibraryService() {
         ): ListenableFuture<LibraryResult<ImmutableList<MediaItem>>> {
             return when (parentId) {
                 "root" -> {
-                    // Erstelle Kategorien für die Musikbibliothek
                     val categories = ImmutableList.of(
                         createCategoryItem("songs", "All Songs"),
                         createCategoryItem("albums", "Albums"),
@@ -99,41 +100,39 @@ class MediaService : MediaLibraryService() {
                     )
                     Futures.immediateFuture(LibraryResult.ofItemList(categories, params))
                 }
+
                 "songs" -> {
-                    // Hier würdest du normalerweise deine Songs aus der Datenbank laden
                     val songs = loadSongs()
                     Futures.immediateFuture(LibraryResult.ofItemList(songs, params))
                 }
+
                 "albums" -> {
-                    // Hier würdest du Alben laden
                     val albums = loadAlbums()
                     Futures.immediateFuture(LibraryResult.ofItemList(albums, params))
                 }
+
                 "artists" -> {
-                    // Hier würdest du Künstler laden
                     val artists = loadArtists()
                     Futures.immediateFuture(LibraryResult.ofItemList(artists, params))
                 }
+
                 "playlists" -> {
-                    // Hier würdest du Playlists laden
                     val playlists = loadPlaylists()
                     Futures.immediateFuture(LibraryResult.ofItemList(playlists, params))
                 }
+
                 else -> {
-                    // Unbekannte Parent-ID
                     Futures.immediateFuture(LibraryResult.ofError(SessionError.ERROR_BAD_VALUE))
                 }
             }
         }
 
-        // Wird aufgerufen, um ein bestimmtes Item zu erhalten
         @OptIn(UnstableApi::class)
         override fun onGetItem(
             session: MediaLibrarySession,
             browser: MediaSession.ControllerInfo,
             mediaId: String
         ): ListenableFuture<LibraryResult<MediaItem>> {
-            // Hier würdest du das spezifische Item aus deiner Datenbank laden
             val item = findItemById(mediaId)
             return if (item != null) {
                 Futures.immediateFuture(LibraryResult.ofItem(item, null))
@@ -142,7 +141,6 @@ class MediaService : MediaLibraryService() {
             }
         }
 
-        // Wird aufgerufen, wenn ein Item zum Abspielen hinzugefügt werden soll
         override fun onAddMediaItems(
             mediaSession: MediaSession,
             controller: MediaSession.ControllerInfo,
@@ -150,7 +148,6 @@ class MediaService : MediaLibraryService() {
         ): ListenableFuture<MutableList<MediaItem>> {
             val updatedMediaItems = mediaItems.map { mediaItem ->
                 if (mediaItem.localConfiguration == null) {
-                    // Lade die vollständigen Metadaten und URI für das Item
                     loadFullMediaItem(mediaItem.mediaId)
                 } else {
                     mediaItem
@@ -165,6 +162,20 @@ class MediaService : MediaLibraryService() {
     override fun onCreate() {
         super.onCreate()
 
+        // Does this work?
+        val cacheSize = 500 * 1024 * 1024
+        val cacheEvictor = LeastRecentlyUsedCacheEvictor(cacheSize.toLong())
+        val databaseProvider = StandaloneDatabaseProvider(applicationContext)
+        val simpleCache =
+            SimpleCache(File(applicationContext.cacheDir, "media"), cacheEvictor, databaseProvider)
+
+        val httpDataSourceFactory = DefaultHttpDataSource.Factory()
+        val cacheDataSourceFactory = CacheDataSource.Factory().setCache(simpleCache)
+            .setUpstreamDataSourceFactory(httpDataSourceFactory)
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+
+        val mediaSourceFactory = ProgressiveMediaSource.Factory(cacheDataSourceFactory)
+
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(C.USAGE_MEDIA)
             .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
@@ -175,6 +186,7 @@ class MediaService : MediaLibraryService() {
         val trackSelector = DefaultTrackSelector(this)
 
         val player = ExoPlayer.Builder(this)
+            .setMediaSourceFactory(mediaSourceFactory)
             .setTrackSelector(trackSelector)
             .setAudioAttributes(audioAttributes, true)
             .setHandleAudioBecomingNoisy(true)
@@ -203,7 +215,6 @@ class MediaService : MediaLibraryService() {
         super.onDestroy()
     }
 
-    // Helper-Methoden für die Callback-Implementierung
     private fun createCategoryItem(mediaId: String, title: String): MediaItem {
         return MediaItem.Builder()
             .setMediaId(mediaId)
@@ -235,7 +246,6 @@ class MediaService : MediaLibraryService() {
             val songs = runBlocking {
                 songRepository.getAllSongs()
             }
-            // Gruppiere Songs nach Album
             val albums = songs.groupBy { it.album }.map { (albumName, albumSongs) ->
                 MediaItem.Builder()
                     .setMediaId("album_$albumName")
@@ -261,7 +271,6 @@ class MediaService : MediaLibraryService() {
             val songs = runBlocking {
                 songRepository.getAllSongs()
             }
-            // Gruppiere Songs nach Künstler
             val artists = songs.groupBy { it.artist }.map { (artistName, artistSongs) ->
                 MediaItem.Builder()
                     .setMediaId("artist_$artistName")
@@ -327,12 +336,12 @@ class MediaService : MediaLibraryService() {
                             .build()
                     }
                 }
+
                 mediaId.startsWith("album_") || mediaId.startsWith("artist_") -> {
-                    // Für Album/Artist Items - diese werden dynamisch erstellt
                     null
                 }
+
                 else -> {
-                    // Regulärer Song - verwende PlayerServiceV2.buildMediaItem
                     val song = runBlocking {
                         songRepository.getSongById(mediaId)
                     }

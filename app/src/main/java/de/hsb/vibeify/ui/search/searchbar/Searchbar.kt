@@ -38,7 +38,6 @@ import de.hsb.vibeify.services.SearchResult
 import de.hsb.vibeify.ui.components.PlaylistCard
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel
-import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,7 +50,6 @@ fun SimpleSearchBar(
     onPlaylistClick: (Playlist) -> Unit = {},
     onSongClick: (Song) -> Unit = {},
     playbackViewModel: PlaybackViewModel = hiltViewModel(),
-    playlistDetailViewModel: PlaylistDetailViewModel = hiltViewModel()
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
 

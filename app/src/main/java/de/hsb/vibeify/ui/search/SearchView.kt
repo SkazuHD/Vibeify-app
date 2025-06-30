@@ -7,15 +7,16 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import de.hsb.vibeify.ui.search.searchbar.SearchbarViewModel
-import de.hsb.vibeify.ui.search.searchbar.SimpleSearchBar
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 import de.hsb.vibeify.ui.search.discovery.DiscoverySection
+import de.hsb.vibeify.ui.search.searchbar.SearchbarViewModel
+import de.hsb.vibeify.ui.search.searchbar.SimpleSearchBar
 
 @Composable
 fun SearchView(
@@ -26,6 +27,7 @@ fun SearchView(
 ) {
     val textFieldState = remember { TextFieldState("") }
     val searchResults by vm.searchResults
+    val recentSearches = vm.recentSearches.collectAsState(initial = emptyList())
 
     Box(modifier = modifier) {
         Column {
@@ -39,6 +41,7 @@ fun SearchView(
                         vm.onSearch(query)
                     },
                     searchResults = searchResults,
+                    recentSearches = recentSearches.value,
                     onPlaylistClick = { playlist ->
                         navController?.navigate("playlist_detail_view/${playlist.id}")
                         vm.clearSearchResults()

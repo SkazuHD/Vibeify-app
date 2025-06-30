@@ -36,11 +36,9 @@ interface UserRepository {
     suspend fun removeSongFromFavorites(songId: String)
     suspend fun addSongToFavorites(songId: String)
     fun getLikedSongIds(): List<String>
-    suspend fun updateUser(user: User) {
-    }
-
+    suspend fun updateUser(user: User)
     fun uploadPhoto(imageUrl: String)
-
+    suspend fun addRecentSearch(searchTerm: String)
     suspend fun addRecentActivity(activity: RecentActivity)
     val state: StateFlow<UserRepositoryState>
 }
@@ -194,6 +192,27 @@ class UserRepositoryImpl @Inject constructor(
         val inputStream = context.contentResolver.openInputStream(uri!!)
         val bytes = inputStream?.readBytes()
         inputStream?.close()
+    }
+
+    override suspend fun addRecentSearch(searchTerm: String) {
+        Log.d("UserRepository", "addRecentSearch called with term: $searchTerm")
+        _state.update { currentState ->
+            val user = currentState.currentUser ?: return@update currentState
+
+            val updatedSearches = (user.recentSearches + searchTerm)
+                .distinct()
+                .takeLast(10)
+
+            db.collection(collectionName).document(user.id).update(
+                "recentSearches", updatedSearches
+            ).await()
+
+            currentState.copy(
+                currentUser = currentState.currentUser.copy(
+                    recentSearches = updatedSearches
+                )
+            )
+        }
     }
 
     override suspend fun addRecentActivity(activity: RecentActivity) {

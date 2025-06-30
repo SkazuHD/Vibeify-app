@@ -43,6 +43,7 @@ fun SimpleSearchBar(
     onSearch: (String) -> Unit,
     searchResults: SearchResult,
     modifier: Modifier = Modifier,
+    recentSearches: List<String>? = emptyList(),
     onPlaylistClick: (Playlist) -> Unit = {},
     onSongClick: (Song) -> Unit = {},
     playbackViewModel: PlaybackViewModel = hiltViewModel(),
@@ -91,33 +92,50 @@ fun SimpleSearchBar(
                     searchResults.playlists.isEmpty() &&
                     searchResults.artists.isEmpty()
                 ) {
-                   return@SearchBar Text(
-                        text = "No results found",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                    return@SearchBar Column {
+                        recentSearches?.reversed()?.forEach { recentSearch ->
+                            ListItem(
+                                modifier = Modifier
+                                    .clickable {
+                                        textFieldState.edit { replace(0, length, recentSearch) }
+                                        onSearch(recentSearch)
+                                    }
+                                    .semantics { traversalIndex = 0f },
+                                headlineContent = { Text(recentSearch) },
+                                trailingContent = { Text("Recent") }
+                            )
+                        }
+                        if (recentSearches.isNullOrEmpty()) {
+                            Text(
+                                text = "No recent searches",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    }
                 }
-                if (searchResults.songs.isNotEmpty()){
+                if (searchResults.songs.isNotEmpty()) {
                     ListItem(
                         modifier = Modifier.semantics { traversalIndex = 1f },
                         headlineContent = { Text("Songs") },
                         trailingContent = { Text("${searchResults.songs.size} results") }
                     )
-                    searchResults.songs.take(if (showAllSongs) Int.MAX_VALUE else resultLimit).forEach { song ->
-                        SmartSongCard(
-                            song = song,
-                            playbackViewModel = playbackViewModel,
-                            shape = RoundedCornerShape(0.dp),
-                            onClick = {
-                                if (onSongClick != {}) {
-                                    onSongClick(song)
-                                }
-                                expanded = true
-                            },
-                        )
-                    }
+                    searchResults.songs.take(if (showAllSongs) Int.MAX_VALUE else resultLimit)
+                        .forEach { song ->
+                            SmartSongCard(
+                                song = song,
+                                playbackViewModel = playbackViewModel,
+                                shape = RoundedCornerShape(0.dp),
+                                onClick = {
+                                    if (onSongClick != {}) {
+                                        onSongClick(song)
+                                    }
+                                    expanded = true
+                                },
+                            )
+                        }
                     if (!showAllSongs && searchResults.songs.size > resultLimit) {
                         Text(
                             text = "Show all ${searchResults.songs.size} songs",
@@ -129,19 +147,20 @@ fun SimpleSearchBar(
                     }
                 }
 
-                if (searchResults.artists.isNotEmpty()){
+                if (searchResults.artists.isNotEmpty()) {
                     ListItem(
                         modifier = Modifier.semantics { traversalIndex = 2f },
                         headlineContent = { Text("Artists") },
                         trailingContent = { Text("${searchResults.artists.size} results") }
                     )
-                    searchResults.artists.take(if (showAllArtists) Int.MAX_VALUE else resultLimit).forEach { artist ->
-                        ListItem(
-                            modifier = Modifier,
-                            headlineContent = { Text(artist.name) },
-                            trailingContent = { Text("View Artist") }
-                        )
-                    }
+                    searchResults.artists.take(if (showAllArtists) Int.MAX_VALUE else resultLimit)
+                        .forEach { artist ->
+                            ListItem(
+                                modifier = Modifier,
+                                headlineContent = { Text(artist.name) },
+                                trailingContent = { Text("View Artist") }
+                            )
+                        }
                     if (!showAllArtists && searchResults.artists.size > resultLimit) {
                         Text(
                             text = "Show all ${searchResults.artists.size} artists",
@@ -152,26 +171,27 @@ fun SimpleSearchBar(
                         )
                     }
                 }
-                if (searchResults.playlists.isNotEmpty()){
+                if (searchResults.playlists.isNotEmpty()) {
                     ListItem(
                         modifier = Modifier.semantics { traversalIndex = 2f },
                         headlineContent = { Text("Playlists") },
                         trailingContent = { Text("${searchResults.playlists.size} results") }
                     )
 
-                    searchResults.playlists.take(if (showAllPlaylists) Int.MAX_VALUE else resultLimit).forEach { playlist ->
-                        PlaylistCard(
-                            modifier = Modifier
-                                .clickable {
-                                    onPlaylistClick(playlist)
-                                    expanded = false
-                                    textFieldState.edit { replace(0, length, "") }
-                                },
-                            playlistDescription = playlist.description ?: "No description",
-                            playlistName = playlist.title,
-                            shape = RoundedCornerShape(0.dp),
-                        )
-                    }
+                    searchResults.playlists.take(if (showAllPlaylists) Int.MAX_VALUE else resultLimit)
+                        .forEach { playlist ->
+                            PlaylistCard(
+                                modifier = Modifier
+                                    .clickable {
+                                        onPlaylistClick(playlist)
+                                        expanded = false
+                                        textFieldState.edit { replace(0, length, "") }
+                                    },
+                                playlistDescription = playlist.description ?: "No description",
+                                playlistName = playlist.title,
+                                shape = RoundedCornerShape(0.dp),
+                            )
+                        }
                     if (!showAllPlaylists && searchResults.playlists.size > resultLimit) {
                         Text(
                             text = "Show all ${searchResults.playlists.size} playlists",
@@ -188,13 +208,14 @@ fun SimpleSearchBar(
                         headlineContent = { Text("Albums") },
                         trailingContent = { Text("${searchResults.albums.size} results") }
                     )
-                    searchResults.albums.take(if (showAllAlbums) Int.MAX_VALUE else resultLimit).forEach { album ->
-                        ListItem(
-                            modifier = Modifier,
-                            headlineContent = { Text(album.title) },
-                            trailingContent = { Text("View Album") }
-                        )
-                    }
+                    searchResults.albums.take(if (showAllAlbums) Int.MAX_VALUE else resultLimit)
+                        .forEach { album ->
+                            ListItem(
+                                modifier = Modifier,
+                                headlineContent = { Text(album.title) },
+                                trailingContent = { Text("View Album") }
+                            )
+                        }
                     if (!showAllAlbums && searchResults.albums.size > resultLimit) {
                         Text(
                             text = "Show all ${searchResults.albums.size} albums",

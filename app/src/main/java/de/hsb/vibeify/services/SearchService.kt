@@ -1,7 +1,9 @@
 package de.hsb.vibeify.services
 
+import android.util.Log
 import de.hsb.vibeify.data.model.Album
 import de.hsb.vibeify.data.model.Artist
+import de.hsb.vibeify.data.model.Genre
 import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.repository.ArtistRepository
@@ -12,6 +14,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -20,12 +23,14 @@ data class SearchResult(
     val songs: List<Song> = emptyList(),
     val playlists: List<Playlist> = emptyList(),
     val artists: List<Artist> = emptyList(),
-    val albums: List<Album> = emptyList()
+    val albums: List<Album> = emptyList(),
+    val genres: List<Genre> = emptyList()
 )
 
 
 interface SearchService {
     suspend fun search(query: String): SearchResult
+    val recentSearchQueries: Flow<List<String>?>
 }
 
 
@@ -38,10 +43,10 @@ class SearchServiceImpl @Inject constructor(
     @Volatile
     private var currentSearchJob: Job? = null
 
-    val recentSearchQueries = userRepository.state.map {
+    override val recentSearchQueries = userRepository.state.map {
         it.currentUser
-    }.distinctUntilChanged().map { user ->
-        user?.recentSearches
+    }.distinctUntilChanged().map { it ->
+        it?.recentSearches
     }
 
     override suspend fun search(query: String): SearchResult = coroutineScope {
@@ -61,6 +66,11 @@ class SearchServiceImpl @Inject constructor(
                 albums = emptyList()
             )
             val sortedResult = sortByRelevance(res, query)
+            Log.d(
+                "SearchService",
+                "Search completed for query: $query, found ${sortedResult.songs.size} songs, ${sortedResult.playlists.size} playlists, ${sortedResult.artists.size} artists"
+            )
+            userRepository.addRecentSearch(query)
             sortedResult
         } catch (_: CancellationException) {
             SearchResult()
@@ -68,6 +78,7 @@ class SearchServiceImpl @Inject constructor(
             if (currentSearchJob == coroutineContext[Job]) {
                 currentSearchJob = null
             }
+
         }
     }
 

@@ -16,6 +16,8 @@ class SearchbarViewModel @Inject constructor(val searchService: SearchService) :
     var searchResults = mutableStateOf(SearchResult())
         private set
 
+    var recentSearches = searchService.recentSearchQueries
+
     fun onSearch(query: String) {
         viewModelScope.launch {
             if (

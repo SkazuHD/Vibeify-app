@@ -75,12 +75,20 @@ class DiscoveryService @Inject constructor(
         }
     }
 
-    private suspend fun loadTrendingSongs() {
-        try {
+    suspend fun generateRandomSongs(limit: Int): List<Song> {
+        return try {
             val songs = _allSongs.value.ifEmpty {
                 songRepository.getAllSongs()
             }
-            trendingSongs.value = songs.shuffled().take(5)
+            songs.shuffled().take(limit)
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    private suspend fun loadTrendingSongs() {
+        try {
+            trendingSongs.value = generateRandomSongs(5)
         } catch (e: Exception) {
             trendingSongs.value = emptyList()
         }
@@ -97,10 +105,7 @@ class DiscoveryService @Inject constructor(
 
     private suspend fun loadRandomSongs() {
         try {
-            val songs = _allSongs.value.ifEmpty {
-                songRepository.getRandomSongs(3)
-            }.shuffled().take(3)
-            randomSongs.value = songs
+            randomSongs.value = generateRandomSongs(3)
         } catch (e: Exception) {
             randomSongs.value = emptyList()
         }

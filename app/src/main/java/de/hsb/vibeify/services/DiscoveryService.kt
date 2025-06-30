@@ -39,6 +39,10 @@ class DiscoveryService @Inject constructor(
     var isLoading = mutableStateOf(false)
         private set
 
+    private val _allSongs = mutableStateOf(
+        emptyList<Song>()
+    )
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     init {
@@ -49,6 +53,7 @@ class DiscoveryService @Inject constructor(
         scope.launch {
             isLoading.value = true
             try {
+                _allSongs.value = songRepository.getAllSongs()
                 loadTrendingSongs()
                 loadFeaturedPlaylists()
                 loadRandomSongs()
@@ -70,7 +75,9 @@ class DiscoveryService @Inject constructor(
 
     private suspend fun loadTrendingSongs() {
         try {
-            val songs = songRepository.getAllSongs()
+            val songs = _allSongs.value.ifEmpty {
+                songRepository.getAllSongs()
+            }
             trendingSongs.value = songs.shuffled().take(5)
         } catch (e: Exception) {
             trendingSongs.value = emptyList()
@@ -88,7 +95,9 @@ class DiscoveryService @Inject constructor(
 
     private suspend fun loadRandomSongs() {
         try {
-            val songs = songRepository.getRandomSongs(3)
+            val songs = _allSongs.value.ifEmpty {
+                songRepository.getRandomSongs(3)
+            }.shuffled().take(3)
             randomSongs.value = songs
         } catch (e: Exception) {
             randomSongs.value = emptyList()
@@ -104,14 +113,20 @@ class DiscoveryService @Inject constructor(
 
     suspend fun getSongsByGenre(genre: String): List<Song> {
         return try {
-            songRepository.getSongsByGenre(genre)
+            _allSongs.value.ifEmpty {
+                songRepository.getSongsByGenre(genre)
+            }.filter { song ->
+                song.genre?.equals(genre, ignoreCase = true) ?: false
+            }
         } catch (e: Exception) {
             emptyList()
         }
     }
 
     suspend fun getGenreList(): List<Genre> {
-        val allSongs = songRepository.getAllSongs()
+        val allSongs = _allSongs.value.ifEmpty {
+            songRepository.getAllSongs()
+        }
         val genres = allSongs.mapNotNull { it.genre }
             .distinct()
             .filter { it.isNotBlank() }

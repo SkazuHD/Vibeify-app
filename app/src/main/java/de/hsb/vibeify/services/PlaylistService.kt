@@ -50,7 +50,8 @@ interface PlaylistService {
 class PlaylistServiceImpl @Inject constructor(
     private val playlistRepository: PlaylistRepository,
     private val songRepository: SongRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val discoveryService: DiscoveryService,
 ) : PlaylistService {
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -212,11 +213,11 @@ class PlaylistServiceImpl @Inject constructor(
 
     override suspend fun getGenreAsPlaylist(genreName: String): PlaylistDetailData? {
         return try {
-            val songs = songRepository.getSongsByGenre(genreName)
+            val songs = discoveryService.getSongsByGenre(genreName)
             if (songs.isNotEmpty()) {
                 PlaylistDetailData(
                     title = genreName,
-                    description = "Alle Songs im Genre $genreName • ${songs.size} Songs",
+                    description = "Alle Songs im Genre $genreName \n Created by Vibeify",
                     imagePath = null,
                     songs = songs,
                     isFavorite = false,

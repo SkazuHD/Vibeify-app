@@ -12,8 +12,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import de.hsb.vibeify.ui.components.searchbar.SearchbarViewModel
-import de.hsb.vibeify.ui.components.searchbar.SimpleSearchBar
+import de.hsb.vibeify.ui.search.searchbar.SearchbarViewModel
+import de.hsb.vibeify.ui.search.searchbar.SimpleSearchBar
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 import de.hsb.vibeify.ui.search.discovery.DiscoverySection
 

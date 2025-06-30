@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.components.searchbar
+package de.hsb.vibeify.ui.search.searchbar
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -48,16 +48,13 @@ fun SimpleSearchBar(
     playbackViewModel: PlaybackViewModel = hiltViewModel(),
     playlistDetailViewModel: PlaylistDetailViewModel = hiltViewModel()
 ) {
-    // Controls expansion state of the search bar
     var expanded by rememberSaveable { mutableStateOf(false) }
 
-    // State variables to control which lists show all results
     var showAllSongs by rememberSaveable { mutableStateOf(false) }
     var showAllArtists by rememberSaveable { mutableStateOf(false) }
     var showAllPlaylists by rememberSaveable { mutableStateOf(false) }
     var showAllAlbums by rememberSaveable { mutableStateOf(false) }
 
-    // Limit for visible results
     val resultLimit = 3
 
     Box(

@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.components.searchbar
+package de.hsb.vibeify.ui.search.searchbar
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +30,7 @@ class SearchbarViewModel @Inject constructor(val searchService: SearchService) :
 
         }
     }
+
     fun clearSearchResults() {
         searchResults.value = SearchResult()
         Log.d("AppHeaderViewModel", "Search results cleared")

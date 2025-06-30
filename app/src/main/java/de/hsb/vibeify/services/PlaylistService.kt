@@ -42,6 +42,7 @@ interface PlaylistService {
     suspend fun removeSongFromPlaylist(playlistId: String, songId: String)
     fun getPlaylistDurationText(songs: List<Song>): String
 
+    suspend fun getGenreAsPlaylist(genreName: String): PlaylistDetailData?
     val playlists: MutableStateFlow<List<Playlist>>
 }
 
@@ -117,6 +118,9 @@ class PlaylistServiceImpl @Inject constructor(
                 isFavoriteAble = false,
                 isOwner = true
             )
+        } else if (playlistId.startsWith("genre_")) {
+            val genreName = playlistId.removePrefix("genre_")
+            getGenreAsPlaylist(genreName)
         } else {
             val playlist = playlistRepository.getPlaylistById(playlistId)
             playlist?.let { playlistData ->
@@ -203,6 +207,27 @@ class PlaylistServiceImpl @Inject constructor(
 
             playlistDurationMinutes > 0 -> "$playlistDurationMinutes Minuten und $playlistDurationSeconds Sekunden"
             else -> "$playlistDurationSeconds Sekunden"
+        }
+    }
+
+    override suspend fun getGenreAsPlaylist(genreName: String): PlaylistDetailData? {
+        return try {
+            val songs = songRepository.getSongsByGenre(genreName)
+            if (songs.isNotEmpty()) {
+                PlaylistDetailData(
+                    title = genreName,
+                    description = "Alle Songs im Genre $genreName • ${songs.size} Songs",
+                    imagePath = null,
+                    songs = songs,
+                    isFavorite = false,
+                    isFavoriteAble = false,
+                    isOwner = false
+                )
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
         }
     }
 }

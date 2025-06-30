@@ -9,13 +9,16 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class Destinations(val route: String) {
-     MainView("main"),
-     LoginView("login_view"),
-     RegisterView("register_view"),
-     PlaylistView("playlist_view"),
-     PlaylistDetailView("playlist_detail_view/{playlistId}"),
-     SearchView("search_view"),
-     ProfileView("profile_view/{userId}"),
+    MainView("main"),
+    LoginView("login_view"),
+    RegisterView("register_view"),
+    PlaylistView("playlist_view"),
+    PlaylistDetailView("playlist_detail_view/{playlistId}"),
+
+    //Might be used later if playlist DetailView is not sufficient
+    GenrePlaylistView("genre/genre_{playlistId}"),
+    SearchView("search_view"),
+    ProfileView("profile_view/{userId}"),
 
     PlaybackView("playback_view"),
 

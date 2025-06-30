@@ -154,7 +154,7 @@ class PlaylistServiceImpl @Inject constructor(
         //Sort to original order
         val sortedPlaylists = playlistIds.mapNotNull { id ->
             when {
-                id.startsWith("genre_") -> genrePlaylists.find { it.id == "genre_$id" }
+                id.startsWith("genre_") -> genrePlaylists.find { it.id == id }
                 else -> otherPlaylists.find { it.id == id }
             }
         }

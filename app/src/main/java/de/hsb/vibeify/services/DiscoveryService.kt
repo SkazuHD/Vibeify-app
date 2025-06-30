@@ -55,9 +55,9 @@ class DiscoveryService @Inject constructor(
             try {
                 _allSongs.value = songRepository.getAllSongs()
                 loadTrendingSongs()
+                loadGenres()
                 loadFeaturedPlaylists()
                 loadRandomSongs()
-                loadGenres()
 
             } catch (e: Exception) {
             } finally {
@@ -69,7 +69,9 @@ class DiscoveryService @Inject constructor(
 
     fun refreshContent() {
         scope.launch {
-            loadDiscoveryContent()
+            loadTrendingSongs()
+            loadFeaturedPlaylists()
+            loadRandomSongs()
         }
     }
 

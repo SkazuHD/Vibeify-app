@@ -18,6 +18,7 @@ import de.hsb.vibeify.data.repository.SongRepositoryImpl
 import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.data.repository.UserRepositoryImpl
 import de.hsb.vibeify.services.AnalyticsService
+import de.hsb.vibeify.services.DiscoveryService
 import de.hsb.vibeify.services.MediaService
 import de.hsb.vibeify.services.PlayerServiceV2
 import de.hsb.vibeify.services.PlaylistService
@@ -92,12 +93,14 @@ object UserModule {
     fun providePlaylistService(
         playlistRepository: PlaylistRepository,
         userRepository: UserRepository,
-        songRepository: SongRepository
+        songRepository: SongRepository,
+        discoveryService: DiscoveryService
     ): PlaylistService {
         return de.hsb.vibeify.services.PlaylistServiceImpl(
             playlistRepository,
             songRepository,
-            userRepository
+            userRepository,
+            discoveryService
         )
     }
 

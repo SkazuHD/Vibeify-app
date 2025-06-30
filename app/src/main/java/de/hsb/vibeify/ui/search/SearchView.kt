@@ -48,8 +48,13 @@ fun SearchView(
                     },
                     onSongClick = { song ->
                         vm2.play(song)
-                    }
-                )
+                    },
+                    onGenreClick = { genre ->
+                        navController?.navigate("playlist_detail_view/genre_${genre.name}")
+                        vm.clearSearchResults()
+                    },
+
+                    )
             }
 
             if (searchResults.songs.isEmpty() && searchResults.playlists.isEmpty()) {

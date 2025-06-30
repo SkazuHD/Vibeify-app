@@ -32,6 +32,7 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.hsb.vibeify.data.model.Genre
 import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.services.SearchResult
@@ -49,6 +50,7 @@ fun SimpleSearchBar(
     recentSearches: List<String>? = emptyList(),
     onPlaylistClick: (Playlist) -> Unit = {},
     onSongClick: (Song) -> Unit = {},
+    onGenreClick: (Genre) -> Unit = {},
     playbackViewModel: PlaybackViewModel = hiltViewModel(),
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -57,6 +59,7 @@ fun SimpleSearchBar(
     var showAllArtists by rememberSaveable { mutableStateOf(false) }
     var showAllPlaylists by rememberSaveable { mutableStateOf(false) }
     var showAllAlbums by rememberSaveable { mutableStateOf(false) }
+    var showAllGenres by rememberSaveable { mutableStateOf(false) }
 
     val resultLimit = 3
 
@@ -169,6 +172,26 @@ fun SimpleSearchBar(
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
+                }
+                if (searchResults.genres.isNotEmpty()) {
+                    ListItem(
+                        modifier = Modifier.semantics { traversalIndex = 1f },
+                        headlineContent = { Text("Genres") },
+                        trailingContent = { Text("${searchResults.genres.size} results") }
+                    )
+                    searchResults.genres.take(if (showAllGenres) Int.MAX_VALUE else resultLimit - 1)
+                        .forEach { genre ->
+                            ListItem(
+                                modifier = Modifier
+                                    .clickable {
+                                        onGenreClick(genre)
+                                        expanded = false
+                                        textFieldState.edit { replace(0, length, "") }
+                                    },
+                                headlineContent = { Text(genre.name) },
+                                trailingContent = { Text("${genre.count} Songs") }
+                            )
+                        }
                 }
 
                 if (searchResults.artists.isNotEmpty()) {

@@ -39,6 +39,7 @@ class SearchServiceImpl @Inject constructor(
     private val playlistRepository: PlaylistRepository,
     private val artistRepository: ArtistRepository,
     private val userRepository: UserRepository,
+    private val discoveryService: DiscoveryService
 ) : SearchService {
     @Volatile
     private var currentSearchJob: Job? = null
@@ -58,12 +59,18 @@ class SearchServiceImpl @Inject constructor(
             val songsDeferred = async { songRepository.searchSongs(query) }
             val playlistsDeferred = async { playlistRepository.searchPlaylists(query) }
             val artistsDeferred = async { artistRepository.searchArtists(query) }
+            val genresDeferred = async {
+                discoveryService.getGenreList().filter { genre ->
+                    genre.name.contains(query, ignoreCase = true)
+                }
+            }
 
             val res = SearchResult(
                 songs = songsDeferred.await(),
                 playlists = playlistsDeferred.await(),
                 artists = artistsDeferred.await(),
-                albums = emptyList()
+                albums = emptyList(),
+                genres = genresDeferred.await()
             )
             val sortedResult = sortByRelevance(res, query)
             Log.d(
@@ -99,11 +106,15 @@ class SearchServiceImpl @Inject constructor(
         val sortedArtists = searchResult.artists.sortedByDescending { artist ->
             calculateArtistRelevanceScore(artist, lowerQuery)
         }
+        val sortedGenres = searchResult.genres.sortedByDescending { genre ->
+            genre.name.lowercase().indexOf(lowerQuery)
+        }
 
         return searchResult.copy(
             songs = sortedSongs,
             playlists = sortedPlaylists,
             artists = sortedArtists,
+            genres = sortedGenres
         )
     }
 

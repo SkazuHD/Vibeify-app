@@ -78,13 +78,15 @@ object UserModule {
         songRepository: SongRepository,
         playlistRepository: PlaylistRepository,
         artistRepository: ArtistRepository,
-        userRepository: UserRepository
+        userRepository: UserRepository,
+        discoveryService: DiscoveryService
     ): SearchService {
         return SearchServiceImpl(
             songRepository,
             playlistRepository,
             artistRepository,
-            userRepository
+            userRepository,
+            discoveryService
         )
     }
 

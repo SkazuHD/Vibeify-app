@@ -4,10 +4,10 @@
     <selectionStates>
       <SelectionState runConfigName="Vibeify.app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-06-26T11:06:42.900091600Z">
+        <DropdownSelection timestamp="2025-06-29T22:30:29.675596Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\jonah\.android\avd\Medium_Phone.avd" />
+              <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CWA2ZQBLV" />
             </handle>
           </Target>
         </DropdownSelection>

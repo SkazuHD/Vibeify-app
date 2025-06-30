@@ -3,6 +3,7 @@ package de.hsb.vibeify.ui.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -39,11 +40,7 @@ fun MainView(
         modifier = modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        item {
-            SurpriseCard(
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+
         item {
             Box(
                 modifier = Modifier
@@ -54,6 +51,17 @@ fun MainView(
                     )
             ) {
                 Text("Friends will be displayed here", textAlign = TextAlign.Center)
+            }
+        }
+        item {
+            Column {
+                ListItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    headlineContent = { Text("Discover Something new") },
+                )
+                SurpriseCard(
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
         item {

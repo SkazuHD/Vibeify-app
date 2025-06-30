@@ -28,7 +28,6 @@ fun SearchView(
 
     Box(modifier = modifier) {
         Column {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Center
@@ -46,7 +45,25 @@ fun SearchView(
                     onSongClick = { song ->
                         vm2.play(song)
                     }
+                )
+            }
 
+            // Zeige Discovery-Sektion wenn keine Suchergebnisse vorhanden sind
+            if (searchResults.songs.isEmpty() && searchResults.playlists.isEmpty()) {
+                DiscoverySection(
+                    onSongClick = { song ->
+                        vm2.play(song)
+                    },
+                    onPlaylistClick = { playlist ->
+                        navController?.navigate("playlist_detail_view/${playlist.id}")
+                    },
+                    onGenreClick = { genre ->
+                        // Führe eine Genre-basierte Suche durch
+                        textFieldState.edit {
+                            replace(0, length, genre)
+                        }
+                        vm.onSearch(genre)
+                    }
                 )
             }
         }

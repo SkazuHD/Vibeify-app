@@ -26,7 +26,7 @@ import androidx.core.net.toUri
 fun Avatar(
     modifier: Modifier = Modifier,
     size: Dp = 50.dp,
-    imageurl : String? = null,
+    imageUrl : String? = null,
     initials : String? = null,
     onClick : (() -> Unit)? = null
 ) {
@@ -38,7 +38,7 @@ fun Avatar(
     {
         val color = MaterialTheme.colorScheme.primary
         val initials = initials?.uppercase() ?: "AB"
-        val uri = try { imageurl?.toUri() } catch (e: Exception) { null }
+        val uri = try { imageUrl?.toUri() } catch (e: Exception) { null }
         if (uri != null && uri.toString().isNotEmpty()) {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)

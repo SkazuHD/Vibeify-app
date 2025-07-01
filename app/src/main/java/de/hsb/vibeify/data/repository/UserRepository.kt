@@ -3,6 +3,7 @@ package de.hsb.vibeify.data.repository
 import android.util.Log
 import androidx.core.net.toUri
 import com.google.firebase.firestore.FieldValue
+import de.hsb.vibeify.api.retrofit2.src.main.kotlin.de.hsb.vibeify.api.generated.infrastructure.ApiClient
 import de.hsb.vibeify.data.model.RecentActivity
 import de.hsb.vibeify.data.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +17,14 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.google.firebase.firestore.FirebaseFirestore as Firestore
+import de.hsb.vibeify.api.generated.infrastructure.*
+import de.hsb.vibeify.api.generated.models.*
+import de.hsb.vibeify.api.generated.*
+import de.hsb.vibeify.api.generated.apis.DefaultApi
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 
 
 data class UserRepositoryState(
@@ -37,7 +46,7 @@ interface UserRepository {
     suspend fun addSongToFavorites(songId: String)
     fun getLikedSongIds(): List<String>
     suspend fun updateUser(user: User)
-    fun uploadPhoto(imageUrl: String)
+    fun uploadPhoto(id: String, imageUrl: String)
     suspend fun addRecentSearch(searchTerm: String)
     suspend fun addRecentActivity(activity: RecentActivity)
     val state: StateFlow<UserRepositoryState>
@@ -50,6 +59,10 @@ class UserRepositoryImpl @Inject constructor(
 ) : UserRepository {
 
     private val db = Firestore.getInstance()
+
+    private val apiClient = ApiClient(baseUrl = "https://vibeify-app.skazu.net/")
+    val webService = apiClient.createService(DefaultApi::class.java)
+
     private val collectionName = "users"
     private val _state = MutableStateFlow(UserRepositoryState())
 
@@ -82,6 +95,7 @@ class UserRepositoryImpl @Inject constructor(
                         _state.value = UserRepositoryState(currentUser = user)
                     } else {
                         _state.value = UserRepositoryState(currentUser = user)
+
                     }
                 }
             }
@@ -187,12 +201,43 @@ class UserRepositoryImpl @Inject constructor(
         _state.value = _state.value.copy(currentUser = user)
     }
 
-    override fun uploadPhoto(imageUrl: String) {
+    override fun uploadPhoto(id: String, imageUrl: String) {
         val uri = try { imageUrl.toUri() } catch (e: Exception) { null }
         val inputStream = context.contentResolver.openInputStream(uri!!)
         val bytes = inputStream?.readBytes()
         inputStream?.close()
+        if (bytes == null) {
+            Log.e("UserRepository", "Failed to read bytes from image URI: $uri")
+            return
+        }
+        Log.d("UserRepository", "uploadPhoto called with id: $id, imageUrl: $imageUrl")
+        val requestBody = bytes.toRequestBody("image/*".toMediaTypeOrNull(), 0, bytes.size)
+        val part = MultipartBody.Part.createFormData("file", "profile.jpg", requestBody)
+        val call = webService.uploadProfilePictureUploadProfilePictureUserIdPost(id,part)
+        call.enqueue(object : retrofit2.Callback<kotlin.Any> {
+            override fun onResponse(call: retrofit2.Call<kotlin.Any>, response: retrofit2.Response<kotlin.Any>) {
+                if (response.isSuccessful) {
+                    Log.d("UserRepository", "Photo uploaded successfully for user: $id")
+                    _state.update { currentState ->
+                        currentState.copy(
+                            currentUser = currentState.currentUser?.copy(imageUrl = "https://vibeify-app.skazu.net/picture/$id")
+                        )
+                    }
+                    scope.launch {
+                        updateUser(_state.value.currentUser!!)
+                    }
+                } else {
+                    Log.e("UserRepository", "Failed to upload photo: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: retrofit2.Call<kotlin.Any>, t: Throwable) {
+                Log.e("UserRepository", "Error uploading photo: ${t.message}")
+            }
+        })
     }
+
+
 
     override suspend fun addRecentSearch(searchTerm: String) {
         Log.d("UserRepository", "addRecentSearch called with term: $searchTerm")

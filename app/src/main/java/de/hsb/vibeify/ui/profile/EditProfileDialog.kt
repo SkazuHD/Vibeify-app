@@ -7,6 +7,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,6 +41,7 @@ fun EditProfileDialog(
     val pickedImageUri = remember { mutableStateOf(user?.imageUrl) }
 
 
+
     Dialog(onDismissRequest = {onDismiss()}){
         Card {
             Text(
@@ -64,19 +66,31 @@ fun EditProfileDialog(
                     value = name.value,
                     onValueChange = { name.value = it },
                     label = { Text("Name") },
-                    modifier = Modifier.padding(vertical = 16.dp)
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    isError = name.value.length > 12,
+                    supportingText = {
+                        if (name.value.length > 12) {
+                            Text(
+                                text ="Limit: ${name.value.length}/12",
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
                 )
                 Button(
                     onClick = {
+                        if (name.value.length > 12){
+                            return@Button
+                        }
                         viewModel.onSave(name.value, pickedImageUri.value ?: "")
                         onDismiss()
                     },
                     modifier = Modifier.align(Alignment.End)
+
                 ) {
                     Text("Save")
                 }
             }
-
         }
     }
 }

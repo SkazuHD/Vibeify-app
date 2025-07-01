@@ -66,15 +66,20 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun onSave(name: String, url: String) {
-
+        Log.d("ProfileViewModel", "onSave called with name: $name, url: $url")
         viewModelScope.launch {
             val currentUser = _uiState.value.user ?: return@launch
-            if (currentUser.name == name ) {
+            if (currentUser.name == name && url == currentUser.imageUrl) {
                 Log.d("ProfileViewModel", "No changes to save")
                 return@launch // No changes to save
+            } else {
+                val updatedUser = currentUser.copy(name = name, imageUrl = url)
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    userRepository.updateUser(updatedUser)
+                } else {
+                    userRepository.uploadPhoto(updatedUser.id, url)
+                }
             }
-            val updatedUser = currentUser.copy(name = name)
-            userRepository.updateUser(updatedUser)
         }
     }
 }

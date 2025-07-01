@@ -73,33 +73,19 @@ class PlayerServiceV2 {
     ) { songList, _, mode ->
         mediaController?.let { controller ->
             val currentIndex = controller.currentMediaItemIndex
-            if (currentIndex >= 0 && currentIndex < songList.size - 1) {
-                if (mode == PlaybackMode.SHUFFLE && controller.shuffleModeEnabled) {
 
-                    val customShuffleOrder = ShuffleOrder.DefaultShuffleOrder(
-                        songList.size,
-                        12345L
-                    )
+                if (mode == PlaybackMode.SHUFFLE) {
+                    val nextIndex = controller.getNextMediaItemIndex().coerceIn(0, songList.size)
+                    println("Next Media Item Index: $nextIndex")
+                    songList.subList(nextIndex, songList.size)
 
-                    // Sammle alle kommenden Indices
-                    var nextIndex = currentIndex
-                    val upcomingIndices = mutableListOf<Int>()
-
-                    repeat(songList.size - 1) {
-                        nextIndex = customShuffleOrder.getNextIndex(nextIndex)
-                        if (nextIndex != -1 && nextIndex != currentIndex) {
-                            upcomingIndices.add(nextIndex)
-                        }
-                    }
-
-                    // Wandle Indices in Songs um
-                    upcomingIndices.map { songList[it] }
                 } else {
+                    if (currentIndex >= 0 && currentIndex < songList.size - 1) {
                     songList.subList(currentIndex + 1, songList.size)
+                    } else {
+                        emptyList()
+                    }
                 }
-            } else {
-                emptyList()
-            }
         } ?: emptyList()
     }.stateIn(
         scope = CoroutineScope(Dispatchers.Main),

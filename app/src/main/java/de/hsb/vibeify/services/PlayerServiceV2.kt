@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import de.hsb.vibeify.data.model.Song
@@ -17,13 +18,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import androidx.media3.exoplayer.source.ShuffleOrder
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.collections.get
+import kotlin.compareTo
+import kotlin.text.compareTo
+import kotlin.text.get
 
+@UnstableApi
 @Singleton
 class PlayerServiceV2 {
 
@@ -33,7 +41,7 @@ class PlayerServiceV2 {
     private val controllerReadyActions = mutableListOf<(MediaController) -> Unit>()
     private var mediaController: MediaController? = null
 
-    private val _currentSongList = MutableStateFlow( emptyList<Song>())
+    private val _currentSongList = MutableStateFlow(emptyList<Song>())
     val currentSongList: StateFlow<List<Song>> = _currentSongList
 
     private val _currentPlaylistId = MutableStateFlow<String?>(null)
@@ -48,17 +56,46 @@ class PlayerServiceV2 {
     private val _position = MutableStateFlow(0L)
     val position: StateFlow<Long> = _position
 
+    enum class PlaybackMode {
+        SHUFFLE, NONE
+    }
+
+    enum class RepeatMode {
+         ALL, LOOP, NONE
+    }
+    private val _playbackMode = MutableStateFlow(PlaybackMode.NONE)
+    val playbackMode: StateFlow<PlaybackMode> = _playbackMode
+
+    private val _repeatMode = MutableStateFlow(RepeatMode.NONE)
+    val repeatMode: StateFlow<RepeatMode> = _repeatMode
+
+
+
     val upcomingSongs: StateFlow<List<Song>> = combine(
         currentSongList,
-        currentSong
-    ) { songList, _ ->
+        currentSong,
+        playbackMode
+    ) { songList, _, mode ->
         mediaController?.let { controller ->
             val currentIndex = controller.currentMediaItemIndex
-            if (currentIndex >= 0 && currentIndex < songList.size - 1) {
-                songList.subList(currentIndex + 1, songList.size)
-            } else {
-                emptyList()
-            }
+
+                if (mode == PlaybackMode.SHUFFLE) {
+                    val nextIndex = controller.getNextMediaItemIndex().coerceIn(0, songList.size)
+
+
+                    if (nextIndex in songList.indices) {
+                        listOf(songList[nextIndex])
+                    } else {
+                        emptyList()
+                    }
+
+                } else {
+                    if (currentIndex >= 0 && currentIndex < songList.size - 1) {
+                    songList.subList(currentIndex + 1, songList.size)
+                    } else {
+                        emptyList()
+                    }
+                }
         } ?: emptyList()
     }.stateIn(
         scope = CoroutineScope(Dispatchers.Main),
@@ -66,14 +103,12 @@ class PlayerServiceV2 {
         initialValue = emptyList()
     )
 
+
     private val _duration = MutableStateFlow(1L)
     val duration: StateFlow<Long> = _duration
 
     private val _playerState = MutableStateFlow(Player.STATE_IDLE)
     val playerState: StateFlow<Int> = _playerState
-
-    private val _repeatMode = MutableStateFlow(Player.REPEAT_MODE_OFF)
-    val repeatMode: StateFlow<Int> = _repeatMode
 
     private var positionTrackingJob: Job? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main)
@@ -201,7 +236,7 @@ class PlayerServiceV2 {
                 throw IllegalArgumentException("Invalid repeat mode: $mode")
             }
             controller.repeatMode = mode
-            _repeatMode.value = mode
+           // _repeatMode.value = mode
         }
     }
 
@@ -282,6 +317,61 @@ class PlayerServiceV2 {
     fun stopPositionTracking() {
         positionTrackingJob?.cancel()
         positionTrackingJob = null
+    }
+
+
+    fun togglePlaybackMode() {
+        withController { controller ->
+            _playbackMode.value = when (_playbackMode.value) {
+                PlaybackMode.NONE -> {
+                    controller.shuffleModeEnabled = true
+                    PlaybackMode.SHUFFLE
+                }
+                PlaybackMode.SHUFFLE -> {
+
+                    controller.shuffleModeEnabled = false
+
+                    PlaybackMode.NONE
+                }
+
+            }
+        }
+    }
+
+    fun toggleRepeatMode() {
+        withController { controller ->
+            _repeatMode.value = when (_repeatMode.value) {
+                RepeatMode.NONE -> {
+                    controller.repeatMode = Player.REPEAT_MODE_ALL
+                    println()
+                    println("1")
+                    RepeatMode.ALL
+                }
+                RepeatMode.ALL -> {
+                    controller.repeatMode = Player.REPEAT_MODE_ONE
+                    println("2")
+
+                    RepeatMode.LOOP
+                }
+                RepeatMode.LOOP -> {
+                    controller.repeatMode = Player.REPEAT_MODE_OFF
+                    println("3")
+
+                    RepeatMode.NONE
+                }
+
+
+            }
+        }
+    }
+
+
+    fun getPlaybackMode(): PlaybackMode {
+        return _playbackMode.value
+    }
+
+    fun getRepeatMode(): RepeatMode {
+        return _repeatMode.value
     }
 
 

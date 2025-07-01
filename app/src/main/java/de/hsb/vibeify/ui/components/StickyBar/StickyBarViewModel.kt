@@ -22,6 +22,8 @@ class StickyBarViewModel @Inject constructor(
     val duration: StateFlow<Long> = _duration
 
     private val _playerState = playerServiceV2.playerState
+
+
     val playerState: StateFlow<Int> = _playerState
 
     val currentSong = playerServiceV2.currentSong

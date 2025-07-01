@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +19,14 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Loop
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.RepeatOne
+import androidx.compose.material.icons.filled.Shuffle
+import androidx.compose.material.icons.outlined.Loop
+import androidx.compose.material.icons.outlined.Shuffle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -62,8 +71,11 @@ fun MinimalMusicPlayer(
     val position by playbackViewModel.position.collectAsState()
     val duration by playbackViewModel.duration.collectAsState()
     val currentSong by playbackViewModel.currentSong.collectAsState()
-    val nextSongs =playbackViewModel.upcomingSongs.collectAsState()
+    val nextSongs = playbackViewModel.upcomingSongs.collectAsState()
     val currentSongList by playbackViewModel.currentSongList.collectAsState()
+    val playbackMode by playbackViewModel.playbackMode.collectAsState()
+    val repeatMode by playbackViewModel.repeatMode.collectAsState()
+
 
 
     var sliderPosition by remember { mutableStateOf(0f) }
@@ -79,9 +91,10 @@ fun MinimalMusicPlayer(
     }
 
     Box(
-        modifier = Modifier
+    modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(MaterialTheme.colorScheme.background)
+            .padding(top = 80.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -157,47 +170,102 @@ fun MinimalMusicPlayer(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+            Box(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                IconButton(onClick = {
-                    playbackViewModel.skipToPrevious()
-                }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Voriger Song",
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                IconButton(onClick = {
-                    if (isPlaying) {
-                        playbackViewModel.pause()
-                    } else {
-                        playbackViewModel.resume()
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    IconButton(onClick = {
+                        playbackViewModel.skipToPrevious()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Voriger Song",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(40.dp)
+                        )
                     }
-                }) {
-                    Icon(
-                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isPlaying) "Pause" else "Play",
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(48.dp)
-                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    IconButton(onClick = {
+                        if (isPlaying) {
+                            playbackViewModel.pause()
+                        } else {
+                            playbackViewModel.resume()
+                        }
+                    }) {
+                        Icon(
+                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            contentDescription = if (isPlaying) "Pause" else "Play",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(48.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                    IconButton(onClick = {
+                        playbackViewModel.skipToNext()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = "Nächster Song",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
                 }
-                Spacer(modifier = Modifier.width(16.dp))
-                IconButton(onClick = {
-                    playbackViewModel.skipToNext()
-                }) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "Nächster Song",
-                        tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier.size(40.dp)
-                    )
+
+                Row(modifier = Modifier.align(Alignment.CenterEnd).padding(end = 20.dp)){
+                    IconButton(
+                        onClick = { playbackViewModel.togglePlaybackMode() },
+                    ) {
+                        when (playbackMode) {
+                            PlaybackViewModel.PlaybackMode.SHUFFLE -> Icon(
+                                imageVector = Icons.Filled.Shuffle,
+                                contentDescription = "Shuffle",
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                            PlaybackViewModel.PlaybackMode.NONE -> Icon(
+                                imageVector = Icons.Filled.Shuffle,
+                                contentDescription = "Kein Shuffle",
+                                tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+
+                    IconButton(
+                        onClick = { playbackViewModel.toggleRepeatMode() },
+
+                    ) {
+
+                        when (repeatMode) {
+                            PlaybackViewModel.RepeatMode.ALL -> Icon(
+                                imageVector = Icons.Filled.Repeat,
+                                contentDescription = "loop entire playlist",
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                            PlaybackViewModel.RepeatMode.LOOP -> Icon(
+                                imageVector = Icons.Filled.RepeatOne,
+                                contentDescription = "Loop 1 time",
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                            PlaybackViewModel.RepeatMode.NONE -> Icon(
+                                imageVector = Icons.Filled.Repeat,
+                                contentDescription = "None",
+                                tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                                modifier = Modifier.size(32.dp)
+                            )
+
+                        }
+                    }
                 }
             }
+
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -237,4 +305,3 @@ fun formatTime(ms: Long): String {
     else
         "%d:%02d".format(minutes, seconds)
 }
-

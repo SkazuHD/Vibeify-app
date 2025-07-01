@@ -57,12 +57,17 @@ class PlayerServiceV2 {
     val position: StateFlow<Long> = _position
 
     enum class PlaybackMode {
-        SHUFFLE, LOOP, NONE
+        SHUFFLE, NONE
+    }
+
+    enum class RepeatMode {
+         ALL, LOOP, NONE
     }
     private val _playbackMode = MutableStateFlow(PlaybackMode.NONE)
     val playbackMode: StateFlow<PlaybackMode> = _playbackMode
 
-
+    private val _repeatMode = MutableStateFlow(RepeatMode.NONE)
+    val repeatMode: StateFlow<RepeatMode> = _repeatMode
 
 
 
@@ -76,8 +81,13 @@ class PlayerServiceV2 {
 
                 if (mode == PlaybackMode.SHUFFLE) {
                     val nextIndex = controller.getNextMediaItemIndex().coerceIn(0, songList.size)
-                    println("Next Media Item Index: $nextIndex")
-                    songList.subList(nextIndex, songList.size)
+
+
+                    if (nextIndex in songList.indices) {
+                        listOf(songList[nextIndex])
+                    } else {
+                        emptyList()
+                    }
 
                 } else {
                     if (currentIndex >= 0 && currentIndex < songList.size - 1) {
@@ -99,9 +109,6 @@ class PlayerServiceV2 {
 
     private val _playerState = MutableStateFlow(Player.STATE_IDLE)
     val playerState: StateFlow<Int> = _playerState
-
-    private val _repeatMode = MutableStateFlow(Player.REPEAT_MODE_OFF)
-    val repeatMode: StateFlow<Int> = _repeatMode
 
     private var positionTrackingJob: Job? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main)
@@ -229,7 +236,7 @@ class PlayerServiceV2 {
                 throw IllegalArgumentException("Invalid repeat mode: $mode")
             }
             controller.repeatMode = mode
-            _repeatMode.value = mode
+           // _repeatMode.value = mode
         }
     }
 
@@ -321,20 +328,50 @@ class PlayerServiceV2 {
                     PlaybackMode.SHUFFLE
                 }
                 PlaybackMode.SHUFFLE -> {
+
                     controller.shuffleModeEnabled = false
-                    controller.repeatMode = Player.REPEAT_MODE_ONE
-                    PlaybackMode.LOOP
-                }
-                PlaybackMode.LOOP -> {
-                    controller.repeatMode = Player.REPEAT_MODE_OFF
+
                     PlaybackMode.NONE
                 }
+
             }
         }
     }
 
+    fun toggleRepeatMode() {
+        withController { controller ->
+            _repeatMode.value = when (_repeatMode.value) {
+                RepeatMode.NONE -> {
+                    controller.repeatMode = Player.REPEAT_MODE_ALL
+                    println()
+                    println("1")
+                    RepeatMode.ALL
+                }
+                RepeatMode.ALL -> {
+                    controller.repeatMode = Player.REPEAT_MODE_ONE
+                    println("2")
+
+                    RepeatMode.LOOP
+                }
+                RepeatMode.LOOP -> {
+                    controller.repeatMode = Player.REPEAT_MODE_OFF
+                    println("3")
+
+                    RepeatMode.NONE
+                }
+
+
+            }
+        }
+    }
+
+
     fun getPlaybackMode(): PlaybackMode {
         return _playbackMode.value
+    }
+
+    fun getRepeatMode(): RepeatMode {
+        return _repeatMode.value
     }
 
 

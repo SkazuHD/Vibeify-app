@@ -22,6 +22,8 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Loop
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.RepeatOne
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material.icons.outlined.Loop
 import androidx.compose.material.icons.outlined.Shuffle
@@ -69,9 +71,11 @@ fun MinimalMusicPlayer(
     val position by playbackViewModel.position.collectAsState()
     val duration by playbackViewModel.duration.collectAsState()
     val currentSong by playbackViewModel.currentSong.collectAsState()
-    val nextSongs =playbackViewModel.upcomingSongs.collectAsState()
+    val nextSongs = playbackViewModel.upcomingSongs.collectAsState()
     val currentSongList by playbackViewModel.currentSongList.collectAsState()
     val playbackMode by playbackViewModel.playbackMode.collectAsState()
+    val repeatMode by playbackViewModel.repeatMode.collectAsState()
+
 
 
     var sliderPosition by remember { mutableStateOf(0f) }
@@ -212,32 +216,56 @@ fun MinimalMusicPlayer(
                     }
                 }
 
-                IconButton(
-                    onClick = { playbackViewModel.togglePlaybackMode() },
-                    modifier = Modifier.align(Alignment.CenterEnd).padding(end = 55.dp)
-                ) {
-                    when (playbackMode) {
-                        PlaybackViewModel.PlaybackMode.SHUFFLE -> Icon(
-                            imageVector = Icons.Filled.Shuffle,
-                            contentDescription = "Shuffle",
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(32.dp)
-                        )
-                        PlaybackViewModel.PlaybackMode.LOOP -> Icon(
-                            imageVector = Icons.Filled.Loop,
-                            contentDescription = "Loop",
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(32.dp)
-                        )
-                        PlaybackViewModel.PlaybackMode.NONE -> Icon(
-                            imageVector = Icons.Filled.Shuffle,
-                            contentDescription = "Kein Shuffle",
-                            tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                            modifier = Modifier.size(32.dp)
-                        )
+                Row(modifier = Modifier.align(Alignment.CenterEnd).padding(end = 20.dp)){
+                    IconButton(
+                        onClick = { playbackViewModel.togglePlaybackMode() },
+                    ) {
+                        when (playbackMode) {
+                            PlaybackViewModel.PlaybackMode.SHUFFLE -> Icon(
+                                imageVector = Icons.Filled.Shuffle,
+                                contentDescription = "Shuffle",
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                            PlaybackViewModel.PlaybackMode.NONE -> Icon(
+                                imageVector = Icons.Filled.Shuffle,
+                                contentDescription = "Kein Shuffle",
+                                tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                                modifier = Modifier.size(32.dp)
+                            )
+                        }
+                    }
+
+                    IconButton(
+                        onClick = { playbackViewModel.toggleRepeatMode() },
+
+                    ) {
+
+                        when (repeatMode) {
+                            PlaybackViewModel.RepeatMode.ALL -> Icon(
+                                imageVector = Icons.Filled.Repeat,
+                                contentDescription = "loop entire playlist",
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                            PlaybackViewModel.RepeatMode.LOOP -> Icon(
+                                imageVector = Icons.Filled.RepeatOne,
+                                contentDescription = "Loop 1 time",
+                                tint = MaterialTheme.colorScheme.secondary,
+                                modifier = Modifier.size(32.dp)
+                            )
+                            PlaybackViewModel.RepeatMode.NONE -> Icon(
+                                imageVector = Icons.Filled.Repeat,
+                                contentDescription = "None",
+                                tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                                modifier = Modifier.size(32.dp)
+                            )
+
+                        }
                     }
                 }
             }
+
 
             Spacer(modifier = Modifier.height(32.dp))
 

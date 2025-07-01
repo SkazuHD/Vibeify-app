@@ -30,9 +30,15 @@ class PlaybackViewModel @Inject constructor(
     val currentSongList = playerServiceV2.currentSongList
 
     enum class PlaybackMode {
-        SHUFFLE, LOOP, NONE
+        SHUFFLE, NONE
     }
 
+    enum class RepeatMode {
+        ALL, LOOP, NONE
+    }
+
+    private val _repeatMode = MutableStateFlow(RepeatMode.NONE)
+    val repeatMode: StateFlow<RepeatMode> = _repeatMode
     private val _playbackMode = MutableStateFlow(PlaybackMode.NONE)
     val playbackMode: StateFlow<PlaybackMode> = _playbackMode
 
@@ -41,8 +47,16 @@ class PlaybackViewModel @Inject constructor(
             playerServiceV2.playbackMode.collect { serviceMode ->
                 _playbackMode.value = when (serviceMode) {
                     PlayerServiceV2.PlaybackMode.SHUFFLE -> PlaybackMode.SHUFFLE
-                    PlayerServiceV2.PlaybackMode.LOOP -> PlaybackMode.LOOP
                     PlayerServiceV2.PlaybackMode.NONE -> PlaybackMode.NONE
+                }
+            }
+        }
+        viewModelScope.launch {
+            playerServiceV2.repeatMode.collect { serviceMode ->
+                _repeatMode.value = when (serviceMode) {
+                    PlayerServiceV2.RepeatMode.ALL -> RepeatMode.ALL
+                    PlayerServiceV2.RepeatMode.LOOP -> RepeatMode.LOOP
+                    PlayerServiceV2.RepeatMode.NONE -> RepeatMode.NONE
                 }
             }
         }
@@ -80,6 +94,10 @@ class PlaybackViewModel @Inject constructor(
 
     fun togglePlaybackMode() {
         playerServiceV2.togglePlaybackMode()
+    }
+
+    fun toggleRepeatMode() {
+        playerServiceV2.toggleRepeatMode()
     }
 
     override fun onCleared() {

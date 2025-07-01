@@ -2,6 +2,7 @@ package de.hsb.vibeify.data.repository
 
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Filter
+import com.google.firebase.firestore.FirebaseFirestore
 import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Playlist
 import kotlinx.coroutines.async
@@ -10,7 +11,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
-import com.google.firebase.firestore.FirebaseFirestore as Firestore
 
 const val LIKED_SONGS_PLAYLIST_ID = "liked_songs_virtual_playlist"
 
@@ -53,9 +53,9 @@ interface PlaylistRepository {
 }
 
 @Singleton
-class PlaylistRepositoryImpl @Inject constructor() : PlaylistRepository {
-
-    private val db = Firestore.getInstance()
+class PlaylistRepositoryImpl @Inject constructor(
+    private val db: FirebaseFirestore
+) : PlaylistRepository {
     private val collectionName = "playlists"
 
     override suspend fun getPlaylistById(id: String): Playlist? {

@@ -26,13 +26,11 @@ data class AuthRepositoryState(
 
 @Singleton
 class FirebaseAuthRepo @Inject
-constructor(): AuthRepository {
-
+constructor(
+    private val auth: FirebaseAuth
+) : AuthRepository {
 
     override val state = MutableStateFlow(AuthRepositoryState())
-
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
-
     private val authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
         val user = firebaseAuth.currentUser
 
@@ -42,6 +40,7 @@ constructor(): AuthRepository {
             it.copy(currentUser = user, isAuthResolved = true)
         }
     }
+
     init {
         Log.d("FirebaseAuthRepo", "FirebaseAuthRepo initialized")
         auth.addAuthStateListener(authStateListener)

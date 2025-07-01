@@ -1,6 +1,7 @@
 package de.hsb.vibeify.data.repository
 
 import com.google.firebase.firestore.Filter
+import com.google.firebase.firestore.FirebaseFirestore
 import de.hsb.vibeify.data.model.Song
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -8,7 +9,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
-import com.google.firebase.firestore.FirebaseFirestore as Firestore
 
 interface SongRepository {
     suspend fun getSongById(id: String): Song?
@@ -24,9 +24,9 @@ interface SongRepository {
 }
 
 @Singleton
-class SongRepositoryImpl @Inject constructor() : SongRepository {
-
-    private val db = Firestore.getInstance()
+class SongRepositoryImpl @Inject constructor(
+    private val db: FirebaseFirestore
+) : SongRepository {
     private val collectionName = "songs"
 
     override suspend fun getSongById(id: String): Song? {

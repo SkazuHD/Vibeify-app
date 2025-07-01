@@ -1,151 +1,210 @@
 package de.hsb.vibeify.services
 
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
-import com.google.firebase.Firebase
-import com.google.firebase.database.database
+import androidx.media3.common.util.UnstableApi
 import de.hsb.vibeify.data.model.Song
+import de.hsb.vibeify.data.repository.PresenceRepository
 import de.hsb.vibeify.data.repository.UserRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class PresenceService @Inject constructor(
+class PresenceService @OptIn(UnstableApi::class)
+@Inject constructor(
     private val userRepository: UserRepository,
-    private val playerService: PlayerServiceV2
+    private val playerService: PlayerServiceV2,
+    private val presenceRepository: PresenceRepository
 ) : DefaultLifecycleObserver {
-    private val database =
-        Firebase.database(" https://vibeify-16f99-default-rtdb.europe-west1.firebasedatabase.app")
+
+    companion object {
+        private const val TAG = "PresenceService"
+    }
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var currentUserId: String? = null
     private var isAppInForeground = false
     private var isMusicPlaying = false
+    private var isInitialized = false
 
     init {
-        database.setPersistenceEnabled(true)
-        Log.d("PresenceService", "Firebase Realtime Database persistence enabled")
+        initialize()
+    }
 
-        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+    private fun initialize() {
+        if (isInitialized) return
 
+        try {
+            ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+            observeUserState()
+            observePlayerState()
+            observeCurrentSong()
+            isInitialized = true
+            Log.d(TAG, "PresenceService initialized successfully")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to initialize PresenceService", e)
+        }
+    }
+
+    private fun observeUserState() {
         scope.launch {
-            userRepository.state.map { it.currentUser }.collect { user ->
-                currentUserId = user?.id
-                if (user != null) {
-                    updateOnlineStatus()
-                    setupOnDisconnect(user.id)
+            try {
+                userRepository.state.map { it.currentUser }.collect { user ->
+                    val previousUserId = currentUserId
+                    currentUserId = user?.id
+
+                    if (user != null && previousUserId != user.id) {
+                        updateOnlineStatus()
+                        presenceRepository.setupOnDisconnect(user.id)
+                        Log.d(TAG, "User changed to: ${user.id}")
+                    } else if (user == null && previousUserId != null) {
+                        handleUserLogout(previousUserId)
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error observing user state", e)
             }
         }
+    }
 
+    private fun observePlayerState() {
         scope.launch {
-            playerService.isPlaying.collect { playing ->
-                isMusicPlaying = playing
-                Log.d("PresenceService", "Music playing state changed: $playing")
-                currentUserId?.let { updateOnlineStatus() }
+            try {
+                playerService.isPlaying.collect { playing ->
+                    val previousState = isMusicPlaying
+                    isMusicPlaying = playing
+
+                    if (previousState != playing) {
+                        Log.d(TAG, "Music playing state changed: $playing")
+                        currentUserId?.let { updateOnlineStatus() }
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error observing player state", e)
             }
         }
+    }
 
+    private fun observeCurrentSong() {
         scope.launch {
-            playerService.currentSong.collect { song ->
-                currentUserId?.let { userId ->
-                    updateCurrentlyPlaying(userId, song)
+            try {
+                playerService.currentSong.collect { song ->
+                    currentUserId?.let { userId ->
+                        updateCurrentlyPlaying(userId, song)
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error observing current song", e)
             }
         }
     }
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
-        Log.d("PresenceService", "App moved to foreground")
+        Log.d(TAG, "App moved to foreground")
         isAppInForeground = true
         currentUserId?.let { updateOnlineStatus() }
     }
 
     override fun onStop(owner: LifecycleOwner) {
         super.onStop(owner)
-        Log.d("PresenceService", "App moved to background")
+        Log.d(TAG, "App moved to background")
         isAppInForeground = false
         currentUserId?.let { updateOnlineStatus() }
     }
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
-        Log.d("PresenceService", "App destroyed")
-        currentUserId?.let { setUserOffline(it) }
+        Log.d(TAG, "App destroyed")
+        currentUserId?.let { userId ->
+            scope.launch {
+                setUserOffline(userId)
+            }
+        }
+        cleanup()
     }
 
     private fun updateOnlineStatus() {
         currentUserId?.let { userId ->
-            val shouldBeOnline = isAppInForeground || isMusicPlaying
+            scope.launch {
+                try {
+                    val shouldBeOnline = isAppInForeground || isMusicPlaying
 
-            if (shouldBeOnline) {
-                setUserOnline(userId)
-            } else {
-                setUserOffline(userId)
+                    val result = if (shouldBeOnline) {
+                        presenceRepository.setUserOnline(userId)
+                    } else {
+                        presenceRepository.setUserOffline(userId)
+                    }
+
+                    result.onFailure { exception ->
+                        Log.e(TAG, "Failed to update online status", exception)
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error updating online status", e)
+                }
             }
         }
     }
 
     private fun updateCurrentlyPlaying(userId: String, song: Song?) {
-        val currentlyPlayingRef = database.getReference("users/$userId/currentlyPlaying")
-        Log.d("PresenceService", "Updating currently playing for user: $userId")
-        Log.d("PresenceService", "Is music playing: $isMusicPlaying")
-        Log.d("PresenceService", "Current song: ${song?.name ?: "None"}")
-        if (song != null) {
-            val playbackData = mapOf(
-                "songId" to song.id,
-                "songName" to song.name,
-                "artist" to song.artist,
-                "album" to song.album,
-                "imageUrl" to song.imageUrl,
-                "startTime" to System.currentTimeMillis(),
-                "isPlaying" to true
-            )
-            currentlyPlayingRef.setValue(playbackData)
-            Log.d("PresenceService", "Updated currently playing: ${song.name}")
-        } else {
-            currentlyPlayingRef.removeValue()
-            Log.d("PresenceService", "Cleared currently playing")
+        scope.launch {
+            try {
+                val result = presenceRepository.updateCurrentlyPlaying(userId, song)
+                result.onFailure { exception ->
+                    Log.e(TAG, "Failed to update currently playing", exception)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating currently playing", e)
+            }
         }
     }
 
-    private fun setupOnDisconnect(userId: String) {
-        val userRef = database.getReference("users/$userId/online")
-        val lastSeenRef = database.getReference("users/$userId/lastSeen")
-
-        userRef.onDisconnect().setValue(false)
-        lastSeenRef.onDisconnect().setValue(System.currentTimeMillis())
+    private suspend fun setUserOffline(userId: String) {
+        try {
+            val result = presenceRepository.setUserOffline(userId)
+            result.onFailure { exception ->
+                Log.e(TAG, "Failed to set user offline", exception)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error setting user offline", e)
+        }
     }
 
-    fun setUserOnline(userId: String) {
-        val userRef = database.getReference("users/$userId/online")
-        val lastSeenRef = database.getReference("users/$userId/lastSeen")
-
-        userRef.setValue(true)
-        lastSeenRef.setValue(System.currentTimeMillis())
-
-        Log.d("PresenceService", "User $userId set to online")
-    }
-
-    fun setUserOffline(userId: String) {
-        val userRef = database.getReference("users/$userId/online")
-        val lastSeenRef = database.getReference("users/$userId/lastSeen")
-
-        userRef.setValue(false)
-        lastSeenRef.setValue(System.currentTimeMillis())
-
-        Log.d("PresenceService", "User $userId set to offline")
+    private fun handleUserLogout(userId: String) {
+        scope.launch {
+            try {
+                setUserOffline(userId)
+                Log.d(TAG, "User $userId logged out, set to offline")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling user logout", e)
+            }
+        }
     }
 
     fun cleanup() {
-        ProcessLifecycleOwner.get().lifecycle.removeObserver(this)
-        currentUserId?.let { setUserOffline(it) }
+        try {
+            if (isInitialized) {
+                ProcessLifecycleOwner.get().lifecycle.removeObserver(this)
+                currentUserId?.let { userId ->
+                    scope.launch {
+                        setUserOffline(userId)
+                    }
+                }
+                scope.cancel()
+                isInitialized = false
+                Log.d(TAG, "PresenceService cleaned up")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during cleanup", e)
+        }
     }
 }

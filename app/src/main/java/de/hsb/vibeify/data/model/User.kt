@@ -35,18 +35,3 @@ data class RecentActivity(
         const val TYPE_PLAYLIST = "playlist"
     }
 }
-
-data class CurrentPlayback(
-    val songId: String,
-    val startTime: Long,
-    val pausedAt: Long? = null,
-    val isPlaying: Boolean = true,
-    val progress: Long = 0L
-)
-
-data class UserPresence(
-    val userId: String,
-    val isOnline: Boolean,
-    val lastSeen: Long,
-    val currentlyPlaying: CurrentPlayback?
-)

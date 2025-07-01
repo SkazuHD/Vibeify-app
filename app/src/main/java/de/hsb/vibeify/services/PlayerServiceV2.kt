@@ -7,7 +7,6 @@ import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import de.hsb.vibeify.data.model.Song
@@ -18,20 +17,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import androidx.media3.exoplayer.source.ShuffleOrder
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlin.collections.get
-import kotlin.compareTo
-import kotlin.text.compareTo
-import kotlin.text.get
 
-@UnstableApi
 @Singleton
 class PlayerServiceV2 {
 
@@ -61,14 +53,14 @@ class PlayerServiceV2 {
     }
 
     enum class RepeatMode {
-         ALL, LOOP, NONE
+        ALL, LOOP, NONE
     }
+
     private val _playbackMode = MutableStateFlow(PlaybackMode.NONE)
     val playbackMode: StateFlow<PlaybackMode> = _playbackMode
 
     private val _repeatMode = MutableStateFlow(RepeatMode.NONE)
     val repeatMode: StateFlow<RepeatMode> = _repeatMode
-
 
 
     val upcomingSongs: StateFlow<List<Song>> = combine(
@@ -79,23 +71,23 @@ class PlayerServiceV2 {
         mediaController?.let { controller ->
             val currentIndex = controller.currentMediaItemIndex
 
-                if (mode == PlaybackMode.SHUFFLE) {
-                    val nextIndex = controller.getNextMediaItemIndex().coerceIn(0, songList.size)
+            if (mode == PlaybackMode.SHUFFLE) {
+                val nextIndex = controller.getNextMediaItemIndex().coerceIn(0, songList.size)
 
 
-                    if (nextIndex in songList.indices) {
-                        listOf(songList[nextIndex])
-                    } else {
-                        emptyList()
-                    }
-
+                if (nextIndex in songList.indices) {
+                    listOf(songList[nextIndex])
                 } else {
-                    if (currentIndex >= 0 && currentIndex < songList.size - 1) {
-                    songList.subList(currentIndex + 1, songList.size)
-                    } else {
-                        emptyList()
-                    }
+                    emptyList()
                 }
+
+            } else {
+                if (currentIndex >= 0 && currentIndex < songList.size - 1) {
+                    songList.subList(currentIndex + 1, songList.size)
+                } else {
+                    emptyList()
+                }
+            }
         } ?: emptyList()
     }.stateIn(
         scope = CoroutineScope(Dispatchers.Main),
@@ -236,7 +228,7 @@ class PlayerServiceV2 {
                 throw IllegalArgumentException("Invalid repeat mode: $mode")
             }
             controller.repeatMode = mode
-           // _repeatMode.value = mode
+            // _repeatMode.value = mode
         }
     }
 
@@ -334,6 +326,7 @@ class PlayerServiceV2 {
                     controller.shuffleModeEnabled = true
                     PlaybackMode.SHUFFLE
                 }
+
                 PlaybackMode.SHUFFLE -> {
 
                     controller.shuffleModeEnabled = false
@@ -354,12 +347,14 @@ class PlayerServiceV2 {
                     println("1")
                     RepeatMode.ALL
                 }
+
                 RepeatMode.ALL -> {
                     controller.repeatMode = Player.REPEAT_MODE_ONE
                     println("2")
 
                     RepeatMode.LOOP
                 }
+
                 RepeatMode.LOOP -> {
                     controller.repeatMode = Player.REPEAT_MODE_OFF
                     println("3")

@@ -13,7 +13,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class AnalyticsService @Inject constructor(userRepository: UserRepository, playerServiceV2: PlayerServiceV2) {
+class AnalyticsService
+@Inject constructor(userRepository: UserRepository, playerServiceV2: PlayerServiceV2) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     init {

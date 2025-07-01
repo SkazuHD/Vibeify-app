@@ -1,5 +1,8 @@
-package de.hsb.vibeify
+package de.hsb.vibeify.di
 
+import android.content.Context
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,40 +25,47 @@ import de.hsb.vibeify.services.DiscoveryService
 import de.hsb.vibeify.services.MediaService
 import de.hsb.vibeify.services.PlayerServiceV2
 import de.hsb.vibeify.services.PlaylistService
+import de.hsb.vibeify.services.PlaylistServiceImpl
 import de.hsb.vibeify.services.SearchService
 import de.hsb.vibeify.services.SearchServiceImpl
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object UserModule {
+object AppModule {
 
     @Singleton
     @Provides
-    fun provideAuthRepository(): AuthRepository {
-        return FirebaseAuthRepo()
+    fun provideAuthRepository(
+        firebaseAuth: FirebaseAuth
+    ): AuthRepository {
+        return FirebaseAuthRepo(firebaseAuth)
     }
 
     @Singleton
     @Provides
     fun providePlaylistRepository(
+        firebaseFirestore: FirebaseFirestore
     ): PlaylistRepository {
-        return PlaylistRepositoryImpl()
+        return PlaylistRepositoryImpl(firebaseFirestore)
     }
 
     @Singleton
     @Provides
-    fun provideSongRepository(): SongRepository {
-        return SongRepositoryImpl()
+    fun provideSongRepository(
+        firebaseFirestore: FirebaseFirestore,
+    ): SongRepository {
+        return SongRepositoryImpl(firebaseFirestore)
     }
 
     @Singleton
     @Provides
     fun provideUserRepository(
         authRepository: AuthRepository,
-        @ApplicationContext context: android.content.Context
+        @ApplicationContext context: Context,
+        firebaseFirestore: FirebaseFirestore,
     ): UserRepository {
-        return UserRepositoryImpl(authRepository, context)
+        return UserRepositoryImpl(authRepository, context, firebaseFirestore)
     }
 
     @Singleton
@@ -68,7 +78,7 @@ object UserModule {
 
     @Singleton
     @Provides
-    fun providePlayerService(@ApplicationContext context: android.content.Context): PlayerServiceV2 {
+    fun providePlayerService(@ApplicationContext context: Context): PlayerServiceV2 {
         return PlayerServiceV2(context)
     }
 
@@ -98,7 +108,7 @@ object UserModule {
         songRepository: SongRepository,
         discoveryService: DiscoveryService
     ): PlaylistService {
-        return de.hsb.vibeify.services.PlaylistServiceImpl(
+        return PlaylistServiceImpl(
             playlistRepository,
             songRepository,
             userRepository,

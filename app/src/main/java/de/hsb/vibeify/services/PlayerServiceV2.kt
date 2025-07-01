@@ -7,6 +7,7 @@ import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import de.hsb.vibeify.data.model.Song
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import androidx.media3.exoplayer.source.ShuffleOrder
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
@@ -24,10 +26,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.collections.get
 import kotlin.compareTo
 import kotlin.text.compareTo
 import kotlin.text.get
 
+@UnstableApi
 @Singleton
 class PlayerServiceV2 {
 
@@ -55,18 +59,44 @@ class PlayerServiceV2 {
     enum class PlaybackMode {
         SHUFFLE, LOOP, NONE
     }
-
     private val _playbackMode = MutableStateFlow(PlaybackMode.NONE)
     val playbackMode: StateFlow<PlaybackMode> = _playbackMode
 
+
+
+
+
     val upcomingSongs: StateFlow<List<Song>> = combine(
         currentSongList,
-        currentSong
-    ) { songList, _ ->
+        currentSong,
+        playbackMode
+    ) { songList, _, mode ->
         mediaController?.let { controller ->
             val currentIndex = controller.currentMediaItemIndex
             if (currentIndex >= 0 && currentIndex < songList.size - 1) {
-                songList.subList(currentIndex + 1, songList.size)
+                if (mode == PlaybackMode.SHUFFLE && controller.shuffleModeEnabled) {
+
+                    val customShuffleOrder = ShuffleOrder.DefaultShuffleOrder(
+                        songList.size,
+                        12345L
+                    )
+
+                    // Sammle alle kommenden Indices
+                    var nextIndex = currentIndex
+                    val upcomingIndices = mutableListOf<Int>()
+
+                    repeat(songList.size - 1) {
+                        nextIndex = customShuffleOrder.getNextIndex(nextIndex)
+                        if (nextIndex != -1 && nextIndex != currentIndex) {
+                            upcomingIndices.add(nextIndex)
+                        }
+                    }
+
+                    // Wandle Indices in Songs um
+                    upcomingIndices.map { songList[it] }
+                } else {
+                    songList.subList(currentIndex + 1, songList.size)
+                }
             } else {
                 emptyList()
             }

@@ -1,11 +1,9 @@
 package de.hsb.vibeify.ui.profile
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,13 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Output
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,38 +32,49 @@ import de.hsb.vibeify.ui.components.Avatar
 import de.hsb.vibeify.ui.components.PlaylistCard
 
 @Composable
-fun ProfileView(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hiltViewModel(), authViewModel: AuthViewModel = hiltViewModel(), navController: NavController) {
+fun ProfileView(
+    modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel = hiltViewModel(),
+    navController: NavController
+) {
     val uiState by viewModel.uiState.collectAsState()
-    val  playlists = viewModel.playlists
+    val playlists = viewModel.playlists
 
     val openDialog = remember { mutableStateOf(false) }
 
     Column(
-        modifier = modifier.fillMaxSize().padding(16.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
     ) {
         when {
             uiState.isLoading -> {
                 CircularProgressIndicator()
             }
+
             uiState.error != null -> {
                 Text(text = "Error: ${uiState.error}")
             }
+
             openDialog.value -> {
                 EditProfileDialog(onDismiss = { openDialog.value = false })
             }
+
             else -> {
                 Row() {
                     if (uiState.user?.imageUrl?.isNotBlank() == true) {
                         Avatar(
-                            modifier = Modifier.padding(bottom = 16.dp, top = 16.dp)
+                            modifier = Modifier
+                                .padding(bottom = 16.dp, top = 16.dp)
                                 .size(170.dp),
                             initials = "JL",
                             imageUrl = uiState.user?.imageUrl,
                         )
-                    }
-                    else {
+                    } else {
                         Avatar(
-                            modifier = Modifier.padding(bottom = 16.dp)
+                            modifier = Modifier
+                                .padding(bottom = 16.dp)
                                 .size(170.dp)
                                 .padding(top = 16.dp),
                             initials = uiState.user?.name?.take(2) ?: "AB",
@@ -78,18 +82,29 @@ fun ProfileView(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hil
                     }
 
                     uiState.user?.let { user ->
-                        Column (
-                            modifier = Modifier.align(Alignment.CenterVertically)
-                            .padding(start = 16.dp, end = 16.dp)
+                        Column(
+                            modifier = Modifier
+                                .align(Alignment.CenterVertically)
+                                .padding(start = 16.dp, end = 16.dp)
                         ) {
                             Text(
                                 text = user.name.ifBlank { user.email },
                                 modifier = Modifier.padding(start = 8.dp),
                                 fontSize = 24.sp,
                             )
-
+                            Row {
+                                Text(
+                                    "Followers: ${user.followers.size}",
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                                Text(
+                                    "Following: ${user.following.size}",
+                                    fontSize = 14.sp,
+                                    modifier = Modifier.padding(start = 8.dp)
+                                )
+                            }
                         }
-
                     }
                 }
                 Row {
@@ -136,7 +151,8 @@ fun ProfileView(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hil
                                 PlaylistCard(
                                     playlistDescription = it.description ?: "",
                                     playlistName = it.title,
-                                    playlistIcon = it.imagePath ?: R.drawable.ic_launcher_foreground,
+                                    playlistIcon = it.imagePath
+                                        ?: R.drawable.ic_launcher_foreground,
                                     onClick = {
                                         navController.navigate("playlist_detail_view/${it.id}")
                                     }
@@ -157,7 +173,6 @@ fun ProfileView(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hil
                 ) {
                     Text(text = "Sign Out")
                 }
-
 
 
             }

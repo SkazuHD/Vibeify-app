@@ -22,7 +22,7 @@ class MainViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val playlistRepository: PlaylistRepository,
     private val playlistService: PlaylistService,
-    private val songRepository: SongRepository
+    private val songRepository: SongRepository,
 ) : ViewModel() {
 
     val recentActivityItems = MutableStateFlow<List<RecentActivityItem>>(emptyList())

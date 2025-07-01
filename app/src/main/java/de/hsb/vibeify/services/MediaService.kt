@@ -44,6 +44,9 @@ class MediaService : MediaLibraryService() {
     @Inject
     lateinit var playerServiceV2: PlayerServiceV2
 
+    @Inject
+    lateinit var presenceService: PresenceService
+
 
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 

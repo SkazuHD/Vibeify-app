@@ -1,15 +1,29 @@
 package de.hsb.vibeify.data.model
 
 data class User(
-    var id: String = "",
-    var email: String = "",
-    var name: String = "",
-    var imageUrl: String? = "",
-    var playlists: List<String> = emptyList(),
-    var likedSongs: List<String> = emptyList(),
-    var recentActivities: List<RecentActivity> = emptyList(),
-    var recentSearches: List<String> = emptyList(),
-)
+    val id: String = "",
+    val email: String = "",
+    val name: String = "",
+    val imageUrl: String? = "",
+    val playlists: List<String> = emptyList(),
+    val likedSongs: List<String> = emptyList(),
+    val recentActivities: List<RecentActivity> = emptyList(),
+    val recentSearches: List<String> = emptyList(),
+    val followers: List<String> = emptyList(),
+    val following: List<String> = emptyList(),
+) {
+    fun isNewUser(): Boolean {
+        return recentActivities.isEmpty()
+    }
+
+    fun addRecentActivity(activity: RecentActivity) {
+        recentActivities.plus(activity).takeLast(10)
+    }
+
+    fun addRecentSearch(search: String) {
+        recentSearches.plus(search).takeLast(10)
+    }
+}
 
 data class RecentActivity(
     val type: String = TYPE_SONG,
@@ -21,3 +35,18 @@ data class RecentActivity(
         const val TYPE_PLAYLIST = "playlist"
     }
 }
+
+data class CurrentPlayback(
+    val songId: String,
+    val startTime: Long,
+    val pausedAt: Long? = null,
+    val isPlaying: Boolean = true,
+    val progress: Long = 0L
+)
+
+data class UserPresence(
+    val userId: String,
+    val isOnline: Boolean,
+    val lastSeen: Long,
+    val currentlyPlaying: CurrentPlayback?
+)

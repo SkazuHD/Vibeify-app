@@ -215,7 +215,7 @@ class PlayerServiceV2 {
         startPositionTracking()
     }
 
-    fun play(songs: List<Song>, startIndex: Int = 0, playlistId : String? = null) {
+    fun play(songs: List<Song>, startIndex: Int = 0, playlistId: String? = null) {
         if (songs.isEmpty()) return
         _currentSong.value = songs[startIndex]
         _currentSongList.value = songs
@@ -246,11 +246,18 @@ class PlayerServiceV2 {
         }
         stopPositionTracking()
     }
+
     fun stop() {
         withController { controller ->
             controller.stop()
         }
         stopPositionTracking()
+        _currentSong.value = null
+        _currentSongList.value = emptyList()
+        _currentPlaylistId.value = null
+        _position.value = 0L
+        _duration.value = 1L
+        _isPlaying.value = false
     }
 
 

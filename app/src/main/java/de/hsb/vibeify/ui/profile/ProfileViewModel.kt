@@ -16,6 +16,7 @@ import javax.inject.Inject
 import de.hsb.vibeify.data.model.Playlist
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.core.net.toUri
 import kotlin.math.log
 
 
@@ -66,15 +67,22 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun onSave(name: String, url: String) {
-
+        Log.d("ProfileViewModel", "onSave called with name: $name, url: $url")
         viewModelScope.launch {
             val currentUser = _uiState.value.user ?: return@launch
-            if (currentUser.name == name ) {
+            if (currentUser.name == name && url == currentUser.imageUrl) {
                 Log.d("ProfileViewModel", "No changes to save")
                 return@launch // No changes to save
+            } else {
+                var imageUrl = currentUser.imageUrl
+                val uri = try { url.toUri() } catch (e: Exception) { null }
+                if (uri != null && uri.toString().isNotEmpty()) {
+                    imageUrl = userRepository.uploadPhoto(currentUser.id, url)
+                }
+                val updatedUser = currentUser.copy(name = name, imageUrl = imageUrl)
+                userRepository.updateUser(updatedUser)
+
             }
-            val updatedUser = currentUser.copy(name = name)
-            userRepository.updateUser(updatedUser)
         }
     }
 }

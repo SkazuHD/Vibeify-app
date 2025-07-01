@@ -60,12 +60,22 @@ fun ProfileView(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hil
             }
             else -> {
                 Row() {
-                    Avatar(
-                        modifier = Modifier.padding(bottom = 16.dp)
-                            .size(170.dp)
-                            .padding(top = 16.dp),
-                        initials = "JL"
-                    )
+                    if (uiState.user?.imageUrl?.isNotBlank() == true) {
+                        Avatar(
+                            modifier = Modifier.padding(bottom = 16.dp, top = 16.dp)
+                                .size(170.dp),
+                            initials = "JL",
+                            imageUrl = uiState.user?.imageUrl,
+                        )
+                    }
+                    else {
+                        Avatar(
+                            modifier = Modifier.padding(bottom = 16.dp)
+                                .size(170.dp)
+                                .padding(top = 16.dp),
+                            initials = uiState.user?.name?.take(2) ?: "AB",
+                        )
+                    }
 
                     uiState.user?.let { user ->
                         Column (
@@ -73,8 +83,8 @@ fun ProfileView(modifier: Modifier = Modifier, viewModel: ProfileViewModel = hil
                             .padding(start = 16.dp, end = 16.dp)
                         ) {
                             Text(
-                                text = if (user.name.isBlank()) user.email else user.name,
-                                modifier = Modifier.padding(bottom = 8.dp),
+                                text = user.name.ifBlank { user.email },
+                                modifier = Modifier.padding(start = 8.dp),
                                 fontSize = 24.sp,
                             )
 

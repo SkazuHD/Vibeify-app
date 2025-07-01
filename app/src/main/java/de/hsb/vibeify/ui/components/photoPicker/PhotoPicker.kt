@@ -70,7 +70,7 @@ fun PickPhoto(
         if (selectedImageUri.toString().isNotEmpty() && selectedImageUri != Uri.EMPTY) {
 
             Avatar(
-                imageurl = selectedImageUri.toString(),
+                imageUrl = selectedImageUri.toString(),
                 modifier = Modifier
                     .fillMaxSize()
 

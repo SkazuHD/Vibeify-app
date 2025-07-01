@@ -3,6 +3,7 @@ package de.hsb.vibeify.data.repository
 import android.util.Log
 import androidx.core.net.toUri
 import com.google.firebase.firestore.FieldValue
+import de.hsb.vibeify.api.retrofit2.src.main.kotlin.de.hsb.vibeify.api.generated.infrastructure.ApiClient
 import de.hsb.vibeify.data.model.RecentActivity
 import de.hsb.vibeify.data.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +17,15 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.google.firebase.firestore.FirebaseFirestore as Firestore
+import de.hsb.vibeify.api.generated.infrastructure.*
+import de.hsb.vibeify.api.generated.models.*
+import de.hsb.vibeify.api.generated.*
+import de.hsb.vibeify.api.generated.apis.DefaultApi
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.awaitResponse
 
 
 data class UserRepositoryState(
@@ -36,8 +46,8 @@ interface UserRepository {
     suspend fun removeSongFromFavorites(songId: String)
     suspend fun addSongToFavorites(songId: String)
     fun getLikedSongIds(): List<String>
-    suspend fun updateUser(user: User)
-    fun uploadPhoto(imageUrl: String)
+    suspend fun updateUser(user: User?)
+    suspend fun uploadPhoto(id: String, imageUrl: String) : String
     suspend fun addRecentSearch(searchTerm: String)
     suspend fun addRecentActivity(activity: RecentActivity)
     val state: StateFlow<UserRepositoryState>
@@ -50,6 +60,10 @@ class UserRepositoryImpl @Inject constructor(
 ) : UserRepository {
 
     private val db = Firestore.getInstance()
+
+    private val apiClient = ApiClient(baseUrl = "https://vibeify-app.skazu.net/")
+    val webService = apiClient.createService(DefaultApi::class.java)
+
     private val collectionName = "users"
     private val _state = MutableStateFlow(UserRepositoryState())
 
@@ -82,6 +96,7 @@ class UserRepositoryImpl @Inject constructor(
                         _state.value = UserRepositoryState(currentUser = user)
                     } else {
                         _state.value = UserRepositoryState(currentUser = user)
+
                     }
                 }
             }
@@ -181,18 +196,40 @@ class UserRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun updateUser(user: User) {
+    override suspend fun updateUser(user: User?) {
+        if (user == null) {
+            Log.e("UserRepository", "updateUser called with null user")
+            return
+        }
         Log.d("UserRepository", "updateUser called with user: $user")
         db.collection(collectionName).document(user.id).set(user).await()
         _state.value = _state.value.copy(currentUser = user)
     }
 
-    override fun uploadPhoto(imageUrl: String) {
+    override suspend fun uploadPhoto(id: String, imageUrl: String) : String {
         val uri = try { imageUrl.toUri() } catch (e: Exception) { null }
         val inputStream = context.contentResolver.openInputStream(uri!!)
         val bytes = inputStream?.readBytes()
         inputStream?.close()
+        if (bytes == null) {
+            Log.e("UserRepository", "Failed to read bytes from image URI: $uri")
+            return ""
+        }
+        Log.d("UserRepository", "uploadPhoto called with id: $id, imageUrl: $imageUrl")
+        val requestBody = bytes.toRequestBody("image/*".toMediaTypeOrNull(), 0, bytes.size)
+        val part = MultipartBody.Part.createFormData("file", "profile.jpg", requestBody)
+        val call = webService.uploadProfilePictureUploadProfilePictureUserIdPost(id,part).awaitResponse()
+        if (call.isSuccessful) {
+            Log.d("UserRepository", "Photo uploaded successfully for user: $id")
+            _state.value.currentUser?.copy(imageUrl = "https://vibeify-app.skazu.net/picture/$id")
+            return "https://vibeify-app.skazu.net/picture/$id"
+        } else {
+            Log.e("UserRepository", "Failed to upload photo: ${call.errorBody()?.string()}")
+            return ""
+        }
     }
+
+
 
     override suspend fun addRecentSearch(searchTerm: String) {
         Log.d("UserRepository", "addRecentSearch called with term: $searchTerm")

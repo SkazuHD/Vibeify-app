@@ -25,6 +25,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.awaitResponse
 
 
 data class UserRepositoryState(
@@ -45,8 +46,8 @@ interface UserRepository {
     suspend fun removeSongFromFavorites(songId: String)
     suspend fun addSongToFavorites(songId: String)
     fun getLikedSongIds(): List<String>
-    suspend fun updateUser(user: User)
-    fun uploadPhoto(id: String, imageUrl: String)
+    suspend fun updateUser(user: User?)
+    suspend fun uploadPhoto(id: String, imageUrl: String) : String
     suspend fun addRecentSearch(searchTerm: String)
     suspend fun addRecentActivity(activity: RecentActivity)
     val state: StateFlow<UserRepositoryState>
@@ -195,46 +196,37 @@ class UserRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun updateUser(user: User) {
+    override suspend fun updateUser(user: User?) {
+        if (user == null) {
+            Log.e("UserRepository", "updateUser called with null user")
+            return
+        }
         Log.d("UserRepository", "updateUser called with user: $user")
         db.collection(collectionName).document(user.id).set(user).await()
         _state.value = _state.value.copy(currentUser = user)
     }
 
-    override fun uploadPhoto(id: String, imageUrl: String) {
+    override suspend fun uploadPhoto(id: String, imageUrl: String) : String {
         val uri = try { imageUrl.toUri() } catch (e: Exception) { null }
         val inputStream = context.contentResolver.openInputStream(uri!!)
         val bytes = inputStream?.readBytes()
         inputStream?.close()
         if (bytes == null) {
             Log.e("UserRepository", "Failed to read bytes from image URI: $uri")
-            return
+            return ""
         }
         Log.d("UserRepository", "uploadPhoto called with id: $id, imageUrl: $imageUrl")
         val requestBody = bytes.toRequestBody("image/*".toMediaTypeOrNull(), 0, bytes.size)
         val part = MultipartBody.Part.createFormData("file", "profile.jpg", requestBody)
-        val call = webService.uploadProfilePictureUploadProfilePictureUserIdPost(id,part)
-        call.enqueue(object : retrofit2.Callback<kotlin.Any> {
-            override fun onResponse(call: retrofit2.Call<kotlin.Any>, response: retrofit2.Response<kotlin.Any>) {
-                if (response.isSuccessful) {
-                    Log.d("UserRepository", "Photo uploaded successfully for user: $id")
-                    _state.update { currentState ->
-                        currentState.copy(
-                            currentUser = currentState.currentUser?.copy(imageUrl = "https://vibeify-app.skazu.net/picture/$id")
-                        )
-                    }
-                    scope.launch {
-                        updateUser(_state.value.currentUser!!)
-                    }
-                } else {
-                    Log.e("UserRepository", "Failed to upload photo: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(call: retrofit2.Call<kotlin.Any>, t: Throwable) {
-                Log.e("UserRepository", "Error uploading photo: ${t.message}")
-            }
-        })
+        val call = webService.uploadProfilePictureUploadProfilePictureUserIdPost(id,part).awaitResponse()
+        if (call.isSuccessful) {
+            Log.d("UserRepository", "Photo uploaded successfully for user: $id")
+            _state.value.currentUser?.copy(imageUrl = "https://vibeify-app.skazu.net/picture/$id")
+            return "https://vibeify-app.skazu.net/picture/$id"
+        } else {
+            Log.e("UserRepository", "Failed to upload photo: ${call.errorBody()?.string()}")
+            return ""
+        }
     }
 
 

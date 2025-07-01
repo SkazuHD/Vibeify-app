@@ -52,7 +52,7 @@ fun DiscoverySection(
     discoveryViewModel: DiscoveryViewModel = hiltViewModel(),
     onSongClick: (Song) -> Unit = {},
     onPlaylistClick: (Playlist) -> Unit = {},
-    onGenreClick: (String) -> Unit = {}
+    onGenreClick: (Genre) -> Unit = {}
 ) {
     val trendingSongs by discoveryViewModel.trendingSongs
     val featuredPlaylists by discoveryViewModel.featuredPlaylists
@@ -173,7 +173,7 @@ private fun SectionHeader(title: String) {
 @Composable
 private fun GenreGrid(
     genres: List<Genre>,
-    onGenreClick: (String) -> Unit
+    onGenreClick: (Genre) -> Unit
 ) {
     Column {
         var showAllGenres by rememberSaveable { mutableStateOf(false) }
@@ -189,7 +189,7 @@ private fun GenreGrid(
                     GenreChip(
                         genre = genre.name,
                         count = genre.count ?: 0,
-                        onClick = { onGenreClick(genre.name) },
+                        onClick = { onGenreClick(genre) },
                         modifier = Modifier.weight(1f)
                     )
                 }

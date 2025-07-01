@@ -45,6 +45,7 @@ import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailView
 import de.hsb.vibeify.ui.profile.ProfileView
 import de.hsb.vibeify.ui.register.RegisterView
 import de.hsb.vibeify.ui.search.SearchView
+import java.net.URLDecoder
 
 
 @Composable
@@ -170,9 +171,10 @@ fun RootNavHost() {
                 arguments = listOf(navArgument("playlistId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val playlistId = backStackEntry.arguments?.getString("playlistId") ?: ""
+                val urlDecodeId = URLDecoder.decode(playlistId, "UTF-8")
                 PlaylistDetailView(
                     modifier = Modifier,
-                    playlistId = playlistId,
+                    playlistId = urlDecodeId,
                     navController = navController
                 )
             }

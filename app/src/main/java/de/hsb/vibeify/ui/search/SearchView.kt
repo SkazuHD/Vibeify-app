@@ -17,6 +17,7 @@ import de.hsb.vibeify.ui.player.PlaybackViewModel
 import de.hsb.vibeify.ui.search.discovery.DiscoverySection
 import de.hsb.vibeify.ui.search.searchbar.SearchbarViewModel
 import de.hsb.vibeify.ui.search.searchbar.SimpleSearchBar
+import java.net.URLEncoder
 
 @Composable
 fun SearchView(
@@ -52,7 +53,14 @@ fun SearchView(
                         vm2.play(song)
                     },
                     onGenreClick = { genre ->
-                        navController?.navigate("playlist_detail_view/genre_${genre.name}")
+                        navController?.navigate(
+                            "playlist_detail_view/genre_${
+                                URLEncoder.encode(
+                                    genre.name,
+                                    "UTF-8"
+                                )
+                            }"
+                        )
                         vm.clearSearchResults()
                     },
                     onClose = {
@@ -71,7 +79,14 @@ fun SearchView(
                     navController?.navigate("playlist_detail_view/${playlist.id}")
                 },
                 onGenreClick = { genre ->
-                    navController?.navigate("playlist_detail_view/genre_$genre")
+                    navController?.navigate(
+                        "playlist_detail_view/genre_${
+                            URLEncoder.encode(
+                                genre.name,
+                                "UTF-8"
+                            )
+                        }"
+                    )
                 }
             )
 

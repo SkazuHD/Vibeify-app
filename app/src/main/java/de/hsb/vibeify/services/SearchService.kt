@@ -6,6 +6,7 @@ import de.hsb.vibeify.data.model.Artist
 import de.hsb.vibeify.data.model.Genre
 import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.model.Song
+import de.hsb.vibeify.data.model.User
 import de.hsb.vibeify.data.repository.ArtistRepository
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.SongRepository
@@ -24,9 +25,9 @@ data class SearchResult(
     val playlists: List<Playlist> = emptyList(),
     val artists: List<Artist> = emptyList(),
     val albums: List<Album> = emptyList(),
-    val genres: List<Genre> = emptyList()
+    val genres: List<Genre> = emptyList(),
+    val profiles: List<User> = emptyList()
 )
-
 
 interface SearchService {
     suspend fun search(query: String): SearchResult
@@ -64,13 +65,17 @@ class SearchServiceImpl @Inject constructor(
                     genre.name.contains(query, ignoreCase = true)
                 }
             }
+            val profilesDeferred = async {
+                userRepository.searchUsers(query)
+            }
 
             val res = SearchResult(
                 songs = songsDeferred.await(),
                 playlists = playlistsDeferred.await(),
                 artists = artistsDeferred.await(),
                 albums = emptyList(),
-                genres = genresDeferred.await()
+                genres = genresDeferred.await(),
+                profiles = profilesDeferred.await()
             )
             val sortedResult = sortByRelevance(res, query)
             Log.d(
@@ -109,12 +114,16 @@ class SearchServiceImpl @Inject constructor(
         val sortedGenres = searchResult.genres.sortedByDescending { genre ->
             genre.name.lowercase().indexOf(lowerQuery)
         }
+        val sortedProfiles = searchResult.profiles.sortedByDescending { profile ->
+            profile.name.lowercase().indexOf(lowerQuery)
+        }
 
         return searchResult.copy(
             songs = sortedSongs,
             playlists = sortedPlaylists,
             artists = sortedArtists,
-            genres = sortedGenres
+            genres = sortedGenres,
+            profiles = sortedProfiles
         )
     }
 

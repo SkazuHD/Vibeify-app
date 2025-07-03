@@ -3,6 +3,7 @@ package de.hsb.vibeify.data.repository
 import android.util.Log
 import androidx.core.net.toUri
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
 import de.hsb.vibeify.api.generated.apis.DefaultApi
 import de.hsb.vibeify.api.retrofit2.src.main.kotlin.de.hsb.vibeify.api.generated.infrastructure.ApiClient
@@ -35,6 +36,8 @@ interface UserRepository {
     suspend fun getUsers(): List<User>
     suspend fun insertUser(user: User): User?
     suspend fun getUserById(userId: String): User?
+
+    suspend fun searchUsers(query: String): List<User>
     fun isPlaylistFavorite(playlistId: String): Boolean
     suspend fun removePlaylistFromFavorites(playlistId: String)
     suspend fun addPlaylistToFavorites(playlistId: String)
@@ -46,6 +49,10 @@ interface UserRepository {
     suspend fun uploadPhoto(id: String, imageUrl: String): String
     suspend fun addRecentSearch(searchTerm: String)
     suspend fun addRecentActivity(activity: RecentActivity)
+
+    suspend fun getFollowers(userId: String): List<User>
+
+    suspend fun getFollowing(userId: String): List<User>
     val state: StateFlow<UserRepositoryState>
 }
 
@@ -131,6 +138,24 @@ class UserRepositoryImpl @Inject constructor(
                 Log.e("FirestoreRepository", "Error adding user: $e")
             }.await()
         return getUserById(user.id)
+    }
+
+    override suspend fun searchUsers(query: String): List<User> {
+        Log.d("UserRepository", "searchUsers called with query: $query")
+        val res = db.collection(collectionName).where(
+
+            Filter.and(
+                Filter.greaterThanOrEqualTo("email", query),
+                Filter.lessThanOrEqualTo("email", query + "\uf8ff")
+            )
+
+        ).get().await()
+        Log.d("UserRepository", "searchUsers result size: ${res.size()}")
+        if (res.isEmpty) {
+            return emptyList()
+        }
+
+        return res.documents.mapNotNull { it.toObject(User::class.java) }
     }
 
     override fun getLikedSongIds(): List<String> {
@@ -270,5 +295,37 @@ class UserRepositoryImpl @Inject constructor(
                 )
             )
         }
+    }
+
+    override suspend fun getFollowers(userId: String): List<User> {
+        val followers = _state.value.currentUser?.followers ?: emptyList()
+        if (followers.isEmpty()) {
+            Log.d("UserRepository", "No followers found for user: $userId")
+            return emptyList()
+        }
+        Log.d("UserRepository", "getFollowers called for user: $userId, followers: $followers")
+        val res = db.collection(collectionName)
+            .whereIn("id", followers)
+            .get()
+            .await()
+        Log.d("UserRepository", "getFollowers result size: ${res.size()}")
+        return res.documents.mapNotNull { it.toObject(User::class.java) }
+            .sortedByDescending { it.recentActivities.firstOrNull()?.timestamp ?: 0L }
+    }
+
+    override suspend fun getFollowing(userId: String): List<User> {
+        val following = _state.value.currentUser?.following ?: emptyList()
+        if (following.isEmpty()) {
+            Log.d("UserRepository", "No following found for user: $userId")
+            return emptyList()
+        }
+        Log.d("UserRepository", "getFollowing called for user: $userId, following: $following")
+        val res = db.collection(collectionName)
+            .whereIn("id", following)
+            .get()
+            .await()
+        Log.d("UserRepository", "getFollowing result size: ${res.size()}")
+        return res.documents.mapNotNull { it.toObject(User::class.java) }
+            .sortedByDescending { it.recentActivities.firstOrNull()?.timestamp ?: 0L }
     }
 }

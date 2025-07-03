@@ -33,9 +33,11 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.hsb.vibeify.data.model.Artist
 import de.hsb.vibeify.data.model.Genre
 import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.model.Song
+import de.hsb.vibeify.data.model.User
 import de.hsb.vibeify.services.SearchResult
 import de.hsb.vibeify.ui.components.LoadingIndicator
 import de.hsb.vibeify.ui.components.PlaylistCard
@@ -54,6 +56,8 @@ fun SimpleSearchBar(
     onPlaylistClick: (Playlist) -> Unit = {},
     onSongClick: (Song) -> Unit = {},
     onGenreClick: (Genre) -> Unit = {},
+    onProfileClick: (User) -> Unit = {},
+    onArtistClick : (Artist) -> Unit = {},
     onClose: () -> Unit = {},
     playbackViewModel: PlaybackViewModel = hiltViewModel(),
 ) {
@@ -64,6 +68,7 @@ fun SimpleSearchBar(
     var showAllPlaylists by rememberSaveable { mutableStateOf(false) }
     var showAllAlbums by rememberSaveable { mutableStateOf(false) }
     var showAllGenres by rememberSaveable { mutableStateOf(false) }
+    var showAllProfiles by rememberSaveable { mutableStateOf(false) }
 
     val resultLimit = 3
 
@@ -216,7 +221,13 @@ fun SimpleSearchBar(
                         searchResults.artists.take(if (showAllArtists) Int.MAX_VALUE else resultLimit)
                             .forEach { artist ->
                                 ListItem(
-                                    modifier = Modifier,
+                                    modifier = Modifier.clickable(
+                                        onClick = {
+                                            onArtistClick(artist)
+                                            expanded = false
+                                            textFieldState.edit { replace(0, length, "") }
+                                        }
+                                    ),
                                     headlineContent = { Text(artist.name) },
                                     trailingContent = { Text("View Artist") }
                                 )
@@ -281,6 +292,35 @@ fun SimpleSearchBar(
                                 text = "Show all ${searchResults.albums.size} albums",
                                 modifier = Modifier
                                     .clickable { showAllAlbums = true }
+                                    .padding(16.dp),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                    if(searchResults.profiles.isNotEmpty()) {
+                        ListItem(
+                            modifier = Modifier.semantics { traversalIndex = 4f },
+                            headlineContent = { Text("Profiles") },
+                            trailingContent = { Text("${searchResults.profiles.size} results") }
+                        )
+                        searchResults.profiles.take(if (showAllProfiles) Int.MAX_VALUE else resultLimit)
+                            .forEach { profile ->
+                                ListItem(
+                                    modifier = Modifier
+                                        .clickable {
+                                            onProfileClick(profile)
+                                            expanded = false
+                                            textFieldState.edit { replace(0, length, "") }
+                                        },
+                                    headlineContent = { Text(profile.name) },
+                                    trailingContent = { Text("View Profile") }
+                                )
+                            }
+                        if (!showAllProfiles && searchResults.profiles.size > resultLimit) {
+                            Text(
+                                text = "Show all ${searchResults.profiles.size} profiles",
+                                modifier = Modifier
+                                    .clickable { showAllProfiles = true }
                                     .padding(16.dp),
                                 style = MaterialTheme.typography.bodyMedium
                             )

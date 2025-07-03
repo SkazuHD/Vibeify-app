@@ -20,15 +20,12 @@ class ArtistRepositoryImpl @Inject constructor(
     private var cachedArtists: List<Artist>? = null
 
     private suspend fun getArtistsFromSongs(): List<Artist> {
-        // Cache prüfen
         if (cachedArtists != null) {
             return cachedArtists!!
         }
 
-        // Alle Songs holen
         val allSongs = songRepository.getAllSongs()
 
-        // Nach Künstlern gruppieren
         val artistMap = allSongs
             .filter { !it.artist.isNullOrBlank() }
             .groupBy { it.artist!! }
@@ -46,14 +43,17 @@ class ArtistRepositoryImpl @Inject constructor(
                 )
             }
 
-        // Cache setzen
         cachedArtists = artistMap
 
         return artistMap
     }
 
     private fun generateArtistId(artistName: String): String {
-        return "artist_${artistName.lowercase().replace(" ", "_")}_${UUID.nameUUIDFromBytes(artistName.toByteArray()).toString().take(8)}"
+        return "artist_${artistName.lowercase().replace(" ", "_")}_${
+            UUID.nameUUIDFromBytes(
+                artistName.toByteArray()
+            ).toString().take(8)
+        }"
     }
 
     override suspend fun getArtistById(id: String): Artist? {

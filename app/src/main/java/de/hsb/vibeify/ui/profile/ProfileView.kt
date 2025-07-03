@@ -1,5 +1,6 @@
 package de.hsb.vibeify.ui.profile
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,8 @@ fun ProfileView(
     val playlists = viewModel.playlists
 
     val openDialog = remember { mutableStateOf(false) }
+    val openFollowDialog = remember { mutableStateOf(false) }
+    val openFollowersDialog = remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -59,6 +62,22 @@ fun ProfileView(
 
             openDialog.value -> {
                 EditProfileDialog(onDismiss = { openDialog.value = false })
+            }
+
+            openFollowDialog.value -> {
+                FollowDialog(
+                    onDismissRequest = { openFollowDialog.value = false },
+                    user = uiState.user,
+                    followType = FollowType.FOLLOWING,
+                )
+            }
+
+            openFollowersDialog.value -> {
+                FollowDialog(
+                    onDismissRequest = { openFollowersDialog.value = false },
+                    user = uiState.user,
+                    followType = FollowType.FOLLOWERS,
+                )
             }
 
             else -> {
@@ -96,12 +115,24 @@ fun ProfileView(
                                 Text(
                                     "Followers: ${user.followers.size}",
                                     fontSize = 14.sp,
-                                    modifier = Modifier.padding(start = 8.dp)
+                                    modifier = Modifier
+                                        .padding(start = 8.dp)
+                                        .clickable(
+                                            onClick = {
+                                                openFollowersDialog.value = true
+                                            }
+                                        )
                                 )
                                 Text(
                                     "Following: ${user.following.size}",
                                     fontSize = 14.sp,
-                                    modifier = Modifier.padding(start = 8.dp)
+                                    modifier = Modifier
+                                        .padding(start = 8.dp)
+                                        .clickable(
+                                            onClick = {
+                                                openFollowDialog.value = true
+                                            }
+                                        )
                                 )
                             }
                         }

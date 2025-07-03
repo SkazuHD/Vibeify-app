@@ -128,6 +128,7 @@ class PresenceService @OptIn(UnstableApi::class)
         currentUserId?.let { userId ->
             scope.launch {
                 setUserOffline(userId)
+                updateCurrentlyPlaying(userId, null)
             }
         }
         cleanup()

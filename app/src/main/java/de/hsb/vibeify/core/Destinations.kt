@@ -20,7 +20,7 @@ enum class Destinations(val route: String) {
     SearchView("search_view"),
     ProfileView("profile_view/{userId}"),
 
-    PublicPlaylistView("public_playlist_view/{playlistId}"),
+    PublicProfileView("public_profile/{userId}"),
 
     PlaybackView("playback_view"),
 

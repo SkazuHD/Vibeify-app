@@ -49,10 +49,6 @@ interface UserRepository {
     suspend fun uploadPhoto(id: String, imageUrl: String): String
     suspend fun addRecentSearch(searchTerm: String)
     suspend fun addRecentActivity(activity: RecentActivity)
-
-    suspend fun getFollowers(userId: String): List<User>
-
-    suspend fun getFollowing(userId: String): List<User>
     val state: StateFlow<UserRepositoryState>
 }
 
@@ -297,35 +293,4 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getFollowers(userId: String): List<User> {
-        val followers = _state.value.currentUser?.followers ?: emptyList()
-        if (followers.isEmpty()) {
-            Log.d("UserRepository", "No followers found for user: $userId")
-            return emptyList()
-        }
-        Log.d("UserRepository", "getFollowers called for user: $userId, followers: $followers")
-        val res = db.collection(collectionName)
-            .whereIn("id", followers)
-            .get()
-            .await()
-        Log.d("UserRepository", "getFollowers result size: ${res.size()}")
-        return res.documents.mapNotNull { it.toObject(User::class.java) }
-            .sortedByDescending { it.recentActivities.firstOrNull()?.timestamp ?: 0L }
-    }
-
-    override suspend fun getFollowing(userId: String): List<User> {
-        val following = _state.value.currentUser?.following ?: emptyList()
-        if (following.isEmpty()) {
-            Log.d("UserRepository", "No following found for user: $userId")
-            return emptyList()
-        }
-        Log.d("UserRepository", "getFollowing called for user: $userId, following: $following")
-        val res = db.collection(collectionName)
-            .whereIn("id", following)
-            .get()
-            .await()
-        Log.d("UserRepository", "getFollowing result size: ${res.size()}")
-        return res.documents.mapNotNull { it.toObject(User::class.java) }
-            .sortedByDescending { it.recentActivities.firstOrNull()?.timestamp ?: 0L }
-    }
 }

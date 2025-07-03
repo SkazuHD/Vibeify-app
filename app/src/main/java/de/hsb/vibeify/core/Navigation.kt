@@ -168,7 +168,7 @@ fun RootNavHost() {
                 }
             }
             composable(
-                route = Destinations.PublicPlaylistView.route,
+                route = Destinations.PublicProfileView.route,
                 arguments = listOf(navArgument("userId") { type = NavType.StringType })
             ) {
                 PublicProfileView(

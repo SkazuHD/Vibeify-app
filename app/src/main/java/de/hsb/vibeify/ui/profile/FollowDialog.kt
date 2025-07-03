@@ -1,5 +1,7 @@
 package de.hsb.vibeify.ui.profile
 
+import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +29,7 @@ fun FollowDialog(
     followType: FollowType,
     user: User?,
     modifier: Modifier = Modifier,
+    onProfileClick: (User) -> Unit = {},
     onDismissRequest: () -> Unit,
     followDialogViewModel: FollowDialogViewModel = hiltViewModel()
 ) {
@@ -84,13 +87,21 @@ fun FollowDialog(
                     ) {
                         items(followList) { followUser ->
                             ListItem(
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(
+                                        onClick = {
+                                            Log.d("FollowDialog", "Clicked on ${followUser.name}")
+                                            onProfileClick(followUser)
+                                        }
+                                    ),
                                 headlineContent = {
                                     Text(
                                         text = followUser.name.ifBlank { followUser.email },
                                         style = MaterialTheme.typography.bodyLarge
                                     )
                                 },
+
                                 leadingContent = {
                                     Avatar(
                                         imageUrl = followUser.imageUrl,

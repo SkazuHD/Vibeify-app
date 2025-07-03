@@ -5,7 +5,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.data.model.User
 import de.hsb.vibeify.data.repository.UserRepository
+import de.hsb.vibeify.services.FollowService
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,19 +20,30 @@ FollowType {
 
 @HiltViewModel
 class FollowDialogViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val followService: FollowService
 ) : ViewModel() {
 
-    val followList = MutableStateFlow<List<User>>(emptyList())
+    private val _followList = MutableStateFlow<List<User>>(emptyList())
+    val followList: StateFlow<List<User>> = _followList.asStateFlow()
 
     fun loadFollowList(userId: String, type: FollowType) {
         viewModelScope.launch {
-            val flow = when (type) {
-                FollowType.FOLLOWING -> userRepository.getFollowing(userId)
-                FollowType.FOLLOWERS -> userRepository.getFollowers(userId)
+            val userIds = when (type) {
+                FollowType.FOLLOWING -> followService.getFollowing(userId)
+                FollowType.FOLLOWERS -> followService.getFollowers(userId)
             }
-            followList.value = flow
 
+            // Convert user IDs to User objects
+            val users = userIds.mapNotNull { userId ->
+                try {
+                    userRepository.getUserById(userId)
+                } catch (e: Exception) {
+                    null
+                }
+            }
+
+            _followList.value = users
         }
     }
 

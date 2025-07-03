@@ -7,8 +7,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.media3.common.util.UnstableApi
 import de.hsb.vibeify.data.model.Song
-import de.hsb.vibeify.data.repository.PresenceRepository
 import de.hsb.vibeify.data.repository.UserRepository
+import de.hsb.vibeify.data.repository.UserStatusRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -23,7 +23,7 @@ class PresenceService @OptIn(UnstableApi::class)
 @Inject constructor(
     private val userRepository: UserRepository,
     private val playerService: PlayerServiceV2,
-    private val presenceRepository: PresenceRepository
+    private val presenceRepository: UserStatusRepository
 ) : DefaultLifecycleObserver {
 
     companion object {

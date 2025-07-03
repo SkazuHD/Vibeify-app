@@ -43,6 +43,9 @@ fun PublicProfileView(
 
     val uiState = viewModel.uiState.collectAsState().value
     val playlists = uiState.playlists
+    val isFollowing = viewModel.isFollowing.collectAsState(initial = false).value
+    val followers = viewModel.followersFlow.collectAsState().value
+    val following = viewModel.followingFlow.collectAsState().value
 
     Column(
         modifier = modifier
@@ -91,23 +94,29 @@ fun PublicProfileView(
                             )
                             Row {
                                 Text(
-                                    "Followers: ${user.followers.size}",
+                                    "Followers: ${followers.size}",
                                     fontSize = 14.sp,
                                     modifier = Modifier.padding(start = 8.dp)
                                 )
                                 Text(
-                                    "Following: ${user.following.size}",
+                                    "Following: ${following.size}",
                                     fontSize = 14.sp,
                                     modifier = Modifier.padding(start = 8.dp)
                                 )
                             }
+
+
                         }
                     }
                 }
                 Row {
                     Button(
                         onClick = {
-                            // Handle follow action here
+                            if (isFollowing) {
+                                viewModel.unfollowUser(userId)
+                            } else {
+                                viewModel.followUser(userId)
+                            }
                         },
                         modifier = Modifier
                             .padding(end = 8.dp, start = 26.dp)
@@ -117,7 +126,7 @@ fun PublicProfileView(
 
                     ) {
                         Text(
-                            text = "Follow",
+                            text = if (isFollowing) "Unfollow" else "Follow",
                             fontSize = 14.sp
                         )
 
@@ -161,5 +170,4 @@ fun PublicProfileView(
             }
         }
     }
-
 }

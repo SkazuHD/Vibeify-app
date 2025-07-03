@@ -9,8 +9,6 @@ data class User(
     val likedSongs: List<String> = emptyList(),
     val recentActivities: List<RecentActivity> = emptyList(),
     val recentSearches: List<String> = emptyList(),
-    val followers: List<String> = emptyList(),
-    val following: List<String> = emptyList(),
 ) {
     fun isNewUser(): Boolean {
         return recentActivities.isEmpty()

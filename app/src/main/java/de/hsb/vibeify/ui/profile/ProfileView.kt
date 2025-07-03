@@ -1,5 +1,6 @@
 package de.hsb.vibeify.ui.profile
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +42,8 @@ fun ProfileView(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val playlists = viewModel.playlists
+    val followers = viewModel.followersFlow.collectAsState().value
+    val following = viewModel.followingFlow.collectAsState().value
 
     val openDialog = remember { mutableStateOf(false) }
     val openFollowDialog = remember { mutableStateOf(false) }
@@ -69,6 +72,11 @@ fun ProfileView(
                     onDismissRequest = { openFollowDialog.value = false },
                     user = uiState.user,
                     followType = FollowType.FOLLOWING,
+                    onProfileClick = { user ->
+                        Log.d("ProfileView", "onProfileClick: $user")
+                        openFollowDialog.value = false
+                        navController.navigate("public_profile/${user.id}")
+                    }
                 )
             }
 
@@ -77,6 +85,13 @@ fun ProfileView(
                     onDismissRequest = { openFollowersDialog.value = false },
                     user = uiState.user,
                     followType = FollowType.FOLLOWERS,
+                    onProfileClick = { user ->
+
+                        Log.d("ProfileView", "onProfileClick: $user")
+                        openFollowersDialog.value = false
+                        navController.navigate("public_profile/${user.id}")
+
+                    }
                 )
             }
 
@@ -113,7 +128,7 @@ fun ProfileView(
                             )
                             Row {
                                 Text(
-                                    "Followers: ${user.followers.size}",
+                                    "Followers: ${followers.size}",
                                     fontSize = 14.sp,
                                     modifier = Modifier
                                         .padding(start = 8.dp)
@@ -124,7 +139,7 @@ fun ProfileView(
                                         )
                                 )
                                 Text(
-                                    "Following: ${user.following.size}",
+                                    "Following: ${following.size}",
                                     fontSize = 14.sp,
                                     modifier = Modifier
                                         .padding(start = 8.dp)

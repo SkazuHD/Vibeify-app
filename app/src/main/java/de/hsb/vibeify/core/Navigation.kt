@@ -43,6 +43,7 @@ import de.hsb.vibeify.ui.login.LoginView
 import de.hsb.vibeify.ui.playlist.PlaylistView
 import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailView
 import de.hsb.vibeify.ui.profile.ProfileView
+import de.hsb.vibeify.ui.publicProfile.PublicProfileView
 import de.hsb.vibeify.ui.register.RegisterView
 import de.hsb.vibeify.ui.search.SearchView
 import java.net.URLDecoder
@@ -165,6 +166,16 @@ fun RootNavHost() {
                         NavbarDestinations.PROFILE -> ProfileView(navController = navController)
                     }
                 }
+            }
+            composable(
+                route = Destinations.PublicPlaylistView.route,
+                arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            ) {
+                PublicProfileView(
+                    modifier = Modifier,
+                    navController = navController,
+                    userId = it.arguments?.getString("userId") ?: ""
+                )
             }
             composable(
                 route = Destinations.PlaylistDetailView.route,

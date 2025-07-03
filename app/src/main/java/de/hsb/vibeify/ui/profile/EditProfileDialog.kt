@@ -3,14 +3,10 @@ package de.hsb.vibeify.ui.profile
 import android.provider.Contacts
 import androidx.annotation.OptIn
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.input.TextFieldState
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,12 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.media3.common.util.Log
 import androidx.media3.common.util.UnstableApi
-import de.hsb.vibeify.ui.components.Avatar
 import de.hsb.vibeify.ui.components.photoPicker.PickPhoto
 
 @OptIn(UnstableApi::class)

@@ -32,7 +32,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import de.hsb.vibeify.core.navigation.NavigationDestination
+import de.hsb.vibeify.core.navigation.bottomNavDestinations
 import de.hsb.vibeify.core.navigation.rememberVibeifyNavigationController
+import de.hsb.vibeify.core.navigation.urlDecode
 import de.hsb.vibeify.ui.components.AppHeader.AppHeader
 import de.hsb.vibeify.ui.components.StickyBar.StickyBar
 import de.hsb.vibeify.ui.home.MainView
@@ -43,7 +45,6 @@ import de.hsb.vibeify.ui.profile.ProfileView
 import de.hsb.vibeify.ui.publicProfile.PublicProfileView
 import de.hsb.vibeify.ui.register.RegisterView
 import de.hsb.vibeify.ui.search.SearchView
-import java.net.URLDecoder
 
 @Composable
 fun AppRouter(authViewModel: AuthViewModel = hiltViewModel()) {
@@ -174,7 +175,7 @@ private fun AuthenticatedNavigation() {
                 arguments = listOf(navArgument("playlistId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val playlistId = backStackEntry.arguments?.getString("playlistId") ?: ""
-                val urlDecodedId = URLDecoder.decode(playlistId, "UTF-8")
+                val urlDecodedId = playlistId.urlDecode()
                 PlaylistDetailView(
                     modifier = Modifier,
                     playlistId = urlDecodedId,
@@ -196,13 +197,6 @@ private fun BottomNavigationBar(
     currentDestination: NavigationDestination?,
     onNavigate: (NavigationDestination.Main) -> Unit
 ) {
-    val bottomNavDestinations = listOf(
-        NavigationDestination.Main.Home,
-        NavigationDestination.Main.Search,
-        NavigationDestination.Main.Playlists,
-        NavigationDestination.Main.Profile
-    )
-
     NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
         bottomNavDestinations.forEach { destination ->
             val isSelected = when (currentDestination) {

@@ -71,7 +71,6 @@ dependencies {
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.coil.compose)
     implementation(libs.androidx.hilt.navigation.compose)
-    implementation(libs.material.icons.extended)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -82,20 +81,20 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     // KotlinTest für die generierten Tests
-    testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
-    testImplementation("io.kotlintest:kotlintest-assertions:3.4.2")
-    testImplementation("io.kotlintest:kotlintest-core:3.4.2")
+    testImplementation(libs.kotlintest.runner.junit5)
+    testImplementation(libs.kotlintest.assertions)
+    testImplementation(libs.kotlintest.core)
 
     // Retrofit für API-Calls
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation(libs.retrofit)
+    implementation(libs.logging.interceptor)
+    implementation(libs.converter.scalars)
+
 
     // Moshi für JSON-Serialisierung (vom OpenAPI Generator benötigt)
-    implementation("com.squareup.moshi:moshi:1.15.0")
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    implementation(libs.moshi)
+    implementation(libs.moshi.kotlin)
+    implementation(libs.converter.moshi)
 
     // lifecycle
     implementation(libs.androidx.lifecycle.process)

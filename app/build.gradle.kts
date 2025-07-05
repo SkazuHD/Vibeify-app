@@ -11,6 +11,10 @@ android {
     namespace = "de.hsb.vibeify"
     compileSdk = 36
 
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.15"
+    }
+
     defaultConfig {
         applicationId = "de.hsb.vibeify"
         minSdk = 30
@@ -81,6 +85,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.kotlinx.coroutines.android)
 
+
     // KotlinTest für die generierten Tests
     testImplementation("io.kotlintest:kotlintest-runner-junit5:3.4.2")
     testImplementation("io.kotlintest:kotlintest-assertions:3.4.2")
@@ -91,6 +96,13 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // For AppWidgets support
+    implementation("androidx.glance:glance-appwidget:1.1.1")
+    // For interop APIs with Material 3
+    implementation("androidx.glance:glance-material3:1.1.1")
+    // For interop APIs with Material 2
+    implementation("androidx.glance:glance-material:1.1.1")
 
     // Moshi für JSON-Serialisierung (vom OpenAPI Generator benötigt)
     implementation("com.squareup.moshi:moshi:1.15.0")

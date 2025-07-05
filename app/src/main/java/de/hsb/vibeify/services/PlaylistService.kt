@@ -38,6 +38,7 @@ interface PlaylistService {
     suspend fun getPlaylistDetail(playlistId: String): PlaylistDetailData?
     suspend fun createPlaylist(title: String, description: String, userId: String): Playlist
 
+    suspend fun isPlaylistLiked(playlistId: String): Boolean
     suspend fun removePlaylist(playlistId: String): Boolean
     suspend fun togglePlaylistFavorite(playlistId: String): Boolean
     suspend fun addSongToPlaylist(playlistId: String, songId: String)
@@ -101,6 +102,16 @@ class PlaylistServiceImpl @Inject constructor(
         } else {
             emptyList()
         }
+    }
+
+    override suspend fun isPlaylistLiked(playlistId: String): Boolean {
+        val playlist = playlistRepository.getPlaylistById(playlistId)
+        playlist?.let { playlistData ->
+            val isOwner = userRepository.state.value.currentUser?.id == playlistData.userId
+            val isFavorite = userRepository.isPlaylistFavorite(playlistId)
+            return isFavorite && !isOwner
+        }
+        return false
     }
 
     override suspend fun getPlaylistDetail(playlistId: String): PlaylistDetailData? {

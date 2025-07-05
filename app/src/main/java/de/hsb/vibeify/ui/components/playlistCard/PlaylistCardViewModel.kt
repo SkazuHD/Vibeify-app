@@ -10,14 +10,9 @@ import javax.inject.Inject
 class PlaylistCardViewModel @Inject constructor(
     private val playlistService: PlaylistService,
 ) : ViewModel() {
-
     fun isPlaylistFavorite(playlistId: String): Boolean {
         return runBlocking {
-            playlistService.getPlaylistDetail(playlistId)?.let { playlist ->
-                playlist.isFavorite && !playlist.isOwner
-            } ?: false
+            return@runBlocking playlistService.isPlaylistLiked(playlistId)
         }
     }
-
-
 }

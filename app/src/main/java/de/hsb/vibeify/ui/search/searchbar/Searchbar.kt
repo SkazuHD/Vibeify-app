@@ -40,7 +40,7 @@ import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.model.User
 import de.hsb.vibeify.services.SearchResult
 import de.hsb.vibeify.ui.components.LoadingIndicator
-import de.hsb.vibeify.ui.components.PlaylistCard
+import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 
@@ -57,7 +57,7 @@ fun SimpleSearchBar(
     onSongClick: (Song) -> Unit = {},
     onGenreClick: (Genre) -> Unit = {},
     onProfileClick: (User) -> Unit = {},
-    onArtistClick : (Artist) -> Unit = {},
+    onArtistClick: (Artist) -> Unit = {},
     onClose: () -> Unit = {},
     playbackViewModel: PlaybackViewModel = hiltViewModel(),
 ) {
@@ -260,6 +260,7 @@ fun SimpleSearchBar(
                                         },
                                     playlistDescription = playlist.description ?: "No description",
                                     playlistName = playlist.title,
+                                    playlistId = playlist.id,
                                     shape = RoundedCornerShape(0.dp),
                                 )
                             }
@@ -297,7 +298,7 @@ fun SimpleSearchBar(
                             )
                         }
                     }
-                    if(searchResults.profiles.isNotEmpty()) {
+                    if (searchResults.profiles.isNotEmpty()) {
                         ListItem(
                             modifier = Modifier.semantics { traversalIndex = 4f },
                             headlineContent = { Text("Profiles") },

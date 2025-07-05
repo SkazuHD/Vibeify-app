@@ -23,10 +23,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.testing.TestNavHostController
 import de.hsb.vibeify.R
-import de.hsb.vibeify.ui.components.PlaylistCard
+import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
 
 @Composable
-fun PlaylistView(modifier : Modifier = Modifier, navController: NavController, viewModel: PlaylistViewModel = hiltViewModel()) {
+fun PlaylistView(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    viewModel: PlaylistViewModel = hiltViewModel()
+) {
 
     val playlists = viewModel.playlists.collectAsState()
     val openDialog = remember { mutableStateOf(false) }
@@ -34,7 +38,7 @@ fun PlaylistView(modifier : Modifier = Modifier, navController: NavController, v
     Box(modifier = modifier) {
 
 
-        when{
+        when {
             openDialog.value -> {
                 CreatePlaylistDialog(onDismissRequest = {
                     openDialog.value = false
@@ -78,6 +82,7 @@ fun PlaylistView(modifier : Modifier = Modifier, navController: NavController, v
                         playlistDescription = playlist.description ?: "",
                         playlistName = playlist.title,
                         playlistIcon = playlist.imagePath ?: R.drawable.ic_launcher_foreground,
+                        playlistId = playlist.id,
                         onClick = {
                             navController.navigate("playlist_detail_view/${playlist.id}")
                         }

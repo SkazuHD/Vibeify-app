@@ -31,7 +31,7 @@ import androidx.navigation.NavController
 import de.hsb.vibeify.R
 import de.hsb.vibeify.core.AuthViewModel
 import de.hsb.vibeify.ui.components.Avatar
-import de.hsb.vibeify.ui.components.PlaylistCard
+import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
 
 @Composable
 fun ProfileView(
@@ -199,6 +199,7 @@ fun ProfileView(
                                     playlistName = it.title,
                                     playlistIcon = it.imagePath
                                         ?: R.drawable.ic_launcher_foreground,
+                                    playlistId = it.id,
                                     onClick = {
                                         navController.navigate("playlist_detail_view/${it.id}")
                                     }

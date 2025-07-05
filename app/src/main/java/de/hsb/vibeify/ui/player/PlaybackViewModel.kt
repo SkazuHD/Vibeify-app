@@ -1,17 +1,21 @@
 package de.hsb.vibeify.ui.player
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.data.model.Song
+import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.services.PlayerServiceV2
 import jakarta.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class PlaybackViewModel @Inject constructor(
-    private val playerServiceV2: PlayerServiceV2
+    private val playerServiceV2: PlayerServiceV2,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
 
@@ -28,6 +32,15 @@ class PlaybackViewModel @Inject constructor(
 
     val upcomingSongs = playerServiceV2.upcomingSongs
     val currentSongList = playerServiceV2.currentSongList
+
+    val isCurrentSongFavorite = combine(
+        _currentSong,
+        userRepository.state
+    ) { currentSong, userState ->
+        currentSong?.let { song ->
+            userRepository.isSongFavorite(song.id)
+        } ?: false
+    }
 
     enum class PlaybackMode {
         SHUFFLE, NONE
@@ -67,11 +80,13 @@ class PlaybackViewModel @Inject constructor(
             playerServiceV2.play(song)
         }
     }
-    fun play(songs: List<Song>, startIndex: Int = 0, playlistId : String? = null) {
+
+    fun play(songs: List<Song>, startIndex: Int = 0, playlistId: String? = null) {
         viewModelScope.launch {
             playerServiceV2.play(songs, startIndex, playlistId)
         }
     }
+
     fun resume() {
         playerServiceV2.resume()
     }
@@ -79,6 +94,7 @@ class PlaybackViewModel @Inject constructor(
     fun skipToNext() {
         playerServiceV2.skipToNext()
     }
+
     fun skipToPrevious() {
         playerServiceV2.skipToPrevious()
     }
@@ -100,7 +116,21 @@ class PlaybackViewModel @Inject constructor(
         playerServiceV2.toggleRepeatMode()
     }
 
-    override fun onCleared() {
-        super.onCleared()
+    fun toggleFavorite() {
+        _currentSong.value?.let { song ->
+            viewModelScope.launch {
+                if (userRepository.isSongFavorite(song.id)) {
+                    userRepository.removeSongFromFavorites(song.id)
+                } else {
+                    userRepository.addSongToFavorites(song.id)
+                }
+            }
+        }
     }
+
+    fun isSongFavorite(song: Song): Boolean {
+        return userRepository.isSongFavorite(song.id)
+    }
+
+
 }

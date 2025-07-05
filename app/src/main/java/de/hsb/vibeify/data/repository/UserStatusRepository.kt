@@ -148,7 +148,6 @@ class UserStatusRepository @Inject constructor(
         }
     }
 
-    // Getters
     suspend fun isUserOnline(userId: String): Boolean {
         return try {
             val userRef = database.getReference("$USERS_PATH/$userId/$ONLINE_PATH")

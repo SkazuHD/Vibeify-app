@@ -1,6 +1,5 @@
 package de.hsb.vibeify.services
 
-import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.data.repository.UserStatusRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +11,6 @@ import javax.inject.Singleton
 
 @Singleton
 class FollowService @Inject constructor(
-    private val userRepository: UserRepository,
     private val userStatusRepository: UserStatusRepository,
 ) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())

@@ -92,7 +92,6 @@ class PlaylistServiceImpl @Inject constructor(
 
     override suspend fun getPlaylistCreatedByUser(userId: String): List<Playlist> {
         return playlistRepository.getPlaylistsByUserId(userId)
-
     }
 
     override suspend fun getPlaylistsCreatedByCurrentUser(): List<Playlist> {

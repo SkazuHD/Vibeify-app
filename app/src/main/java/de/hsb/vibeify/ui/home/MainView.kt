@@ -22,8 +22,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import de.hsb.vibeify.R
 import de.hsb.vibeify.ui.components.LoadingIndicator
-import de.hsb.vibeify.ui.components.PlaylistCard
 import de.hsb.vibeify.ui.components.SurpriseCard
+import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 
 @Composable
@@ -137,6 +137,7 @@ fun RecentActivityGrid(
                         playlistIcon = activityItem.playlist.imagePath
                             ?: R.drawable.ic_launcher_foreground,
                         modifier = Modifier.weight(1f),
+                        playlistId = activityItem.playlist.id,
                         onClick = {
                             navController.navigate("playlist_detail_view/${activityItem.playlist.id}")
                         }

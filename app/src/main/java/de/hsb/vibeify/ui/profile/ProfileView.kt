@@ -24,6 +24,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -125,6 +127,7 @@ fun ProfileView(
                                 text = user.name.ifBlank { user.email },
                                 modifier = Modifier.padding(start = 8.dp),
                                 fontSize = 24.sp,
+                                style = TextStyle.Default.copy(lineBreak = LineBreak.Paragraph.copy(strategy = LineBreak.Strategy.Balanced))
                             )
                             Row {
                                 Text(

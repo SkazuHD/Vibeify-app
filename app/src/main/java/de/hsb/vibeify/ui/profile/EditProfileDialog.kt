@@ -60,11 +60,11 @@ fun EditProfileDialog(
                     onValueChange = { name.value = it },
                     label = { Text("Name") },
                     modifier = Modifier.padding(vertical = 16.dp),
-                    isError = name.value.length > 12,
+                    isError = name.value.length > 32,
                     supportingText = {
-                        if (name.value.length > 12) {
+                        if (name.value.length > 32) {
                             Text(
-                                text ="Limit: ${name.value.length}/12",
+                                text ="Limit: ${name.value.length}/32",
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
@@ -72,7 +72,7 @@ fun EditProfileDialog(
                 )
                 Button(
                     onClick = {
-                        if (name.value.length > 12){
+                        if (name.value.length > 32){
                             return@Button
                         }
                         viewModel.onSave(name.value, pickedImageUri.value ?: "")

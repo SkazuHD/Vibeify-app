@@ -30,8 +30,8 @@ data class LiveFriendUiState(
 
 @HiltViewModel
 class LiveFriendsViewModel @Inject constructor(
-    private val presenceService: PresenceService,
-    private val navController: NavController
+    private val presenceService: PresenceService
+
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LiveFriendUiState())
@@ -49,9 +49,5 @@ class LiveFriendsViewModel @Inject constructor(
         }
     }
 
-    fun onClick(friend: LiveFriend) {
-        navController.navigate("public_profile/${friend.id}") {
-            launchSingleTop = true
-        }
-    }
+
 }

@@ -13,11 +13,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 
 @Composable
 fun LiveFriendView(
     modifier: Modifier = Modifier,
-    viewModel: LiveFriendsViewModel = hiltViewModel()
+    viewModel: LiveFriendsViewModel = hiltViewModel(),
+    onClick : (String) -> Unit = { /* Default no-op */ },
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val friends = uiState.liveFriends
@@ -35,7 +37,7 @@ fun LiveFriendView(
                 imageUrl = friend.imageUrl,
                 email = friend.email,
                 onClick = {
-                    viewModel.onClick(friend)
+                    onClick(friend.id)
                 },
             )
         }

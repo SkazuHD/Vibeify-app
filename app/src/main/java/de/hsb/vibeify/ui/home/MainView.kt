@@ -73,7 +73,10 @@ fun MainView(
                 }
                 else{
                     LiveFriendView(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { friendId ->
+                            navController.navigate("public_profile/$friendId")
+                        }
                     )
                 }
             }

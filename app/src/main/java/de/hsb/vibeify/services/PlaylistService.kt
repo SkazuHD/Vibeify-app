@@ -213,7 +213,7 @@ class PlaylistServiceImpl @Inject constructor(
             return "https://vibeify-app.skazu.net/cover/playlist/$id?v=${System.currentTimeMillis()}"
         } else {
             Log.e("PlaylistService", "Failed to upload photo: ${call.errorBody()?.string()}")
-            return ""
+            return "https://vibeify-app.skazu.net/cover/playlist/$id"
         }
     }
 

@@ -155,10 +155,10 @@ class PlaylistRepositoryImpl @Inject constructor(
     override suspend fun getLikedSongsPlaylist(likedSongIds: List<String>): Playlist {
         return Playlist(
             id = LIKED_SONGS_PLAYLIST_ID,
-            userId = "",
+            userId = "system",
             title = "Liked Songs",
             description = "Playlist of liked songs",
-            imageUrl = "",
+            imageUrl = "https://vibeify-app.skazu.net/cover/playlist/$LIKED_SONGS_PLAYLIST_ID",
             songIds = likedSongIds.toMutableList()
         )
     }

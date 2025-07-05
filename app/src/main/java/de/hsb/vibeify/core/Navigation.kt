@@ -1,6 +1,5 @@
 package de.hsb.vibeify.core
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -23,9 +22,6 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -33,9 +29,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import de.hsb.vibeify.core.navigation.NavigationDestination
+import de.hsb.vibeify.core.navigation.rememberVibeifyNavigationController
 import de.hsb.vibeify.ui.components.AppHeader.AppHeader
 import de.hsb.vibeify.ui.components.StickyBar.StickyBar
 import de.hsb.vibeify.ui.home.MainView
@@ -48,160 +45,182 @@ import de.hsb.vibeify.ui.register.RegisterView
 import de.hsb.vibeify.ui.search.SearchView
 import java.net.URLDecoder
 
-
 @Composable
 fun AppRouter(authViewModel: AuthViewModel = hiltViewModel()) {
     val authState by authViewModel.authState.collectAsState()
 
-    val destination = when {
-        !authState.isAuthResolved -> "loading"
-        authState.currentUser != null -> "root"
-        else -> "auth"
+    when {
+        !authState.isAuthResolved -> LoadingScreen()
+        authState.currentUser != null -> AuthenticatedNavigation()
+        else -> UnauthenticatedNavigation()
     }
+}
 
-    Log.d("AppRouter", "Navigating to destination: $destination")
-
-    when (destination) {
-        "loading" -> {
-            Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .systemBarsPadding(),
-                color = MaterialTheme.colorScheme.surface,
-                tonalElevation = 1.dp
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onSurface)
-                }
-            }
-        }
-
-        "auth" -> {
-            AuthNavHost()
-        }
-
-        "root" -> {
-            RootNavHost()
+@Composable
+private fun LoadingScreen() {
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 1.dp
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }
 
 @Composable
-fun AuthNavHost() {
+private fun UnauthenticatedNavigation() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Destinations.LoginView.route) {
-        composable(Destinations.LoginView.route) { LoginView(navController = navController) }
-        composable(Destinations.RegisterView.route) { RegisterView() }
+    val navigationController = rememberVibeifyNavigationController(navController)
+
+    NavHost(
+        navController = navController,
+        startDestination = NavigationDestination.Login.route
+    ) {
+        composable(NavigationDestination.Login.route) {
+            LoginView(navController = navController)
+        }
+        composable(NavigationDestination.Register.route) {
+            RegisterView()
+        }
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RootNavHost() {
+private fun AuthenticatedNavigation() {
     val navController = rememberNavController()
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = navBackStackEntry?.destination?.route
-    val appbarVisibleRoutes = listOf(
-        Destinations.PublicProfileView,
-        Destinations.PlaylistDetailView,
-        Destinations.PlaybackView
-    )
+    val navigationController = rememberVibeifyNavigationController(navController)
+    val currentDestination = navigationController.getCurrentDestination()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets.systemBars,
         topBar = {
-            val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-            if (currentRoute in appbarVisibleRoutes.map { it.route }) {
-                AppHeader(scrollBehavior = scrollBehavior, onBackClick = { navController.popBackStack() })
-
+            if (navigationController.shouldShowAppBar()) {
+                val scrollBehavior =
+                    TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+                AppHeader(
+                    scrollBehavior = scrollBehavior,
+                    onBackClick = { navigationController.navigateBack() }
+                )
             }
         },
         bottomBar = {
-            var selectedDestination by rememberSaveable { mutableIntStateOf(NavbarDestinations.SONGS.ordinal) }
             Column {
-                if (currentRoute != "playback_view") {
+                if (navigationController.shouldShowStickyBar()) {
                     StickyBar(navController = navController)
                 }
-                NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
-                    NavbarDestinations.entries.forEachIndexed { index, destination ->
-                        NavigationBarItem(
-                            selected = selectedDestination == index,
-                            onClick = {
-                                navController.navigate(route = destination.route)
-                                selectedDestination = index
 
-                            },
-                            icon = {
-                                Icon(
-                                    destination.icon,
-                                    contentDescription = destination.contentDescription
-                                )
-                            },
-                            label = { Text(destination.label) }
-                        )
+                BottomNavigationBar(
+                    currentDestination = currentDestination,
+                    onNavigate = { destination ->
+                        navigationController.navigateToMainAndClearStack(destination)
                     }
-                }
+                )
             }
         }
     ) { contentPadding ->
         NavHost(
             navController = navController,
-            startDestination = NavbarDestinations.SONGS.route,
+            startDestination = NavigationDestination.Main.Home.route,
             modifier = Modifier.padding(contentPadding)
         ) {
-            NavbarDestinations.entries.forEach { destination ->
-                composable(destination.route) {
-                    when (destination) {
-                        NavbarDestinations.SONGS -> MainView(
-                            modifier = Modifier,
-                            navController = navController
-                        )
-
-                        NavbarDestinations.PLAYLISTS -> PlaylistView(
-                            modifier = Modifier,
-                            navController = navController
-                        )
-
-                        NavbarDestinations.SEARCH -> SearchView(
-                            modifier = Modifier,
-                            navController = navController
-                        )
-
-                        NavbarDestinations.PROFILE -> ProfileView(navController = navController)
-                    }
-                }
-            }
-            composable(
-                route = Destinations.PublicProfileView.route,
-                arguments = listOf(navArgument("userId") { type = NavType.StringType })
-            ) {
-                PublicProfileView(
+            composable(NavigationDestination.Main.Home.route) {
+                MainView(
                     modifier = Modifier,
-                    navController = navController,
-                    userId = it.arguments?.getString("userId") ?: ""
-                )
-            }
-            composable(
-                route = Destinations.PlaylistDetailView.route,
-                arguments = listOf(navArgument("playlistId") { type = NavType.StringType })
-            ) { backStackEntry ->
-                val playlistId = backStackEntry.arguments?.getString("playlistId") ?: ""
-                val urlDecodeId = URLDecoder.decode(playlistId, "UTF-8")
-                PlaylistDetailView(
-                    modifier = Modifier,
-                    playlistId = urlDecodeId,
                     navController = navController
                 )
             }
-            composable(Destinations.PlaybackView.route) {
-                de.hsb.vibeify.ui.player.MinimalMusicPlayer(
-                    nextSong = "Current Queue",
+
+            composable(NavigationDestination.Main.Playlists.route) {
+                PlaylistView(
+                    modifier = Modifier,
+                    navController = navController
                 )
             }
+
+            composable(NavigationDestination.Main.Search.route) {
+                SearchView(
+                    modifier = Modifier,
+                    navController = navController
+                )
+            }
+
+            composable(NavigationDestination.Main.Profile.route) {
+                ProfileView(navController = navController)
+            }
+
+            composable(
+                route = NavigationDestination.Detail.PublicProfile.ROUTE_TEMPLATE,
+                arguments = listOf(navArgument("userId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val userId = backStackEntry.arguments?.getString("userId") ?: ""
+                PublicProfileView(
+                    modifier = Modifier,
+                    navController = navController,
+                    userId = userId
+                )
+            }
+
+            composable(
+                route = NavigationDestination.Detail.PlaylistDetail.ROUTE_TEMPLATE,
+                arguments = listOf(navArgument("playlistId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val playlistId = backStackEntry.arguments?.getString("playlistId") ?: ""
+                val urlDecodedId = URLDecoder.decode(playlistId, "UTF-8")
+                PlaylistDetailView(
+                    modifier = Modifier,
+                    playlistId = urlDecodedId,
+                    navController = navController
+                )
+            }
+
+            composable(NavigationDestination.Detail.Playback.route) {
+                de.hsb.vibeify.ui.player.MinimalMusicPlayer(
+                    nextSong = "Current Queue"
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BottomNavigationBar(
+    currentDestination: NavigationDestination?,
+    onNavigate: (NavigationDestination.Main) -> Unit
+) {
+    val bottomNavDestinations = listOf(
+        NavigationDestination.Main.Home,
+        NavigationDestination.Main.Search,
+        NavigationDestination.Main.Playlists,
+        NavigationDestination.Main.Profile
+    )
+
+    NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+        bottomNavDestinations.forEach { destination ->
+            val isSelected = when (currentDestination) {
+                is NavigationDestination.Main -> currentDestination.route == destination.route
+                else -> false
+            }
+
+            NavigationBarItem(
+                selected = isSelected,
+                onClick = { onNavigate(destination) },
+                icon = {
+                    Icon(
+                        destination.icon,
+                        contentDescription = destination.label
+                    )
+                },
+                label = { Text(destination.label) }
+            )
         }
     }
 }

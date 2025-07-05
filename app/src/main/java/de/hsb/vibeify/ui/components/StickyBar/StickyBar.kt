@@ -45,6 +45,7 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import de.hsb.vibeify.R
+import de.hsb.vibeify.core.navigation.navigateToPlayback
 
 
 @Composable
@@ -81,7 +82,7 @@ fun StickyBar(navController: NavController, modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .height(72.dp)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
-                .clickable { navController.navigate("playback_view") }
+                .clickable { navController.navigateToPlayback() }
 
         ) {
             Column() {

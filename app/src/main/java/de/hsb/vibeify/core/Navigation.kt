@@ -104,13 +104,18 @@ fun RootNavHost() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
+    val appbarVisibleRoutes = listOf(
+        Destinations.PublicProfileView,
+        Destinations.PlaylistDetailView,
+        Destinations.PlaybackView
+    )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets.systemBars,
         topBar = {
             val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-            if (currentRoute == "playback_view" || currentRoute == "public_profile/{userId}" || currentRoute == "playlist_detail_view/{playlistId}") {
+            if (currentRoute in appbarVisibleRoutes.map { it.route }) {
                 AppHeader(scrollBehavior = scrollBehavior, onBackClick = { navController.popBackStack() })
 
             }

@@ -110,7 +110,10 @@ fun RootNavHost() {
         contentWindowInsets = WindowInsets.systemBars,
         topBar = {
             val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
-            AppHeader(scrollBehavior, modifier = Modifier)
+            if (currentRoute == "playback_view" || currentRoute == "public_profile/{userId}" || currentRoute == "playlist_detail_view/{playlistId}") {
+                AppHeader(scrollBehavior = scrollBehavior, onBackClick = { navController.popBackStack() })
+
+            }
         },
         bottomBar = {
             var selectedDestination by rememberSaveable { mutableIntStateOf(NavbarDestinations.SONGS.ordinal) }

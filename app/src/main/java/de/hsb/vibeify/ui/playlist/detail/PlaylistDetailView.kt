@@ -14,15 +14,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,11 +41,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import de.hsb.vibeify.data.repository.LIKED_SONGS_PLAYLIST_ID
+import de.hsb.vibeify.ui.components.AppHeader.AppHeader
 import de.hsb.vibeify.ui.components.MenuOption
 import de.hsb.vibeify.ui.components.OptionsMenu
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistDetailView(
     modifier: Modifier = Modifier,
@@ -67,6 +73,7 @@ fun PlaylistDetailView(
 
     //Playlist Header
     Column(modifier = modifier) {
+
         Box(modifier = Modifier.fillMaxWidth())
         {
             Row(

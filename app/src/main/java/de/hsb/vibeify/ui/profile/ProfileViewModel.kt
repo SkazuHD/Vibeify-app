@@ -92,13 +92,18 @@ class ProfileViewModel @Inject constructor(
                 return@launch // No changes to save
             } else {
                 var imageUrl = currentUser.imageUrl
-                val uri = try {
-                    url.toUri()
-                } catch (_: Exception) {
-                    null
-                }
-                if (uri != null && uri.toString().isNotEmpty()) {
-                    imageUrl = userRepository.uploadPhoto(currentUser.id, url)
+                // Prüfe, ob es sich um einen HTTP/HTTPS-Link handelt
+                if (url.startsWith("http://") || url.startsWith("https://")) {
+                    imageUrl = url
+                } else {
+                    val uri = try {
+                        url.toUri()
+                    } catch (_: Exception) {
+                        null
+                    }
+                    if (uri != null && uri.toString().isNotEmpty()) {
+                        imageUrl = userRepository.uploadPhoto(currentUser.id, url)
+                    }
                 }
                 val updatedUser = currentUser.copy(name = name, imageUrl = imageUrl)
                 userRepository.updateUser(updatedUser)

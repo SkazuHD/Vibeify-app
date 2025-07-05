@@ -86,8 +86,9 @@ class UserRepositoryImpl @Inject constructor(
                         var user = insertUser(
                             User(
                                 id = authState.currentUser.uid,
-                                email = authState.currentUser.email ?: "unknown",
-                                name = authState.currentUser.displayName ?: "unknown",
+                                email = authState.currentUser.email ?: "",
+                                name = authState.currentUser.displayName
+                                    ?: authState.currentUser.email?.split("@")?.firstOrNull() ?: "",
                                 imageUrl = authState.currentUser.photoUrl?.toString() ?: "",
                             )
                         )

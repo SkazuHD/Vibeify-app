@@ -63,6 +63,10 @@ fun SearchView(
                         )
                         vm.clearSearchResults()
                     },
+                    onProfileClick = { profile ->
+                        navController?.navigate("public_profile/${profile.id}")
+                        vm.clearSearchResults()
+                    },
                     onClose = {
                         textFieldState.edit { replace(0, length, "") }
                         vm.clearSearchResults()

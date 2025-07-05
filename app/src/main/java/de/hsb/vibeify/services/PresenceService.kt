@@ -9,10 +9,17 @@ import androidx.media3.common.util.UnstableApi
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.data.repository.UserStatusRepository
+import de.hsb.vibeify.ui.components.LiveFriends.LiveFriend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -189,6 +196,36 @@ class PresenceService @OptIn(UnstableApi::class)
                 Log.e(TAG, "Error handling user logout", e)
             }
         }
+    }
+
+
+    @kotlin.OptIn(ExperimentalCoroutinesApi::class)
+    fun getLiveFriendsFlow(): Flow<List<LiveFriend>> = flow {
+        userRepository.state.map { it.currentUser }.flatMapLatest { user ->
+            flow {
+                if (user == null) {
+                    emit(emptyList<LiveFriend>())
+                    return@flow
+                }
+                val friendIds = presenceRepository.getFollowing(user.id)
+                val friends = friendIds.mapNotNull { friendId ->
+                    val friendUser = userRepository.getUserById(friendId)
+                    friendUser?.let {
+                        val isOnline = presenceRepository.isUserOnline(friendId)
+                        val currentlyPlaying = presenceRepository.getCurrentlyPlaying(friendId)
+                        LiveFriend(
+                            id = it.id,
+                            name = it.name,
+                            imageUrl = it.imageUrl,
+                            isOnline = isOnline,
+                            currentSong = currentlyPlaying?.songName ?: "No Song currently playing",
+                            email = it.email
+                        )
+                    }
+                }
+                emit(friends)
+            }
+        }.collect { emit(it) }
     }
 
     fun cleanup() {

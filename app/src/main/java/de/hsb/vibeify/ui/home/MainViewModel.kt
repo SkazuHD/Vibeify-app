@@ -5,9 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.data.model.RecentActivity
-import de.hsb.vibeify.data.repository.PlaylistRepository
+import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.repository.SongRepository
 import de.hsb.vibeify.data.repository.UserRepository
+import de.hsb.vibeify.services.DiscoveryService
 import de.hsb.vibeify.services.PlaylistService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -20,12 +21,13 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val playlistRepository: PlaylistRepository,
     private val playlistService: PlaylistService,
     private val songRepository: SongRepository,
+    private val discoveryService: DiscoveryService
 ) : ViewModel() {
 
     val recentActivityItems = MutableStateFlow<List<RecentActivityItem>>(emptyList())
+    val recommendations = MutableStateFlow<List<Song>>(emptyList())
     val isLoading = MutableStateFlow(true)
 
     init {
@@ -40,8 +42,11 @@ class MainViewModel @Inject constructor(
                     isLoading.value = false
                 }
             }
-
+            launch {
+                recommendations.value = discoveryService.generateRandomSongs(10)
+            }
         }
+
     }
 
     private suspend fun loadRecentActivities(activities: List<RecentActivity>) {

@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,15 +27,19 @@ import de.hsb.vibeify.ui.components.LoadingIndicator
 import de.hsb.vibeify.ui.components.SurpriseCard
 import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
+import de.hsb.vibeify.ui.components.songCard.TrendingSongCard
+import de.hsb.vibeify.ui.player.PlaybackViewModel
 
 @Composable
 fun MainView(
     navController: NavController,
     modifier: Modifier = Modifier,
-    mainViewModel: MainViewModel = hiltViewModel()
+    mainViewModel: MainViewModel = hiltViewModel(),
+    playbackViewModel: PlaybackViewModel = hiltViewModel()
 ) {
 
     val recentActivityItems = mainViewModel.recentActivityItems.collectAsState()
+    val recommendations = mainViewModel.recommendations.collectAsState()
     val isLoading = mainViewModel.isLoading.collectAsState()
 
     LazyColumn(
@@ -86,22 +92,27 @@ fun MainView(
                 )
             }
         }
-        item {
-            ListItem(
-                modifier = Modifier.fillMaxWidth(),
-                headlineContent = { Text("Recommendations") },
-            )
-        }
-        item {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .size(200.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    )
-            ) {
-                Text("Recommendations will be displayed here", textAlign = TextAlign.Center)
+
+        if (recommendations.value.isNotEmpty()) {
+            item {
+                ListItem(
+                    modifier = Modifier.fillMaxWidth(),
+                    headlineContent = { Text("Recommendations") },
+                )
+            }
+            item {
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(recommendations.value) { song ->
+                        TrendingSongCard(
+                            song = song,
+                            onClick = {
+                                playbackViewModel.play(song)
+                            },
+                        )
+                    }
+                }
             }
         }
     }

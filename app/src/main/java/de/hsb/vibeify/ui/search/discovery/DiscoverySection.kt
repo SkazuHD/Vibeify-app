@@ -160,7 +160,7 @@ fun DiscoverySection(
 }
 
 @Composable
-private fun SectionHeader(title: String) {
+fun SectionHeader(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleLarge,

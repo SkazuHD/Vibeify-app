@@ -18,7 +18,7 @@ import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.ui.components.MenuOption
 import de.hsb.vibeify.ui.player.PlaybackViewModel
-import de.hsb.vibeify.ui.playlist.AddSongToPlaylistDialog
+import de.hsb.vibeify.ui.playlist.dialogs.AddSongToPlaylistDialog
 
 @Composable
 fun SmartSongCard(
@@ -78,7 +78,7 @@ fun SmartSongCard(
         )
     }
 
-    when{
+    when {
         openAddToPlaylistDialog -> {
             AddSongToPlaylistDialog(onDismissRequest = {
                 openAddToPlaylistDialog = false

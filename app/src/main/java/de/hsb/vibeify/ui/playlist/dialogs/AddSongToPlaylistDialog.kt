@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.playlist
+package de.hsb.vibeify.ui.playlist.dialogs
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

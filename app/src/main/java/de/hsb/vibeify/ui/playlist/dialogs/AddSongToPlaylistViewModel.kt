@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.playlist
+package de.hsb.vibeify.ui.playlist.dialogs
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

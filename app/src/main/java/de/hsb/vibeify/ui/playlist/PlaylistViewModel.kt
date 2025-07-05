@@ -31,4 +31,20 @@ class PlaylistViewModel @Inject constructor(
         }
     }
 
+    fun updatePlaylist(
+        playlistId: String,
+        playlistName: String,
+        description: String,
+        imageUrl: String? = null
+    ) {
+        viewModelScope.launch {
+            playlistService.updatePlaylist(
+                playlistId = playlistId,
+                title = playlistName,
+                description = description,
+                imageUrl = imageUrl
+            )
+        }
+    }
+
 }

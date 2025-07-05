@@ -1,5 +1,6 @@
 package de.hsb.vibeify.ui.playlist.detail
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
@@ -28,6 +30,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -47,6 +51,7 @@ import de.hsb.vibeify.ui.components.MenuOption
 import de.hsb.vibeify.ui.components.OptionsMenu
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel
+import de.hsb.vibeify.ui.playlist.dialogs.EditPlaylistDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,6 +76,24 @@ fun PlaylistDetailView(
     val isFavoriteAble = playlistDetailViewModel.isFavoriteAble
     val isLoadingSongs = playlistDetailViewModel.isLoadingSongs
 
+    val openEditDialog = remember { mutableStateOf(false) }
+
+
+
+    when {
+        openEditDialog.value -> {
+            EditPlaylistDialog(
+                onDismissRequest = {
+                    openEditDialog.value = false;
+                    playlistDetailViewModel.loadPlaylist(playlistId)
+                },
+                playlistId = playlistId,
+                playlistName = playlistTitle,
+                playListDescription = playlistDescription,
+                pickedImageUri = Uri.parse(playlistImage),
+            )
+        }
+    }
 
     //Playlist Header
     Column(modifier = modifier) {
@@ -172,6 +195,13 @@ fun PlaylistDetailView(
                 } else if (isPlaylistOwner && playlistId != LIKED_SONGS_PLAYLIST_ID) {
                     OptionsMenu(
                         menuOptions = listOf(
+                            MenuOption(
+                                text = "Edit Playlist",
+                                icon = Icons.Default.Edit,
+                                onClick = {
+                                    openEditDialog.value = true
+                                }
+                            ),
                             MenuOption(
                                 text = "Delete Playlist",
                                 icon = Icons.Default.Remove,

@@ -1,4 +1,4 @@
-package de.hsb.vibeify.ui.playlist
+package de.hsb.vibeify.ui.playlist.dialogs
 
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.hsb.vibeify.ui.components.photoPicker.PickPhoto
+import de.hsb.vibeify.ui.playlist.PlaylistViewModel
 
 @Composable
 fun CreatePlaylistDialog(

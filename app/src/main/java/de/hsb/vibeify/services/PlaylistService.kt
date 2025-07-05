@@ -50,6 +50,13 @@ interface PlaylistService {
         userId: String
     ): Playlist
 
+    suspend fun updatePlaylist(
+        playlistId: String,
+        title: String,
+        description: String,
+        imageUrl: String? = null
+    ): Boolean
+
     suspend fun isPlaylistLiked(playlistId: String): Boolean
     suspend fun removePlaylist(playlistId: String): Boolean
     suspend fun togglePlaylistFavorite(playlistId: String): Boolean
@@ -202,7 +209,7 @@ class PlaylistServiceImpl @Inject constructor(
             webService.uploadCoverUploadCoverPlaylistIdPost(id, part).awaitResponse()
         if (call.isSuccessful) {
             Log.d("PlaylistService", "Photo uploaded successfully for Playlist: $id")
-            return "https://vibeify-app.skazu.net/cover/playlist/$id"
+            return "https://vibeify-app.skazu.net/cover/playlist/$id?v=${System.currentTimeMillis()}"
         } else {
             Log.e("PlaylistService", "Failed to upload photo: ${call.errorBody()?.string()}")
             return ""
@@ -239,6 +246,38 @@ class PlaylistServiceImpl @Inject constructor(
         userRepository.addPlaylistToFavorites(newPlaylist.id)
         playlists.value = playlists.value + newPlaylist
         return newPlaylist
+    }
+
+    override suspend fun updatePlaylist(
+        playlistId: String,
+        title: String,
+        description: String,
+        imageUrl: String?
+    ): Boolean {
+        var updatedImageUrl = imageUrl
+        if (!updatedImageUrl.isNullOrEmpty()) {
+            updatedImageUrl = try {
+                uploadPhoto(playlistId, updatedImageUrl)
+            } catch (e: Exception) {
+                Log.e("PlaylistService", "Error uploading photo: ${e.message}")
+                imageUrl
+            }
+        }
+        val updatedPlaylist = Playlist(
+            id = playlistId,
+            userId = userRepository.state.value.currentUser?.id ?: "",
+            title = title,
+            description = description,
+            imageUrl = updatedImageUrl,
+            songIds = emptyList()
+        )
+
+        return playlistRepository.updatePlaylist(updatedPlaylist).also { success ->
+            if (success) {
+                playlists.value =
+                    playlists.value.map { if (it.id == playlistId) updatedPlaylist else it }
+            }
+        }
     }
 
     override suspend fun removePlaylist(playlistId: String): Boolean {

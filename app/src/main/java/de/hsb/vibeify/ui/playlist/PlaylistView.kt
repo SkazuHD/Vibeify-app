@@ -24,6 +24,7 @@ import androidx.navigation.NavController
 import androidx.navigation.testing.TestNavHostController
 import de.hsb.vibeify.R
 import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
+import de.hsb.vibeify.ui.playlist.dialogs.CreatePlaylistDialog
 
 @Composable
 fun PlaylistView(
@@ -40,9 +41,10 @@ fun PlaylistView(
 
         when {
             openDialog.value -> {
-                CreatePlaylistDialog(onDismissRequest = {
-                    openDialog.value = false
-                })
+                CreatePlaylistDialog(
+                    onDismissRequest = {
+                        openDialog.value = false
+                    })
             }
         }
 

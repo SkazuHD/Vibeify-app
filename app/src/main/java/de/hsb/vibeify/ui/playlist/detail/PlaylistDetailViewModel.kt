@@ -64,6 +64,10 @@ class PlaylistDetailViewModel @Inject constructor(
                 Log.d("PlaylistDetailViewModel", "Loaded playlist data: $it")
                 playlistTitle = it?.title ?: ""
                 playlistDescription = it?.description ?: ""
+                Log.d(
+                    "PlaylistDetailViewModel",
+                    "Playlist image URL: $playlistImage -> ${it?.imageUrl}"
+                )
                 playlistImage = it?.imageUrl ?: ""
                 isLoadingPlayList = false
                 isLoadingSongs = true

@@ -154,7 +154,8 @@ class PlaylistServiceImpl @Inject constructor(
             val genreName = playlistId.removePrefix("genre_")
             getGenreAsPlaylistDetail(genreName)
         } else {
-            val playlist = playlistRepository.getPlaylistById(playlistId)
+            val playlist = playlists.value.find { it.id == playlistId }
+                ?: playlistRepository.getPlaylistById(playlistId)
             playlist?.let { playlistData ->
                 val isOwner = userRepository.state.value.currentUser?.id == playlistData.userId
                 val songs = songRepository.getSongsByIds(playlistData.songIds)
@@ -269,7 +270,7 @@ class PlaylistServiceImpl @Inject constructor(
             title = title,
             description = description,
             imageUrl = updatedImageUrl,
-            songIds = emptyList()
+            songIds = playlists.value.find { it.id == playlistId }?.songIds ?: emptyList()
         )
 
         return playlistRepository.updatePlaylist(updatedPlaylist).also { success ->
@@ -301,7 +302,20 @@ class PlaylistServiceImpl @Inject constructor(
     }
 
     override suspend fun addSongToPlaylist(playlistId: String, songId: String) {
-        playlistRepository.addSongToPlaylist(playlistId, songId)
+        playlistRepository.addSongToPlaylist(playlistId, songId).also {
+            // Update the playlist in the local state
+            if (playlistId == LIKED_SONGS_PLAYLIST_ID) {
+                userRepository.addSongToFavorites(songId)
+            } else {
+                val updatedPlaylist = playlists.value.find { it.id == playlistId }
+                if (updatedPlaylist != null) {
+                    val updatedSongs = updatedPlaylist.songIds + songId
+                    playlists.value = playlists.value.map {
+                        if (it.id == playlistId) it.copy(songIds = updatedSongs) else it
+                    }
+                }
+            }
+        }
     }
 
     override suspend fun removeSongFromPlaylist(playlistId: String, songId: String) {
@@ -310,6 +324,13 @@ class PlaylistServiceImpl @Inject constructor(
         } else {
             playlistRepository.removeSongFromPlaylist(playlistId, songId)
 
+        }
+        val updatedPlaylist = playlists.value.find { it.id == playlistId }
+        if (updatedPlaylist != null) {
+            val updatedSongs = updatedPlaylist.songIds.filter { it != songId }
+            playlists.value = playlists.value.map {
+                if (it.id == playlistId) it.copy(songIds = updatedSongs) else it
+            }
         }
     }
 

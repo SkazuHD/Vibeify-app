@@ -14,6 +14,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
+
 @Singleton
 class UserStatusRepository @Inject constructor(
     private val database: FirebaseDatabase
@@ -193,7 +194,7 @@ class UserStatusRepository @Inject constructor(
         }
     }
 
-    suspend fun getFollowing(userId: String): List<String> {
+    suspend fun getFollowing(userId: String?): List<String> {
         return try {
             val followingRef = database.getReference("$USERS_PATH/$userId/$FOLLOWING_PATH")
             val snapshot = followingRef.get().await()
@@ -260,4 +261,6 @@ class UserStatusRepository @Inject constructor(
         followingRef.addValueEventListener(listener)
         awaitClose { followingRef.removeEventListener(listener) }
     }
+
+
 }

@@ -194,10 +194,11 @@ fun ProfileView(
                         fontSize = 15.sp
                     )
                 } else {
-                    Box(modifier = modifier) {
+                    Column(modifier = modifier) {
                         LazyColumn(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .weight(1f)
                                 .padding(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -214,19 +215,17 @@ fun ProfileView(
                                 )
                             }
                         }
+                        Button(
+                            onClick = {
+                                authViewModel.signOut()
+                            },
+                            modifier = Modifier
+                                .padding(top = 16.dp)
+                                .align(Alignment.CenterHorizontally)
+                        ) {
+                            Text(text = "Sign Out")
+                        }
                     }
-                }
-
-
-                Button(
-                    onClick = {
-                        authViewModel.signOut()
-                    },
-                    modifier = Modifier
-                        .padding(top = 16.dp)
-                        .align(Alignment.CenterHorizontally)
-                ) {
-                    Text(text = "Sign Out")
                 }
 
 

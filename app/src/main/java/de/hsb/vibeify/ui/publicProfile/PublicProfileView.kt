@@ -157,8 +157,8 @@ fun PublicProfileView(
                                 PlaylistCard(
                                     playlistDescription = it.description ?: "",
                                     playlistName = it.title,
-                                    playlistIcon = it.imagePath
-                                        ?: R.drawable.ic_launcher_foreground,
+                                    playlistIcon = R.drawable.ic_launcher_foreground,
+                                    playlistImage = it.imageUrl,
                                     playlistId = it.id,
                                     onClick = {
                                         navController.navigate("playlist_detail_view/${it.id}")

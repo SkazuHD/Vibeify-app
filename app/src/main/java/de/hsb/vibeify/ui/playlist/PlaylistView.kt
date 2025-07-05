@@ -81,8 +81,9 @@ fun PlaylistView(
                     PlaylistCard(
                         playlistDescription = playlist.description ?: "",
                         playlistName = playlist.title,
-                        playlistIcon = playlist.imagePath ?: R.drawable.ic_launcher_foreground,
+                        playlistIcon = R.drawable.ic_launcher_foreground,
                         playlistId = playlist.id,
+                        playlistImage = playlist.imageUrl,
                         onClick = {
                             navController.navigate("playlist_detail_view/${playlist.id}")
                         }

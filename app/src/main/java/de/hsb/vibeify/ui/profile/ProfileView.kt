@@ -127,7 +127,11 @@ fun ProfileView(
                                 text = user.name.ifBlank { user.email },
                                 modifier = Modifier.padding(start = 8.dp),
                                 fontSize = 24.sp,
-                                style = TextStyle.Default.copy(lineBreak = LineBreak.Paragraph.copy(strategy = LineBreak.Strategy.Balanced))
+                                style = TextStyle.Default.copy(
+                                    lineBreak = LineBreak.Paragraph.copy(
+                                        strategy = LineBreak.Strategy.Balanced
+                                    )
+                                )
                             )
                             Row {
                                 Text(
@@ -200,8 +204,8 @@ fun ProfileView(
                                 PlaylistCard(
                                     playlistDescription = it.description ?: "",
                                     playlistName = it.title,
-                                    playlistIcon = it.imagePath
-                                        ?: R.drawable.ic_launcher_foreground,
+                                    playlistIcon = R.drawable.ic_launcher_foreground,
+                                    playlistImage = it.imageUrl,
                                     playlistId = it.id,
                                     onClick = {
                                         navController.navigate("playlist_detail_view/${it.id}")

@@ -134,8 +134,8 @@ fun RecentActivityGrid(
                     PlaylistCard(
                         playlistName = activityItem.playlist.title,
                         playlistDescription = activityItem.playlist.description ?: "",
-                        playlistIcon = activityItem.playlist.imagePath
-                            ?: R.drawable.ic_launcher_foreground,
+                        playlistIcon = R.drawable.ic_launcher_foreground,
+                        playlistImage = activityItem.playlist.imageUrl,
                         modifier = Modifier.weight(1f),
                         playlistId = activityItem.playlist.id,
                         onClick = {

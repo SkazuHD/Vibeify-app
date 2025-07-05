@@ -3,7 +3,6 @@ package de.hsb.vibeify.data.repository
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
-import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Playlist
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -159,7 +158,7 @@ class PlaylistRepositoryImpl @Inject constructor(
             userId = "",
             title = "Liked Songs",
             description = "Playlist of liked songs",
-            imagePath = R.drawable.ic_launcher_background,
+            imageUrl = "",
             songIds = likedSongIds.toMutableList()
         )
     }

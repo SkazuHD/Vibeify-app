@@ -1,6 +1,7 @@
 package de.hsb.vibeify.ui.components.playlistCard
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,10 +23,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import de.hsb.vibeify.R
 
 
@@ -37,6 +42,7 @@ fun PlaylistCard(
     playlistDescription: String = "Playlist from Vibeify",
     playlistName: String = "Absolute banger",
     playlistIcon: Int = R.drawable.ic_launcher_foreground,
+    playlistImage: String? = null,
     shape: RoundedCornerShape = RoundedCornerShape(8.dp),
     playlistCardViewModel: PlaylistCardViewModel = hiltViewModel()
 
@@ -62,13 +68,37 @@ fun PlaylistCard(
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(playlistIcon),
-                contentDescription = "Playlist Icon",
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(shape),
-            )
+            if (playlistImage.isNullOrEmpty()) {
+                Image(
+                    painter = painterResource(playlistIcon),
+                    contentDescription = "Playlist Icon",
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(shape),
+                )
+            } else {
+                AsyncImage(
+                    model = ImageRequest.Builder(context = LocalContext.current)
+                        .data(playlistImage)
+                        .crossfade(true)
+                        .placeholder(R.drawable.ic_launcher_foreground)
+                        .error(R.drawable.ic_launcher_foreground)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
+                        .diskCachePolicy(CachePolicy.ENABLED)
+                        .networkCachePolicy(CachePolicy.ENABLED)
+                        .build(),
+                    contentDescription = "Song Image",
+                    placeholder = painterResource(id = playlistIcon),
+                    error = painterResource(id = playlistIcon),
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                            shape = shape
+                        )
+                )
+            }
+
 
             Column(
                 modifier = Modifier

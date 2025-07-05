@@ -20,7 +20,7 @@ import javax.inject.Singleton
 data class PlaylistDetailData(
     val title: String,
     val description: String,
-    val imagePath: Int?,
+    val imageUrl: String?,
     val songs: List<Song>,
     val isFavorite: Boolean,
     val isFavoriteAble: Boolean,
@@ -36,7 +36,12 @@ interface PlaylistService {
 
     suspend fun getPlaylistsCreatedByCurrentUser(): List<Playlist>
     suspend fun getPlaylistDetail(playlistId: String): PlaylistDetailData?
-    suspend fun createPlaylist(title: String, description: String, userId: String): Playlist
+    suspend fun createPlaylist(
+        title: String,
+        description: String,
+        imageUrl: String?,
+        userId: String
+    ): Playlist
 
     suspend fun isPlaylistLiked(playlistId: String): Boolean
     suspend fun removePlaylist(playlistId: String): Boolean
@@ -123,7 +128,7 @@ class PlaylistServiceImpl @Inject constructor(
             PlaylistDetailData(
                 title = likedSongsPlaylist.title,
                 description = likedSongsPlaylist.description ?: "",
-                imagePath = likedSongsPlaylist.imagePath,
+                imageUrl = likedSongsPlaylist.imageUrl,
                 songs = songs,
                 isFavorite = false,
                 isFavoriteAble = false,
@@ -142,7 +147,7 @@ class PlaylistServiceImpl @Inject constructor(
                 PlaylistDetailData(
                     title = playlistData.title,
                     description = playlistData.description ?: "",
-                    imagePath = playlistData.imagePath,
+                    imageUrl = playlistData.imageUrl,
                     songs = songs,
                     isFavorite = isFavorite,
                     isFavoriteAble = !isOwner,
@@ -171,6 +176,7 @@ class PlaylistServiceImpl @Inject constructor(
     override suspend fun createPlaylist(
         title: String,
         description: String,
+        imageUrl: String?,
         userId: String
     ): Playlist {
         val newPlaylist = Playlist(
@@ -178,7 +184,7 @@ class PlaylistServiceImpl @Inject constructor(
             userId = userId,
             title = title,
             description = description,
-            imagePath = null,
+            imageUrl = imageUrl,
             songIds = emptyList()
         )
         playlistRepository.createPlaylist(newPlaylist)
@@ -258,7 +264,7 @@ class PlaylistServiceImpl @Inject constructor(
                 PlaylistDetailData(
                     title = genreName,
                     description = "Alle Songs im Genre $genreName \n Created by Vibeify",
-                    imagePath = null,
+                    imageUrl = null,
                     songs = songs,
                     isFavorite = false,
                     isFavoriteAble = false,

@@ -20,11 +20,12 @@ class PlaylistViewModel @Inject constructor(
     private val _playlists = playlistService.playlists
     val playlists: StateFlow<List<Playlist>> = _playlists.asStateFlow()
 
-    fun createPlaylist(playlistName: String, description: String) {
+    fun createPlaylist(playlistName: String, description: String, imageUrl: String? = null) {
         viewModelScope.launch {
             playlistService.createPlaylist(
                 title = playlistName,
                 description = description,
+                imageUrl = imageUrl,
                 userId = userRepository.state.value.currentUser?.id ?: "",
             )
         }

@@ -1,6 +1,7 @@
 package de.hsb.vibeify.ui.components.StickyBar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
@@ -54,6 +56,10 @@ fun StickyBar(navController: NavController, modifier: Modifier = Modifier) {
     val song by viewModel.currentSong.collectAsState()
     val playbackState by viewModel.playerState.collectAsState()
 
+    val isFavorite by viewModel.isCurrentSongFavorite.collectAsState(
+        initial = false
+    )
+
     var showBar by remember { mutableStateOf(false) }
     var sliderPosition by remember { mutableStateOf(0f) }
     var isUserSeeking by remember { mutableStateOf(false) }
@@ -75,85 +81,121 @@ fun StickyBar(navController: NavController, modifier: Modifier = Modifier) {
                 .fillMaxWidth()
                 .height(72.dp)
                 .background(MaterialTheme.colorScheme.surfaceVariant)
-                .clickable { navController.navigate("playback_view")}
+                .clickable { navController.navigate("playback_view") }
 
         ) {
-            Column(){
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .padding(bottom = 2.dp)
-            ) {
-
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(song!!.imageUrl)
-                        .crossfade(true)
-                        .placeholder(R.drawable.ic_launcher_foreground)
-                        .error(R.drawable.ic_launcher_foreground)
-                        .memoryCachePolicy(CachePolicy.ENABLED)
-                        .diskCachePolicy(CachePolicy.ENABLED)
-                        .networkCachePolicy(CachePolicy.ENABLED)
-                        .build(),
-                    contentScale = ContentScale.Crop,
-                    placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = "Album Art",
+            Column() {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .size(56.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    verticalArrangement = Arrangement.Center
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(bottom = 2.dp)
                 ) {
-                    Text(
-                        text = song!!.name,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
+
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(song!!.imageUrl)
+                            .crossfade(true)
+                            .placeholder(R.drawable.ic_launcher_foreground)
+                            .error(R.drawable.ic_launcher_foreground)
+                            .memoryCachePolicy(CachePolicy.ENABLED)
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .networkCachePolicy(CachePolicy.ENABLED)
+                            .build(),
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(id = R.drawable.ic_launcher_foreground),
+                        contentDescription = "Album Art",
+                        modifier = Modifier
+                            .size(56.dp)
                     )
-                    song!!.artist?.let {
-                        Text(
-                            text = it,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        {
+                            Column {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        text = song!!.name,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        modifier = Modifier
+                                            .basicMarquee(
+                                                iterations = Int.MAX_VALUE,
+                                                repeatDelayMillis = 3500,
+                                                initialDelayMillis = 3000,
+                                                velocity = 28.dp
+                                            )
+                                    )
+                                    if (isFavorite) {
+                                        Icon(
+                                            imageVector = Icons.Default.Favorite,
+                                            contentDescription = "Favorite Icon",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+                                song!!.artist?.let {
+                                    Text(
+                                        text = it,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        modifier = Modifier.basicMarquee(
+                                            iterations = Int.MAX_VALUE,
+                                            repeatDelayMillis = 3500,
+                                            initialDelayMillis = 3000,
+                                            velocity = 28.dp
+                                        )
+                                    )
+                                }
+                            }
+                        }
+
+
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(onClick = {
+                        if (isPlaying) {
+                            viewModel.pause()
+                        } else {
+                            viewModel.play()
+                        }
+                    }) {
+                        Icon(
+                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            contentDescription = if (isPlaying) "Pause" else "Play",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(48.dp)
                         )
                     }
-
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                IconButton(onClick = {
-                    if (isPlaying) {
-                        viewModel.pause()
-                    } else {
-                        viewModel.play()
+                    Spacer(modifier = Modifier.width(8.dp))
+                    IconButton(
+                        onClick = {
+                            viewModel.stop()
+                            viewModel.clearMediaItems()
+                        },
+                        modifier = Modifier.size(26.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Stop,
+                            contentDescription = "Terminate",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
-                }) {
-                    Icon(
-                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isPlaying) "Pause" else "Play",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(48.dp)
-                    )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                IconButton(
-                    onClick = {
-                        viewModel.stop()
-                        viewModel.clearMediaItems()
-                    },
-                    modifier = Modifier.size(26.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Stop,
-                        contentDescription = "Terminate",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
                 Slider(
                     value = sliderPosition,
                     onValueChange = {

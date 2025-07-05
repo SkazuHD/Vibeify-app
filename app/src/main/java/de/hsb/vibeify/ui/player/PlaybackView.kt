@@ -1,6 +1,7 @@
 package de.hsb.vibeify.ui.player
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -93,7 +94,7 @@ fun MinimalMusicPlayer(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .padding(top = 80.dp),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.TopCenter
     ) {
         Column(
             modifier = Modifier,
@@ -119,12 +120,22 @@ fun MinimalMusicPlayer(
             Spacer(modifier = Modifier.height(32.dp))
 
             Row(modifier = Modifier.fillMaxWidth(0.65f)) {
-                Column {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    horizontalAlignment = Alignment.Start,
+                    verticalArrangement = Arrangement.SpaceBetween
+                ) {
                     currentSong?.name?.let {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.headlineSmall,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.basicMarquee(
+                                iterations = Int.MAX_VALUE,
+                                repeatDelayMillis = 3500,
+                                initialDelayMillis = 3000,
+                                velocity = 28.dp
+                            )
                         )
                     }
 
@@ -132,15 +143,20 @@ fun MinimalMusicPlayer(
                         Text(
                             text = it,
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.basicMarquee(
+                                iterations = Int.MAX_VALUE,
+                                repeatDelayMillis = 3500,
+                                initialDelayMillis = 3000,
+                                velocity = 28.dp
+                            )
                         )
                     }
                 }
-                Spacer(modifier = Modifier.weight(1f))
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(start = 16.dp)
+                    modifier = Modifier.padding(start = 4.dp)
                 ) {
                     IconButton(
                         onClick = {

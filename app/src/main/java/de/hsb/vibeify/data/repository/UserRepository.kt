@@ -6,7 +6,6 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
 import de.hsb.vibeify.api.generated.apis.DefaultApi
-import de.hsb.vibeify.api.retrofit2.src.main.kotlin.de.hsb.vibeify.api.generated.infrastructure.ApiClient
 import de.hsb.vibeify.data.model.RecentActivity
 import de.hsb.vibeify.data.model.User
 import kotlinx.coroutines.CoroutineScope
@@ -56,11 +55,9 @@ interface UserRepository {
 class UserRepositoryImpl @Inject constructor(
     private val authRepository: AuthRepository,
     private val context: android.content.Context,
-    private val db: FirebaseFirestore
+    private val db: FirebaseFirestore,
+    private val webService: DefaultApi
 ) : UserRepository {
-
-    private val apiClient = ApiClient(baseUrl = "https://vibeify-app.skazu.net/")
-    val webService = apiClient.createService(DefaultApi::class.java)
 
     private val collectionName = "users"
     private val _state = MutableStateFlow(UserRepositoryState())

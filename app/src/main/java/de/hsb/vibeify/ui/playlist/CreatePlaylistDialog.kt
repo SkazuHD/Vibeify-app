@@ -1,5 +1,6 @@
 package de.hsb.vibeify.ui.playlist
 
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,18 +15,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.hsb.vibeify.ui.components.photoPicker.PickPhoto
 
 @Composable
-fun CreatePlaylistDialog(onDismissRequest: () -> Unit, playlistViewModel: PlaylistViewModel = hiltViewModel()) {
+fun CreatePlaylistDialog(
+    onDismissRequest: () -> Unit,
+    playlistViewModel: PlaylistViewModel = hiltViewModel()
+) {
 
     val playlistName = TextFieldState()
     val playListDescription = TextFieldState()
+    val pickedImageUri = remember { mutableStateOf<Uri?>(null) }
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
@@ -38,6 +46,7 @@ fun CreatePlaylistDialog(onDismissRequest: () -> Unit, playlistViewModel: Playli
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = "Create Playlist",
@@ -47,13 +56,21 @@ fun CreatePlaylistDialog(onDismissRequest: () -> Unit, playlistViewModel: Playli
                     style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center
                 )
+                PickPhoto(
+                    onImagePicked = { uri ->
+                        pickedImageUri.value = uri
+                    },
+                    size = 200.dp,
+                    placeholderInitials = "",
+                    isCircle = false
+                )
                 OutlinedTextField(
                     state = playlistName,
-                    label = {Text("Playlist Name")},
+                    label = { Text("Playlist Name") },
                 )
                 OutlinedTextField(
                     state = playListDescription,
-                    label = {Text("Playlist Description")},
+                    label = { Text("Playlist Description") },
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -76,7 +93,8 @@ fun CreatePlaylistDialog(onDismissRequest: () -> Unit, playlistViewModel: Playli
                         onClick = {
                             playlistViewModel.createPlaylist(
                                 playlistName = playlistName.text.toString(),
-                                description = playListDescription.text.toString()
+                                description = playListDescription.text.toString(),
+                                imageUrl = pickedImageUri.value?.toString()
                             )
                             onDismissRequest()
                         }

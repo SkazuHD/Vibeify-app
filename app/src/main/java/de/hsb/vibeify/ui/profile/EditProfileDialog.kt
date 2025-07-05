@@ -1,8 +1,10 @@
 package de.hsb.vibeify.ui.profile
 
-import android.provider.Contacts
+import android.net.Uri
 import androidx.annotation.OptIn
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
@@ -26,16 +28,17 @@ import de.hsb.vibeify.ui.components.photoPicker.PickPhoto
 @Composable
 fun EditProfileDialog(
     onDismiss: () -> Unit,
-    viewModel: ProfileViewModel = hiltViewModel()) {
+    viewModel: ProfileViewModel = hiltViewModel()
+) {
     val user = viewModel.uiState.collectAsState().value.user
 
-    val name = remember{ mutableStateOf(user?.name ?: "") }
-    val url = remember{ mutableStateOf(user?.imageUrl ?: "") }
+    val name = remember { mutableStateOf(user?.name ?: "") }
+    val url = remember { mutableStateOf(user?.imageUrl ?: "") }
     val pickedImageUri = remember { mutableStateOf(user?.imageUrl) }
 
 
 
-    Dialog(onDismissRequest = {onDismiss()}){
+    Dialog(onDismissRequest = { onDismiss() }) {
         Card {
             Text(
                 modifier = Modifier.padding(16.dp),
@@ -50,6 +53,7 @@ fun EditProfileDialog(
             ) {
 
                 PickPhoto(
+                    initialImageUri = pickedImageUri.value?.let { Uri.parse(it) },
                     onImagePicked = { uri ->
                         pickedImageUri.value = uri.toString()
                         url.value = uri.toString()
@@ -64,7 +68,7 @@ fun EditProfileDialog(
                     supportingText = {
                         if (name.value.length > 32) {
                             Text(
-                                text ="Limit: ${name.value.length}/32",
+                                text = "Limit: ${name.value.length}/32",
                                 color = MaterialTheme.colorScheme.error
                             )
                         }
@@ -72,7 +76,7 @@ fun EditProfileDialog(
                 )
                 Button(
                     onClick = {
-                        if (name.value.length > 32){
+                        if (name.value.length > 32) {
                             return@Button
                         }
                         viewModel.onSave(name.value, pickedImageUri.value ?: "")

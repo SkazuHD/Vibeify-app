@@ -1,4 +1,4 @@
-package de.hsb.vibeify.api.retrofit2.src.main.kotlin.de.hsb.vibeify.api.generated.infrastructure
+package de.hsb.vibeify.api.generated.infrastructure
 
 
 import okhttp3.Call
@@ -10,7 +10,6 @@ import retrofit2.Converter
 import retrofit2.CallAdapter
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import com.squareup.moshi.Moshi
-import de.hsb.vibeify.api.generated.infrastructure.Serializer
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 

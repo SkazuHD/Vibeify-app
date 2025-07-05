@@ -1,5 +1,8 @@
 package de.hsb.vibeify.services
 
+import android.util.Log
+import androidx.core.net.toUri
+import de.hsb.vibeify.api.generated.apis.DefaultApi
 import de.hsb.vibeify.data.model.Playlist
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.repository.LIKED_SONGS_PLAYLIST_ID
@@ -13,6 +16,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.awaitResponse
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -60,6 +67,8 @@ class PlaylistServiceImpl @Inject constructor(
     private val songRepository: SongRepository,
     private val userRepository: UserRepository,
     private val discoveryService: DiscoveryService,
+    private val webService: DefaultApi,
+    private val context: android.content.Context,
 ) : PlaylistService {
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -173,20 +182,59 @@ class PlaylistServiceImpl @Inject constructor(
         return sortedPlaylists
     }
 
+    private suspend fun uploadPhoto(id: String, imageUrl: String): String {
+        val uri = try {
+            imageUrl.toUri()
+        } catch (e: Exception) {
+            null
+        }
+        val inputStream = context.contentResolver.openInputStream(uri!!)
+        val bytes = inputStream?.readBytes()
+        inputStream?.close()
+        if (bytes == null) {
+            Log.e("PlaylistService", "Failed to read bytes from image URI: $uri")
+            return ""
+        }
+        Log.d("PlaylistService", "uploadPhoto called with id: $id, imageUrl: $imageUrl")
+        val requestBody = bytes.toRequestBody("image/*".toMediaTypeOrNull(), 0, bytes.size)
+        val part = MultipartBody.Part.createFormData("file", "cover_$id.jpg", requestBody)
+        val call =
+            webService.uploadCoverUploadCoverPlaylistIdPost(id, part).awaitResponse()
+        if (call.isSuccessful) {
+            Log.d("PlaylistService", "Photo uploaded successfully for Playlist: $id")
+            return "https://vibeify-app.skazu.net/cover/playlist/$id"
+        } else {
+            Log.e("PlaylistService", "Failed to upload photo: ${call.errorBody()?.string()}")
+            return ""
+        }
+    }
+
     override suspend fun createPlaylist(
         title: String,
         description: String,
         imageUrl: String?,
         userId: String
     ): Playlist {
+        var imageUrl = imageUrl
+        val playlistId = UUID.randomUUID().toString()
+        if (!imageUrl.isNullOrEmpty()) {
+            imageUrl = try {
+                uploadPhoto(playlistId, imageUrl)
+            } catch (e: Exception) {
+                Log.e("PlaylistService", "Error uploading photo: ${e.message}")
+                null
+            }
+        }
+
         val newPlaylist = Playlist(
-            id = UUID.randomUUID().toString(),
+            id = playlistId,
             userId = userId,
             title = title,
             description = description,
             imageUrl = imageUrl,
             songIds = emptyList()
         )
+
         playlistRepository.createPlaylist(newPlaylist)
         userRepository.addPlaylistToFavorites(newPlaylist.id)
         playlists.value = playlists.value + newPlaylist

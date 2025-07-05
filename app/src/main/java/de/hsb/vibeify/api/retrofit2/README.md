@@ -53,9 +53,11 @@ All URIs are relative to *http://localhost*
 | Class        | Method                                                                                                                          | HTTP request                              | Description            |
 |--------------|---------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------|------------------------|
 | *DefaultApi* | [**getCoverCoverSongIdGet**](docs/DefaultApi.md#getcovercoversongidget)                                                         | **GET** cover/{song_id}                   | Get Cover              |
+| *DefaultApi* | [**getPlaylistCoverCoverPlaylistPlaylistIdGet**](docs/DefaultApi.md#getplaylistcovercoverplaylistplaylistidget)                 | **GET** cover/playlist/{playlist_id}      | Get Playlist Cover     |
 | *DefaultApi* | [**getProfilePicturePictureUserIdGet**](docs/DefaultApi.md#getprofilepicturepictureuseridget)                                   | **GET** picture/{user_id}                 | Get Profile Picture    |
 | *DefaultApi* | [**rootGet**](docs/DefaultApi.md#rootget)                                                                                       | **GET**                                   | Root                   |
 | *DefaultApi* | [**streamSongStreamSongIdGet**](docs/DefaultApi.md#streamsongstreamsongidget)                                                   | **GET** stream/{song_id}                  | Stream Song            |
+| *DefaultApi* | [**uploadCoverUploadCoverPlaylistIdPost**](docs/DefaultApi.md#uploadcoveruploadcoverplaylistidpost)                             | **POST** upload/cover/{playlist_id}       | Upload Cover           |
 | *DefaultApi* | [**uploadProfilePictureUploadProfilePictureUserIdPost**](docs/DefaultApi.md#uploadprofilepictureuploadprofilepictureuseridpost) | **POST** upload/profile-picture/{user_id} | Upload Profile Picture |
 
 <a id="documentation-for-models"></a>

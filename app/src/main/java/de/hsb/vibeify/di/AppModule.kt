@@ -10,6 +10,8 @@ import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
 import dagger.hilt.components.SingletonComponent
+import de.hsb.vibeify.api.generated.apis.DefaultApi
+import de.hsb.vibeify.api.generated.infrastructure.ApiClient
 import de.hsb.vibeify.data.repository.ArtistRepository
 import de.hsb.vibeify.data.repository.ArtistRepositoryImpl
 import de.hsb.vibeify.data.repository.AuthRepository
@@ -64,8 +66,9 @@ object AppModule {
         authRepository: AuthRepository,
         @ApplicationContext context: Context,
         firebaseFirestore: FirebaseFirestore,
+        defaultApi: DefaultApi
     ): UserRepository {
-        return UserRepositoryImpl(authRepository, context, firebaseFirestore)
+        return UserRepositoryImpl(authRepository, context, firebaseFirestore, defaultApi)
     }
 
     @Singleton
@@ -103,16 +106,20 @@ object AppModule {
     @Singleton
     @Provides
     fun providePlaylistService(
+        @ApplicationContext context: Context,
         playlistRepository: PlaylistRepository,
         userRepository: UserRepository,
         songRepository: SongRepository,
-        discoveryService: DiscoveryService
+        discoveryService: DiscoveryService,
+        defaultApi: DefaultApi,
     ): PlaylistService {
         return PlaylistServiceImpl(
             playlistRepository,
             songRepository,
             userRepository,
-            discoveryService
+            discoveryService,
+            defaultApi,
+            context
         )
     }
 
@@ -123,6 +130,14 @@ object AppModule {
         playerServiceV2: PlayerServiceV2
     ): AnalyticsService {
         return AnalyticsService(userRepository, playerServiceV2)
+    }
+
+    @Singleton
+    @Provides
+    fun provideDefaultApi(): DefaultApi {
+        val apiClient = ApiClient(baseUrl = "https://vibeify-app.skazu.net/")
+        val webService = apiClient.createService(DefaultApi::class.java)
+        return webService
     }
 }
 

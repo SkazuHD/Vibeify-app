@@ -31,3 +31,9 @@ fun String.urlEncode(): String {
 fun String.urlDecode(): String {
     return URLDecoder.decode(this, StandardCharsets.UTF_8.toString())
 }
+
+/**
+ * Utility functions for URL encoding/decoding
+ */
+fun String.urlEncode(): String = java.net.URLEncoder.encode(this, "UTF-8")
+fun String.urlDecode(): String = java.net.URLDecoder.decode(this, "UTF-8")

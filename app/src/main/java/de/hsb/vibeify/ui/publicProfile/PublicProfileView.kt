@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import de.hsb.vibeify.R
+import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
 import de.hsb.vibeify.ui.components.Avatar
 import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
 
@@ -161,7 +162,7 @@ fun PublicProfileView(
                                     playlistImage = it.imageUrl,
                                     playlistId = it.id,
                                     onClick = {
-                                        navController.navigate("playlist_detail_view/${it.id}")
+                                        navController.navigateToPlaylistDetail(it.id)
                                     }
                                 )
                             }

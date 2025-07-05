@@ -23,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.testing.TestNavHostController
 import de.hsb.vibeify.R
+import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
 import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
 import de.hsb.vibeify.ui.playlist.dialogs.CreatePlaylistDialog
 
@@ -87,7 +88,7 @@ fun PlaylistView(
                         playlistId = playlist.id,
                         playlistImage = playlist.imageUrl,
                         onClick = {
-                            navController.navigate("playlist_detail_view/${playlist.id}")
+                            navController.navigateToPlaylistDetail(playlist.id)
                         }
                     )
                 }

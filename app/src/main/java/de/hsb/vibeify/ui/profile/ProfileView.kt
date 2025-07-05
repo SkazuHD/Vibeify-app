@@ -32,6 +32,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import de.hsb.vibeify.R
 import de.hsb.vibeify.core.AuthViewModel
+import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
+import de.hsb.vibeify.core.navigation.navigateToPublicProfile
 import de.hsb.vibeify.ui.components.Avatar
 import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
 
@@ -77,7 +79,7 @@ fun ProfileView(
                     onProfileClick = { user ->
                         Log.d("ProfileView", "onProfileClick: $user")
                         openFollowDialog.value = false
-                        navController.navigate("public_profile/${user.id}")
+                        navController.navigateToPublicProfile(user.id)
                     }
                 )
             }
@@ -91,8 +93,7 @@ fun ProfileView(
 
                         Log.d("ProfileView", "onProfileClick: $user")
                         openFollowersDialog.value = false
-                        navController.navigate("public_profile/${user.id}")
-
+                        navController.navigateToPublicProfile(user.id)
                     }
                 )
             }
@@ -208,7 +209,7 @@ fun ProfileView(
                                     playlistImage = it.imageUrl,
                                     playlistId = it.id,
                                     onClick = {
-                                        navController.navigate("playlist_detail_view/${it.id}")
+                                        navController.navigateToPlaylistDetail(it.id)
                                     }
                                 )
                             }

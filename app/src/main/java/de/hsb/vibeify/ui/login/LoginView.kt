@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import de.hsb.vibeify.core.Destinations
+import de.hsb.vibeify.core.navigation.navigateToRegister
 
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -62,7 +62,7 @@ fun LoginView(
                 state = vm.passwordState,
                 label = { Text("Password") },
 
-            )
+                )
             if (error != null) {
                 Text(
                     text = error,
@@ -81,7 +81,7 @@ fun LoginView(
             Button(
                 modifier = Modifier.fillMaxWidth(0.5f),
                 onClick = {
-                    navController.navigate(Destinations.RegisterView.route)
+                    navController.navigateToRegister()
                 }
             ) {
                 Text("Register NOW")

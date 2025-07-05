@@ -13,6 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
+import de.hsb.vibeify.core.navigation.navigateToPublicProfile
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 import de.hsb.vibeify.ui.search.discovery.DiscoverySection
 import de.hsb.vibeify.ui.search.searchbar.SearchbarViewModel
@@ -46,25 +48,19 @@ fun SearchView(
                     recentSearches = recentSearches.value,
                     isLoading = isLoading,
                     onPlaylistClick = { playlist ->
-                        navController?.navigate("playlist_detail_view/${playlist.id}")
+                        navController?.navigateToPlaylistDetail(playlist.id)
                         vm.clearSearchResults()
                     },
                     onSongClick = { song ->
                         vm2.play(song)
                     },
                     onGenreClick = { genre ->
-                        navController?.navigate(
-                            "playlist_detail_view/genre_${
-                                URLEncoder.encode(
-                                    genre.name,
-                                    "UTF-8"
-                                )
-                            }"
-                        )
+                        val encodedGenreName = URLEncoder.encode(genre.name, "UTF-8")
+                        navController?.navigateToPlaylistDetail(encodedGenreName)
                         vm.clearSearchResults()
                     },
                     onProfileClick = { profile ->
-                        navController?.navigate("public_profile/${profile.id}")
+                        navController?.navigateToPublicProfile(profile.id)
                         vm.clearSearchResults()
                     },
                     onClose = {
@@ -80,17 +76,12 @@ fun SearchView(
                     vm2.play(song)
                 },
                 onPlaylistClick = { playlist ->
-                    navController?.navigate("playlist_detail_view/${playlist.id}")
+                    navController?.navigateToPlaylistDetail(playlist.id)
                 },
                 onGenreClick = { genre ->
-                    navController?.navigate(
-                        "playlist_detail_view/genre_${
-                            URLEncoder.encode(
-                                genre.name,
-                                "UTF-8"
-                            )
-                        }"
-                    )
+                    val genreRoute = "genre_${URLEncoder.encode(genre.name, "UTF-8")}"
+                    navController?.navigateToPlaylistDetail(genreRoute)
+
                 }
             )
 

@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import de.hsb.vibeify.R
+import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
 import de.hsb.vibeify.ui.components.LoadingIndicator
 import de.hsb.vibeify.ui.components.SurpriseCard
 import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
@@ -150,7 +151,7 @@ fun RecentActivityGrid(
                         modifier = Modifier.weight(1f),
                         playlistId = activityItem.playlist.id,
                         onClick = {
-                            navController.navigate("playlist_detail_view/${activityItem.playlist.id}")
+                            navController.navigateToPlaylistDetail(activityItem.playlist.id)
                         }
                     )
                 }

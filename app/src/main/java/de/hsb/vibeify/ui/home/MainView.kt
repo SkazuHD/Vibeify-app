@@ -1,6 +1,5 @@
 package de.hsb.vibeify.ui.home
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,16 +12,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import de.hsb.vibeify.R
+import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
 import de.hsb.vibeify.core.navigation.navigateToPublicProfile
 import de.hsb.vibeify.ui.components.LiveFriends.LiveFriendView
 import de.hsb.vibeify.ui.components.LoadingIndicator
@@ -49,10 +47,10 @@ fun MainView(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         item {
-        ListItem(
-            modifier = Modifier.fillMaxWidth(),
-            headlineContent = { Text("Friend Activities") },
-        )
+            ListItem(
+                modifier = Modifier.fillMaxWidth(),
+                headlineContent = { Text("Friend Activities") },
+            )
         }
 
         item {
@@ -71,8 +69,7 @@ fun MainView(
                             .height(200.dp)
                             .padding(16.dp),
                     )
-                }
-                else{
+                } else {
                     LiveFriendView(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { friendId ->
@@ -173,7 +170,7 @@ fun RecentActivityGrid(
                         modifier = Modifier.weight(1f),
                         playlistId = activityItem.playlist.id,
                         onClick = {
-                            navController.navigate("playlist_detail_view/${activityItem.playlist.id}")
+                            navController.navigateToPlaylistDetail(activityItem.playlist.id)
                         }
                     )
                 }

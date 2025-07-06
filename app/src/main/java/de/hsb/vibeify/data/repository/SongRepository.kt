@@ -12,7 +12,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,7 +43,8 @@ class SongRepositoryImpl @Inject constructor(
         _job = scope.launch {
             try {
                 Log.d("SongRepository", "Preloading all songs into cache")
-                val songs = withContext(Dispatchers.IO) { fetchAllSongsFromFirestore() }
+                // Call the private method directly to avoid circular dependency
+                val songs = fetchAllSongsFromFirestore()
                 _allSongsCache.addAll(songs)
                 Log.d("SongRepository", "Preloaded ${_allSongsCache.size} songs into cache")
             } catch (e: Exception) {
@@ -93,6 +93,7 @@ class SongRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getAllSongs(): List<Song> {
+        // Wait for the preloading job to complete if it's still running
         _job?.join()
 
         if (_allSongsCache.isNotEmpty()) {
@@ -100,6 +101,7 @@ class SongRepositoryImpl @Inject constructor(
             return _allSongsCache
         }
 
+        // If cache is still empty after preloading, fetch directly
         val songs = fetchAllSongsFromFirestore()
         _allSongsCache.clear()
         _allSongsCache.addAll(songs)

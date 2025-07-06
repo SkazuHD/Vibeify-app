@@ -12,6 +12,7 @@ import de.hsb.vibeify.data.repository.UserRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -91,7 +92,13 @@ class PlaylistServiceImpl @Inject constructor(
                     if (userId == null) {
                         playlists.value = emptyList()
                     } else {
-                        playlists.value = getUserPlaylists(userId)
+                        launch {
+                            try {
+                                playlists.value = getUserPlaylists(userId)
+                            } catch (e: Exception) {
+                                Log.e("PlaylistService", "Error loading playlists", e)
+                            }
+                        }
                     }
                 }
         }
@@ -101,8 +108,17 @@ class PlaylistServiceImpl @Inject constructor(
         return if (userId != null) {
             val currentUser = userRepository.state.value.currentUser
             if (currentUser != null) {
-                val userPlaylists = playlistRepository.getPlaylistsByIds(currentUser.playlists)
-                val likedSongsPlaylist = playlistRepository.getLikedSongsPlaylist(emptyList())
+                // Use async to load both concurrently
+                val userPlaylistsDeferred = scope.async {
+                    playlistRepository.getPlaylistsByIds(currentUser.playlists)
+                }
+                val likedSongsDeferred = scope.async {
+                    playlistRepository.getLikedSongsPlaylist(emptyList())
+                }
+
+                val userPlaylists = userPlaylistsDeferred.await()
+                val likedSongsPlaylist = likedSongsDeferred.await()
+
                 listOf(likedSongsPlaylist) + userPlaylists
             } else {
                 emptyList()

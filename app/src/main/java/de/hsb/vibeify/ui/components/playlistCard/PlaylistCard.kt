@@ -19,7 +19,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,12 +49,113 @@ fun PlaylistCard(
     playlistIcon: Int = R.drawable.ic_launcher_foreground,
     playlistImage: String? = null,
     shape: RoundedCornerShape = RoundedCornerShape(8.dp),
-    playlistCardViewModel: PlaylistCardViewModel = hiltViewModel()
-
+    isFavorite: Boolean? = null,
+    playlistCardViewModel: PlaylistCardViewModel? = null
 ) {
 
-    val isPlaylistFavorite = rememberSaveable(playlistId) {
-        playlistCardViewModel.isPlaylistFavorite(playlistId)
+    val actualIsFavorite = when {
+        isFavorite != null -> isFavorite
+        playlistCardViewModel != null -> {
+            var favorite by remember { mutableStateOf(false) }
+            LaunchedEffect(playlistId) {
+                favorite = playlistCardViewModel.isPlaylistFavorite(playlistId)
+            }
+            favorite
+        }
+
+        else -> false
+    }
+
+    PlaylistCardContent(
+        modifier = modifier,
+        onClick = onClick,
+        playlistName = playlistName,
+        playlistDescription = playlistDescription,
+        playlistIcon = playlistIcon,
+        playlistImage = playlistImage,
+        shape = shape,
+        isFavorite = actualIsFavorite
+    )
+}
+
+@Composable
+fun PlaylistCard(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = { /* Default no-op */ },
+    playlistId: String,
+    playlistDescription: String = "Playlist from Vibeify",
+    playlistName: String = "Absolute banger",
+    playlistIcon: Int = R.drawable.ic_launcher_foreground,
+    playlistImage: String? = null,
+    shape: RoundedCornerShape = RoundedCornerShape(8.dp),
+    isFavorite: Boolean = false
+) {
+    PlaylistCardContent(
+        modifier = modifier,
+        onClick = onClick,
+        playlistName = playlistName,
+        playlistDescription = playlistDescription,
+        playlistIcon = playlistIcon,
+        playlistImage = playlistImage,
+        shape = shape,
+        isFavorite = isFavorite
+    )
+}
+
+@Composable
+fun PlaylistCardWithViewModel(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = { /* Default no-op */ },
+    playlistId: String,
+    playlistDescription: String = "Playlist from Vibeify",
+    playlistName: String = "Absolute banger",
+    playlistIcon: Int = R.drawable.ic_launcher_foreground,
+    playlistImage: String? = null,
+    shape: RoundedCornerShape = RoundedCornerShape(8.dp),
+    playlistCardViewModel: PlaylistCardViewModel = hiltViewModel()
+) {
+    var isFavorite by remember { mutableStateOf(false) }
+
+    LaunchedEffect(playlistId) {
+        isFavorite = playlistCardViewModel.isPlaylistFavorite(playlistId)
+    }
+
+    PlaylistCardContent(
+        modifier = modifier,
+        onClick = onClick,
+        playlistName = playlistName,
+        playlistDescription = playlistDescription,
+        playlistIcon = playlistIcon,
+        playlistImage = playlistImage,
+        shape = shape,
+        isFavorite = isFavorite
+    )
+}
+
+@Composable
+private fun PlaylistCardContent(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    playlistName: String,
+    playlistDescription: String,
+    playlistIcon: Int,
+    playlistImage: String?,
+    shape: RoundedCornerShape,
+    isFavorite: Boolean
+) {
+
+    val context = LocalContext.current
+    val imageRequest = remember(playlistImage) {
+        if (!playlistImage.isNullOrEmpty()) {
+            ImageRequest.Builder(context)
+                .data(playlistImage)
+                .crossfade(false) // Disable crossfade for better performance
+                .error(R.drawable.ic_launcher_foreground)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .diskCachePolicy(CachePolicy.ENABLED)
+                .networkCachePolicy(CachePolicy.ENABLED)
+                .build()
+        } else null
     }
 
     Card(
@@ -67,93 +172,65 @@ fun PlaylistCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (playlistImage.isNullOrEmpty()) {
+            if (imageRequest != null) {
+                AsyncImage(
+                    model = imageRequest,
+                    contentDescription = "Playlist cover",
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(shape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
                 Image(
                     painter = painterResource(playlistIcon),
                     contentDescription = "Playlist Icon",
                     modifier = Modifier
                         .size(48.dp)
-                        .clip(shape),
-                )
-            } else {
-                AsyncImage(
-                    model = ImageRequest.Builder(context = LocalContext.current)
-                        .data(playlistImage)
-                        .crossfade(true)
-                        .placeholder(R.drawable.ic_launcher_foreground)
-                        .error(R.drawable.ic_launcher_foreground)
-                        .memoryCachePolicy(CachePolicy.ENABLED)
-                        .diskCachePolicy(CachePolicy.ENABLED)
-                        .networkCachePolicy(CachePolicy.ENABLED)
-                        .build(),
-                    contentDescription = "Song Image",
-                    placeholder = painterResource(id = playlistIcon),
-                    error = painterResource(id = playlistIcon),
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                            shape = shape
-                        )
                         .clip(shape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentScale = ContentScale.Crop
                 )
             }
 
-
+            // Text content
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 12.dp)
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = playlistName,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier
-                            .basicMarquee(
-                                iterations = Int.MAX_VALUE,
-                                repeatDelayMillis = 3500,
-                                initialDelayMillis = 3000,
-                                velocity = 28.dp
-                            ),
-                        maxLines = 1,
-                    )
-                    if (isPlaylistFavorite) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Favorite Icon",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-
+                Text(
+                    text = playlistName,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    modifier = Modifier.basicMarquee()
+                )
                 Text(
                     text = playlistDescription,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .padding(top = 4.dp)
-                        .basicMarquee(
-                            iterations = Int.MAX_VALUE,
-                            repeatDelayMillis = 3500,
-                            initialDelayMillis = 3000,
-                            velocity = 28.dp
-                        ),
-                    maxLines = 1,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2
+                )
+            }
+
+            // Show favorite icon if playlist is favorited
+            if (isFavorite) {
+                Icon(
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = "Favorite playlist",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
                 )
             }
 
             Icon(
                 imageVector = Icons.Default.PlayArrow,
-                contentDescription = "Play Icon",
-                modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.primary
+                contentDescription = "Play playlist",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
             )
         }
     }

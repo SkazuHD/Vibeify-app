@@ -49,10 +49,10 @@ import kotlin.random.Random
 @Composable
 fun DiscoverySection(
     modifier: Modifier = Modifier,
-    discoveryViewModel: DiscoveryViewModel = hiltViewModel(),
     onSongClick: (Song) -> Unit = {},
     onPlaylistClick: (Playlist) -> Unit = {},
-    onGenreClick: (Genre) -> Unit = {}
+    onGenreClick: (Genre) -> Unit = {},
+    discoveryViewModel: DiscoveryViewModel = hiltViewModel(),
 ) {
     val trendingSongs by discoveryViewModel.trendingSongs
     val featuredPlaylists by discoveryViewModel.featuredPlaylists

@@ -1,11 +1,16 @@
 package de.hsb.vibeify.data.repository
 
+import android.util.Log
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
 import de.hsb.vibeify.data.model.Song
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -28,6 +33,36 @@ class SongRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore
 ) : SongRepository {
     private val collectionName = "songs"
+    private val _allSongsCache = mutableListOf<Song>()
+
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var _job: kotlinx.coroutines.Job? = null
+
+    init {
+        Log.d("SongRepository", "Initialized with collection: $collectionName")
+        _job = scope.launch {
+            try {
+                Log.d("SongRepository", "Preloading all songs into cache")
+                // Call the private method directly to avoid circular dependency
+                val songs = fetchAllSongsFromFirestore()
+                _allSongsCache.addAll(songs)
+                Log.d("SongRepository", "Preloaded ${_allSongsCache.size} songs into cache")
+            } catch (e: Exception) {
+                Log.e("SongRepository", "Error preloading songs: ${e.message}")
+            }
+        }
+
+    }
+
+    private suspend fun fetchAllSongsFromFirestore(): List<Song> {
+        Log.d("SongRepository", "Fetching all songs from Firestore")
+        val res = db.collection(collectionName).get().await()
+        return if (!res.isEmpty) {
+            res.documents.mapNotNull { it.toObject(Song::class.java) }
+        } else {
+            emptyList()
+        }
+    }
 
     override suspend fun getSongById(id: String): Song? {
         val res = db.collection(collectionName).document(id).get().await()
@@ -58,12 +93,19 @@ class SongRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getAllSongs(): List<Song> {
-        val res = db.collection(collectionName).get().await()
-        return if (!res.isEmpty) {
-            res.documents.mapNotNull { it.toObject(Song::class.java) }
-        } else {
-            emptyList()
+        // Wait for the preloading job to complete if it's still running
+        _job?.join()
+
+        if (_allSongsCache.isNotEmpty()) {
+            Log.d("SongRepository", "Returning cached songs")
+            return _allSongsCache
         }
+
+        // If cache is still empty after preloading, fetch directly
+        val songs = fetchAllSongsFromFirestore()
+        _allSongsCache.clear()
+        _allSongsCache.addAll(songs)
+        return songs
     }
 
     override suspend fun searchSongs(query: String): List<Song> {

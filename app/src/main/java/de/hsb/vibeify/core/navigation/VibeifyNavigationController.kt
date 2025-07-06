@@ -5,19 +5,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import java.net.URLEncoder
 
 class VibeifyNavigationController(private val navController: NavController) {
 
     fun navigateTo(destination: NavigationDestination) {
         when (destination) {
             is NavigationDestination.Detail.PublicProfile -> {
-                val encodedUserId = URLEncoder.encode(destination.userId, "UTF-8")
+                val encodedUserId = destination.userId.urlEncode()
                 navController.navigate("detail/public_profile/$encodedUserId")
             }
 
             is NavigationDestination.Detail.PlaylistDetail -> {
-                val encodedPlaylistId = URLEncoder.encode(destination.playlistId, "UTF-8")
+                val encodedPlaylistId = destination.playlistId.urlEncode()
                 navController.navigate("detail/playlist/$encodedPlaylistId")
             }
 
@@ -53,12 +52,13 @@ class VibeifyNavigationController(private val navController: NavController) {
             NavigationDestination.Main.Playlists.route -> NavigationDestination.Main.Playlists
             NavigationDestination.Main.Profile.route -> NavigationDestination.Main.Profile
             NavigationDestination.Detail.PublicProfile.ROUTE_TEMPLATE -> {
-                val userId = navBackStackEntry?.arguments?.getString("userId") ?: ""
+                val userId = navBackStackEntry?.arguments?.getString("userId")?.urlDecode() ?: ""
                 NavigationDestination.Detail.PublicProfile(userId)
             }
 
             NavigationDestination.Detail.PlaylistDetail.ROUTE_TEMPLATE -> {
-                val playlistId = navBackStackEntry?.arguments?.getString("playlistId") ?: ""
+                val playlistId =
+                    navBackStackEntry?.arguments?.getString("playlistId")?.urlDecode() ?: ""
                 NavigationDestination.Detail.PlaylistDetail(playlistId)
             }
 
@@ -86,3 +86,4 @@ fun rememberVibeifyNavigationController(navController: NavController): VibeifyNa
         VibeifyNavigationController(navController)
     }
 }
+

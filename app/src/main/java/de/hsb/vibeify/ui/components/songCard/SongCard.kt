@@ -59,7 +59,7 @@ fun SongCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
+                .padding(end = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -91,18 +91,16 @@ fun SongCard(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.Start),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = title,
                         style = MaterialTheme.typography.titleMedium,
                         maxLines = 1,
-                        modifier = Modifier.basicMarquee(
-                            iterations = Int.MAX_VALUE,
-                            repeatDelayMillis = 3500,
-                            initialDelayMillis = 3000,
-                            velocity = 28.dp
-                        )
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .basicMarquee()
                     )
                     if (isSongFavorite) {
                         Icon(

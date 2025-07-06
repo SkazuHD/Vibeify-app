@@ -24,31 +24,34 @@ sealed class NavigationDestination(val route: String) {
         data object Search : Main("main/search", "Search", Icons.Default.Search)
         data object Playlists : Main("main/playlists", "Playlists", Icons.Default.LibraryMusic)
         data object Profile : Main("main/profile", "Profile", Icons.Default.Person)
-
-        companion object {
-            val bottomNavDestinations = listOf(Home, Search, Playlists, Profile)
-        }
     }
-
 
     sealed class Detail(route: String) : NavigationDestination(route) {
         data class PublicProfile(val userId: String) : Detail("detail/public_profile/{userId}") {
             companion object {
                 const val ROUTE_TEMPLATE = "detail/public_profile/{userId}"
-                fun createRoute(userId: String) = "detail/public_profile/$userId"
+                fun createRoute(userId: String) = "detail/public_profile/${userId.urlEncode()}"
             }
         }
 
         data class PlaylistDetail(val playlistId: String) : Detail("detail/playlist/{playlistId}") {
             companion object {
                 const val ROUTE_TEMPLATE = "detail/playlist/{playlistId}"
-                fun createRoute(playlistId: String) = "detail/playlist/$playlistId"
+                fun createRoute(playlistId: String) = "detail/playlist/${playlistId.urlEncode()}"
             }
         }
 
         data object Playback : Detail("detail/playback")
     }
 }
+
+
+val bottomNavDestinations = listOf(
+    NavigationDestination.Main.Home,
+    NavigationDestination.Main.Search,
+    NavigationDestination.Main.Playlists,
+    NavigationDestination.Main.Profile
+)
 
 /**
  * Extension functions for type-safe navigation
@@ -60,3 +63,4 @@ fun NavigationDestination.Detail.PublicProfile.Companion.fromRoute(userId: Strin
 fun NavigationDestination.Detail.PlaylistDetail.Companion.fromRoute(playlistId: String): NavigationDestination.Detail.PlaylistDetail {
     return NavigationDestination.Detail.PlaylistDetail(playlistId)
 }
+

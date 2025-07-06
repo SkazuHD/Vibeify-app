@@ -38,6 +38,46 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import de.hsb.vibeify.R
 
+
+@Composable
+fun PlaylistCard(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = { /* Default no-op */ },
+    playlistId: String,
+    playlistDescription: String = "Playlist from Vibeify",
+    playlistName: String = "Absolute banger",
+    playlistIcon: Int = R.drawable.ic_launcher_foreground,
+    playlistImage: String? = null,
+    shape: RoundedCornerShape = RoundedCornerShape(8.dp),
+    isFavorite: Boolean? = null,
+    playlistCardViewModel: PlaylistCardViewModel? = null
+) {
+
+    val actualIsFavorite = when {
+        isFavorite != null -> isFavorite
+        playlistCardViewModel != null -> {
+            var favorite by remember { mutableStateOf(false) }
+            LaunchedEffect(playlistId) {
+                favorite = playlistCardViewModel.isPlaylistFavorite(playlistId)
+            }
+            favorite
+        }
+
+        else -> false
+    }
+
+    PlaylistCardContent(
+        modifier = modifier,
+        onClick = onClick,
+        playlistName = playlistName,
+        playlistDescription = playlistDescription,
+        playlistIcon = playlistIcon,
+        playlistImage = playlistImage,
+        shape = shape,
+        isFavorite = actualIsFavorite
+    )
+}
+
 @Composable
 fun PlaylistCard(
     modifier: Modifier = Modifier,
@@ -63,7 +103,7 @@ fun PlaylistCard(
 }
 
 @Composable
-fun PlaylistCardVM(
+fun PlaylistCardWithViewModel(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = { /* Default no-op */ },
     playlistId: String,
@@ -101,8 +141,7 @@ private fun PlaylistCardContent(
     playlistIcon: Int,
     playlistImage: String?,
     shape: RoundedCornerShape,
-    isFavorite: Boolean,
-    showArrow: Boolean = true
+    isFavorite: Boolean
 ) {
 
     val context = LocalContext.current
@@ -132,7 +171,7 @@ private fun PlaylistCardContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(end = 4.dp),
+                .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -162,50 +201,37 @@ private fun PlaylistCardContent(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.Start),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = playlistName,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        modifier = Modifier
-                            .weight(1f, fill = false)
-                            .basicMarquee()
-                    )
-                    if (isFavorite) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Favorite playlist",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
+                Text(
+                    text = playlistName,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    modifier = Modifier.basicMarquee()
+                )
                 Text(
                     text = playlistDescription,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    modifier = Modifier.basicMarquee(),
+                    maxLines = 2
                 )
             }
 
-
-            if (showArrow) {
+            // Show favorite icon if playlist is favorited
+            if (isFavorite) {
                 Icon(
-                    imageVector = Icons.Default.PlayArrow,
-                    contentDescription = "Play playlist",
+                    imageVector = Icons.Default.Favorite,
+                    contentDescription = "Favorite playlist",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
-
             }
 
-
+            Icon(
+                imageVector = Icons.Default.PlayArrow,
+                contentDescription = "Play playlist",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }

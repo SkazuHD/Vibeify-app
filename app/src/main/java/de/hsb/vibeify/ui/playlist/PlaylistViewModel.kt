@@ -1,6 +1,5 @@
 package de.hsb.vibeify.ui.playlist
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,7 +34,7 @@ class PlaylistViewModel @Inject constructor(
     init {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                _isLoading.value = true
+                _isLoading.value = false
 
                 launch {
                     playlistService.playlists.collect { servicePlaylist ->
@@ -44,11 +43,8 @@ class PlaylistViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
-                Log.d("PlaylistViewModel", "Error loading playlists: ${e.message}")
-            } finally {
                 _isLoading.value = false
             }
-
         }
     }
 

@@ -27,7 +27,7 @@ import de.hsb.vibeify.core.navigation.navigateToPublicProfile
 import de.hsb.vibeify.ui.components.LiveFriends.LiveFriendView
 import de.hsb.vibeify.ui.components.LoadingIndicator
 import de.hsb.vibeify.ui.components.SurpriseCard
-import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
+import de.hsb.vibeify.ui.components.playlistCard.PlaylistCardVM
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 import de.hsb.vibeify.ui.components.songCard.TrendingSongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel
@@ -165,7 +165,7 @@ fun RecentActivityGrid(
                 }
 
                 is RecentActivityItem.PlaylistActivity -> {
-                    PlaylistCard(
+                    PlaylistCardVM(
                         playlistName = activityItem.playlist.title,
                         playlistDescription = activityItem.playlist.description ?: "",
                         playlistIcon = R.drawable.ic_launcher_foreground,

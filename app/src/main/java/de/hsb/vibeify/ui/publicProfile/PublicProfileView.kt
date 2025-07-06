@@ -27,7 +27,7 @@ import androidx.navigation.NavController
 import de.hsb.vibeify.R
 import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
 import de.hsb.vibeify.ui.components.Avatar
-import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
+import de.hsb.vibeify.ui.components.playlistCard.PlaylistCardVM
 
 @Composable
 fun PublicProfileView(
@@ -155,7 +155,7 @@ fun PublicProfileView(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(playlists) {
-                                PlaylistCard(
+                                PlaylistCardVM(
                                     playlistDescription = it.description ?: "",
                                     playlistName = it.title,
                                     playlistIcon = R.drawable.ic_launcher_foreground,

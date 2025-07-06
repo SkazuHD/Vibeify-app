@@ -58,8 +58,7 @@ fun SongCard(
     ) {
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(end = 4.dp),
+                .fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
             AsyncImage(

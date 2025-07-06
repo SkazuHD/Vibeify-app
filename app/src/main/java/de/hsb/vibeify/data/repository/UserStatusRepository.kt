@@ -262,5 +262,37 @@ class UserStatusRepository @Inject constructor(
         awaitClose { followingRef.removeEventListener(listener) }
     }
 
+    fun getCurrentlyPlayingFlow(userId: String): Flow<CurrentlyPlaying?> = callbackFlow {
+        val currentlyPlayingRef = database.getReference("$USERS_PATH/$userId/$CURRENTLY_PLAYING_PATH")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val currentlyPlaying = snapshot.getValue(CurrentlyPlaying::class.java)
+                trySend(currentlyPlaying)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        currentlyPlayingRef.addValueEventListener(listener)
+        awaitClose { currentlyPlayingRef.removeEventListener(listener) }
+    }
+
+    fun getOnlineStatusFlow(userId: String): Flow<Boolean> = callbackFlow {
+        val onlineRef = database.getReference("$USERS_PATH/$userId/$ONLINE_PATH")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val isOnline = snapshot.getValue(Boolean::class.java) ?: false
+                trySend(isOnline)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        onlineRef.addValueEventListener(listener)
+        awaitClose { onlineRef.removeEventListener(listener) }
+    }
+
 
 }

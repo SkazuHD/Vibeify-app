@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import de.hsb.vibeify.R
+import de.hsb.vibeify.core.navigation.navigateToPublicProfile
 import de.hsb.vibeify.ui.components.LiveFriends.LiveFriendView
 import de.hsb.vibeify.ui.components.LoadingIndicator
 import de.hsb.vibeify.ui.components.SurpriseCard
@@ -75,7 +76,7 @@ fun MainView(
                     LiveFriendView(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = { friendId ->
-                            navController.navigate("public_profile/$friendId")
+                            navController.navigateToPublicProfile(friendId)
                         }
                     )
                 }

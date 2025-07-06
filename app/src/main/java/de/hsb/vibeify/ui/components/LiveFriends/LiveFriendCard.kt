@@ -38,16 +38,13 @@ fun LiveFriendCard(
     currentSong : String,
     imageUrl : String?,
     email : String,
-    onClick : () -> Unit = { /* Default no-op */ }
 ){
 
     val cardColors =
         CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
     Card(
         modifier = modifier
-            .clickable(
-                onClick = onClick
-            )
+
             .shadow(
                 elevation = 4.dp,
                 shape = MaterialTheme.shapes.large

@@ -200,33 +200,43 @@ class PresenceService @OptIn(UnstableApi::class)
 
 
     @kotlin.OptIn(ExperimentalCoroutinesApi::class)
-    fun getLiveFriendsFlow(): Flow<List<LiveFriend>> = flow {
+    fun getLiveFriendsFlow(): Flow<List<LiveFriend>> =
         userRepository.state.map { it.currentUser }.flatMapLatest { user ->
-            flow {
-                if (user == null) {
-                    emit(emptyList<LiveFriend>())
-                    return@flow
-                }
-                val friendIds = presenceRepository.getFollowing(user.id)
-                val friends = friendIds.mapNotNull { friendId ->
-                    val friendUser = userRepository.getUserById(friendId)
-                    friendUser?.let {
-                        val isOnline = presenceRepository.isUserOnline(friendId)
-                        val currentlyPlaying = presenceRepository.getCurrentlyPlaying(friendId)
-                        LiveFriend(
-                            id = it.id,
-                            name = it.name,
-                            imageUrl = it.imageUrl,
-                            isOnline = isOnline,
-                            currentSong = currentlyPlaying?.songName ?: "No Song currently playing",
-                            email = it.email
-                        )
+            if (user == null) {
+                flow { emit(emptyList<LiveFriend>()) }
+            } else {
+
+                presenceRepository.getFollowingFlow(user.id).flatMapLatest { friendIds ->
+                    if (friendIds.isEmpty()) {
+                        flow { emit(emptyList<LiveFriend>()) }
+                    } else {
+                        combine(friendIds.map { friendId ->
+                            combine(
+                                flow {
+                                    val friendUser = userRepository.getUserById(friendId)
+                                    emit(friendUser)
+                                },
+                                presenceRepository.getOnlineStatusFlow(friendId),
+                                presenceRepository.getCurrentlyPlayingFlow(friendId)
+                            ) { friendUser, isOnline, currentlyPlaying ->
+                                friendUser?.let {
+                                    LiveFriend(
+                                        id = it.id,
+                                        name = it.name,
+                                        imageUrl = it.imageUrl,
+                                        isOnline = isOnline,
+                                        currentSong = currentlyPlaying?.songName ?: "No Song currently playing",
+                                        email = it.email
+                                    )
+                                }
+                            }
+                        }) { friends ->
+                            friends.filterNotNull()
+                        }
                     }
                 }
-                emit(friends)
             }
-        }.collect { emit(it) }
-    }
+        }
 
     fun cleanup() {
         try {

@@ -1,5 +1,6 @@
 package de.hsb.vibeify.ui.components.LiveFriends
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -36,9 +37,9 @@ fun LiveFriendView(
                 currentSong = friend.currentSong ?: "N/A",
                 imageUrl = friend.imageUrl,
                 email = friend.email,
-                onClick = {
-                    onClick(friend.id)
-                },
+                modifier = Modifier.clickable {
+                    onClick(friend.id) // Trigger the click action with the friend's ID
+                }
             )
         }
     }

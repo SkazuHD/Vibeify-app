@@ -16,6 +16,8 @@ data class CurrentlyPlaying(
     val startTime: Long,
     val isPlaying: Boolean
 ) {
+
+    constructor() : this("", "", "", "", null, 0L, false)
     companion object {
         fun from(song: Song): CurrentlyPlaying {
             return CurrentlyPlaying(

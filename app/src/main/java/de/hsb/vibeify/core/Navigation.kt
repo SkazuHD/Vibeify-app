@@ -1,5 +1,10 @@
 package de.hsb.vibeify.core
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -39,6 +44,7 @@ import de.hsb.vibeify.ui.components.AppHeader.AppHeader
 import de.hsb.vibeify.ui.components.StickyBar.StickyBar
 import de.hsb.vibeify.ui.home.MainView
 import de.hsb.vibeify.ui.login.LoginView
+import de.hsb.vibeify.ui.player.MinimalMusicPlayer
 import de.hsb.vibeify.ui.playlist.PlaylistView
 import de.hsb.vibeify.ui.playlist.detail.PlaylistDetailView
 import de.hsb.vibeify.ui.profile.ProfileView
@@ -133,34 +139,169 @@ private fun AuthenticatedNavigation() {
             startDestination = NavigationDestination.Main.Home.route,
             modifier = Modifier.padding(contentPadding)
         ) {
-            composable(NavigationDestination.Main.Home.route) {
+            composable(
+                NavigationDestination.Main.Home.route,
+                enterTransition = {
+                    when (initialState.destination.route) {
+                        NavigationDestination.Main.Search.route,
+                        NavigationDestination.Main.Playlists.route,
+                        NavigationDestination.Main.Profile.route ->
+                            slideInHorizontally(
+                                initialOffsetX = { -it },
+                                animationSpec = tween(300)
+                            )
+
+                        else -> null
+                    }
+                },
+                exitTransition = {
+                    when (targetState.destination.route) {
+                        NavigationDestination.Main.Search.route,
+                        NavigationDestination.Main.Playlists.route,
+                        NavigationDestination.Main.Profile.route ->
+                            slideOutHorizontally(
+                                targetOffsetX = { -it },
+                                animationSpec = tween(300)
+                            )
+
+                        else -> null
+                    }
+                }
+            ) {
                 MainView(
                     modifier = Modifier,
                     navController = navController
                 )
             }
 
-            composable(NavigationDestination.Main.Playlists.route) {
-                PlaylistView(
-                    modifier = Modifier,
-                    navController = navController
-                )
-            }
+            composable(
+                NavigationDestination.Main.Search.route,
+                enterTransition = {
+                    when (initialState.destination.route) {
+                        NavigationDestination.Main.Home.route ->
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(300)
+                            )
 
-            composable(NavigationDestination.Main.Search.route) {
+                        NavigationDestination.Main.Playlists.route,
+                        NavigationDestination.Main.Profile.route ->
+                            slideInHorizontally(
+                                initialOffsetX = { -it },
+                                animationSpec = tween(300)
+                            )
+
+                        else -> null
+                    }
+                },
+                exitTransition = {
+                    when (targetState.destination.route) {
+                        NavigationDestination.Main.Home.route ->
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(300)
+                            )
+
+                        NavigationDestination.Main.Playlists.route,
+                        NavigationDestination.Main.Profile.route ->
+                            slideOutHorizontally(
+                                targetOffsetX = { -it },
+                                animationSpec = tween(300)
+                            )
+
+                        else -> null
+                    }
+                }
+            ) {
                 SearchView(
                     modifier = Modifier,
                     navController = navController
                 )
             }
 
-            composable(NavigationDestination.Main.Profile.route) {
+            composable(
+                NavigationDestination.Main.Playlists.route,
+                enterTransition = {
+                    when (initialState.destination.route) {
+                        NavigationDestination.Main.Home.route,
+                        NavigationDestination.Main.Search.route ->
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(300)
+                            )
+
+                        NavigationDestination.Main.Profile.route ->
+                            slideInHorizontally(
+                                initialOffsetX = { -it },
+                                animationSpec = tween(300)
+                            )
+
+                        else -> null
+                    }
+                },
+                exitTransition = {
+                    when (targetState.destination.route) {
+                        NavigationDestination.Main.Home.route,
+                        NavigationDestination.Main.Search.route ->
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(300)
+                            )
+
+                        NavigationDestination.Main.Profile.route ->
+                            slideOutHorizontally(
+                                targetOffsetX = { -it },
+                                animationSpec = tween(300)
+                            )
+
+                        else -> null
+                    }
+                }
+            ) {
+                PlaylistView(
+                    modifier = Modifier,
+                    navController = navController
+                )
+            }
+
+            composable(
+                NavigationDestination.Main.Profile.route,
+                enterTransition = {
+                    when (initialState.destination.route) {
+                        NavigationDestination.Main.Home.route,
+                        NavigationDestination.Main.Search.route,
+                        NavigationDestination.Main.Playlists.route ->
+                            slideInHorizontally(
+                                initialOffsetX = { it },
+                                animationSpec = tween(300)
+                            )
+
+                        else -> null
+                    }
+                },
+                exitTransition = {
+                    when (targetState.destination.route) {
+                        NavigationDestination.Main.Home.route,
+                        NavigationDestination.Main.Search.route,
+                        NavigationDestination.Main.Playlists.route ->
+                            slideOutHorizontally(
+                                targetOffsetX = { it },
+                                animationSpec = tween(300)
+                            )
+
+                        else -> null
+                    }
+                }
+            ) {
                 ProfileView(navController = navController)
             }
 
             composable(
                 route = NavigationDestination.Detail.PublicProfile.ROUTE_TEMPLATE,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 300 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { 300 }) },
                 arguments = listOf(navArgument("userId") { type = NavType.StringType })
+
             ) { backStackEntry ->
                 val userId = backStackEntry.arguments?.getString("userId") ?: ""
                 PublicProfileView(
@@ -172,6 +313,8 @@ private fun AuthenticatedNavigation() {
 
             composable(
                 route = NavigationDestination.Detail.PlaylistDetail.ROUTE_TEMPLATE,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 300 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { 300 }) },
                 arguments = listOf(navArgument("playlistId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val playlistId = backStackEntry.arguments?.getString("playlistId") ?: ""
@@ -183,8 +326,11 @@ private fun AuthenticatedNavigation() {
                 )
             }
 
-            composable(NavigationDestination.Detail.Playback.route) {
-                de.hsb.vibeify.ui.player.MinimalMusicPlayer(
+            composable(
+                NavigationDestination.Detail.Playback.route,
+                enterTransition = { slideInVertically(initialOffsetY = { 300 }) },
+                exitTransition = { slideOutVertically(targetOffsetY = { 300 }) }) {
+                MinimalMusicPlayer(
                     nextSong = "Current Queue"
                 )
             }

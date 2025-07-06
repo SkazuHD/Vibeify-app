@@ -40,7 +40,6 @@ import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.model.User
 import de.hsb.vibeify.services.SearchResult
 import de.hsb.vibeify.ui.components.LoadingIndicator
-import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
 import de.hsb.vibeify.ui.components.playlistCard.PlaylistCardVM
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel

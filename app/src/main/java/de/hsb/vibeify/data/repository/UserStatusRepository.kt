@@ -14,6 +14,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
+
 @Singleton
 class UserStatusRepository @Inject constructor(
     private val database: FirebaseDatabase
@@ -193,7 +194,7 @@ class UserStatusRepository @Inject constructor(
         }
     }
 
-    suspend fun getFollowing(userId: String): List<String> {
+    suspend fun getFollowing(userId: String?): List<String> {
         return try {
             val followingRef = database.getReference("$USERS_PATH/$userId/$FOLLOWING_PATH")
             val snapshot = followingRef.get().await()
@@ -260,4 +261,38 @@ class UserStatusRepository @Inject constructor(
         followingRef.addValueEventListener(listener)
         awaitClose { followingRef.removeEventListener(listener) }
     }
+
+    fun getCurrentlyPlayingFlow(userId: String): Flow<CurrentlyPlaying?> = callbackFlow {
+        val currentlyPlayingRef = database.getReference("$USERS_PATH/$userId/$CURRENTLY_PLAYING_PATH")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val currentlyPlaying = snapshot.getValue(CurrentlyPlaying::class.java)
+                trySend(currentlyPlaying)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        currentlyPlayingRef.addValueEventListener(listener)
+        awaitClose { currentlyPlayingRef.removeEventListener(listener) }
+    }
+
+    fun getOnlineStatusFlow(userId: String): Flow<Boolean> = callbackFlow {
+        val onlineRef = database.getReference("$USERS_PATH/$userId/$ONLINE_PATH")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val isOnline = snapshot.getValue(Boolean::class.java) ?: false
+                trySend(isOnline)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        onlineRef.addValueEventListener(listener)
+        awaitClose { onlineRef.removeEventListener(listener) }
+    }
+
+
 }

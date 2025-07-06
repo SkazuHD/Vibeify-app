@@ -9,10 +9,17 @@ import androidx.media3.common.util.UnstableApi
 import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.data.repository.UserStatusRepository
+import de.hsb.vibeify.ui.components.LiveFriends.LiveFriend
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -190,6 +197,46 @@ class PresenceService @OptIn(UnstableApi::class)
             }
         }
     }
+
+
+    @kotlin.OptIn(ExperimentalCoroutinesApi::class)
+    fun getLiveFriendsFlow(): Flow<List<LiveFriend>> =
+        userRepository.state.map { it.currentUser }.flatMapLatest { user ->
+            if (user == null) {
+                flow { emit(emptyList<LiveFriend>()) }
+            } else {
+
+                presenceRepository.getFollowingFlow(user.id).flatMapLatest { friendIds ->
+                    if (friendIds.isEmpty()) {
+                        flow { emit(emptyList<LiveFriend>()) }
+                    } else {
+                        combine(friendIds.map { friendId ->
+                            combine(
+                                flow {
+                                    val friendUser = userRepository.getUserById(friendId)
+                                    emit(friendUser)
+                                },
+                                presenceRepository.getOnlineStatusFlow(friendId),
+                                presenceRepository.getCurrentlyPlayingFlow(friendId)
+                            ) { friendUser, isOnline, currentlyPlaying ->
+                                friendUser?.let {
+                                    LiveFriend(
+                                        id = it.id,
+                                        name = it.name,
+                                        imageUrl = it.imageUrl,
+                                        isOnline = isOnline,
+                                        currentSong = currentlyPlaying?.songName ?: "No Song currently playing",
+                                        email = it.email
+                                    )
+                                }
+                            }
+                        }) { friends ->
+                            friends.filterNotNull()
+                        }
+                    }
+                }
+            }
+        }
 
     fun cleanup() {
         try {

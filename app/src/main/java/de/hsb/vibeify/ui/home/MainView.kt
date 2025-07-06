@@ -23,7 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import de.hsb.vibeify.R
-import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
+import de.hsb.vibeify.core.navigation.navigateToPublicProfile
+import de.hsb.vibeify.ui.components.LiveFriends.LiveFriendView
 import de.hsb.vibeify.ui.components.LoadingIndicator
 import de.hsb.vibeify.ui.components.SurpriseCard
 import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
@@ -47,17 +48,38 @@ fun MainView(
         modifier = modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
+        item {
+        ListItem(
+            modifier = Modifier.fillMaxWidth(),
+            headlineContent = { Text("Friend Activities") },
+        )
+        }
 
         item {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .size(200.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    )
+                    .padding(bottom = 16.dp)
+                    .size(160.dp)
+
             ) {
-                Text("Friends will be displayed here", textAlign = TextAlign.Center)
+
+                if (isLoading.value) {
+                    LoadingIndicator(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .padding(16.dp),
+                    )
+                }
+                else{
+                    LiveFriendView(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { friendId ->
+                            navController.navigateToPublicProfile(friendId)
+                        }
+                    )
+                }
             }
         }
         item {
@@ -151,7 +173,7 @@ fun RecentActivityGrid(
                         modifier = Modifier.weight(1f),
                         playlistId = activityItem.playlist.id,
                         onClick = {
-                            navController.navigateToPlaylistDetail(activityItem.playlist.id)
+                            navController.navigate("playlist_detail_view/${activityItem.playlist.id}")
                         }
                     )
                 }

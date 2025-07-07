@@ -37,12 +37,14 @@ import de.hsb.vibeify.R
 import de.hsb.vibeify.ui.components.LoadingIndicator
 import de.hsb.vibeify.ui.components.NoContentCard
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
+import de.hsb.vibeify.ui.player.PlaybackViewModel
 
 @Composable
 fun ArtistView(
     artistId: String,
     navController: NavController,
-    viewModel: ArtistViewModel = hiltViewModel()
+    viewModel: ArtistViewModel = hiltViewModel(),
+    playbackViewModel: PlaybackViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -81,7 +83,7 @@ fun ArtistView(
                     artist = uiState.artist!!,
                     songs = uiState.songs,
                     onPlayAll = {
-                        // TODO: Implement play all functionality
+                        playbackViewModel.play(uiState.songs, 0, null) //artistId
                     }
                 )
             }

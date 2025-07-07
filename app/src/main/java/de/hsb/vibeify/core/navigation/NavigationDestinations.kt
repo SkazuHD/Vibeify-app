@@ -24,7 +24,6 @@ sealed class NavigationDestination(val route: String) {
         data object Search : Main("main/search", "Search", Icons.Default.Search)
         data object Playlists : Main("main/playlists", "Playlists", Icons.Default.LibraryMusic)
         data object Profile : Main("main/profile", "Profile", Icons.Default.Person)
-        data object Player2 : Main("main/player", "Player", Icons.Default.Person)
     }
 
     sealed class Detail(route: String) : NavigationDestination(route) {

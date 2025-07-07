@@ -35,7 +35,7 @@ class VibeifyNavigationController(private val navController: NavController) {
                 saveState = true
             }
             launchSingleTop = true
-            restoreState = true
+            restoreState = false
         }
     }
 

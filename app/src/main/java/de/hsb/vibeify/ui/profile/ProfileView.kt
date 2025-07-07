@@ -39,7 +39,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import de.hsb.vibeify.core.AuthViewModel
-import de.hsb.vibeify.core.navigation.NavigationDestination
 import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
 import de.hsb.vibeify.core.navigation.navigateToPublicProfile
 import de.hsb.vibeify.ui.components.Avatar
@@ -247,19 +246,6 @@ fun ProfileView(
                     .padding(top = 16.dp)
             ) {
                 Text(text = "Sign Out")
-            }
-        }
-        item {
-            Button(
-                onClick = {
-                    navController.navigate(NavigationDestination.Main.Player2.route)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
-            )
-            {
-                Text("Open Player")
             }
         }
     }

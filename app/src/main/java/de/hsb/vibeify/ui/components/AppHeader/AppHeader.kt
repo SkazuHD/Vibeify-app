@@ -33,7 +33,7 @@ fun AppHeader(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(8.dp),
+            .padding(start = 8.dp, end = 8.dp, top = 8.dp),
 
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween

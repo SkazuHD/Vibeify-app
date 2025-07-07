@@ -2,6 +2,7 @@ package de.hsb.vibeify.ui.player
 
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,6 +15,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.LibraryAdd
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +45,10 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import de.hsb.vibeify.R
 import de.hsb.vibeify.data.model.Song
+import de.hsb.vibeify.ui.components.MenuOption
 import de.hsb.vibeify.ui.components.songCard.SongCard
+import de.hsb.vibeify.ui.playlist.dialogs.AddSongToPlaylistDialog
+import de.hsb.vibeify.ui.playlist.dialogs.AddSongToPlaylistViewModel
 import kotlinx.coroutines.delay
 
 @Composable
@@ -55,10 +61,11 @@ fun MinimalMusicPlayer(
     val currentSongList by playbackViewModel.currentSongList.collectAsState()
 
     Column(
-        modifier = Modifier,
+        modifier = Modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+
 
         PlayerHero(currentSong, playbackViewModel)
 
@@ -77,7 +84,7 @@ fun MinimalMusicPlayer(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        LazyColumn {
+        LazyColumn (verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(nextSongs.value) { song ->
                 SongCard(
                     modifier = Modifier.fillMaxWidth(),
@@ -124,9 +131,9 @@ fun PlayerHero(currentSong: Song?, playbackViewModel: PlaybackViewModel = hiltVi
 
     Spacer(modifier = Modifier.height(32.dp))
 
-    Row(modifier = Modifier.fillMaxWidth(0.65f)) {
+    Row(modifier = Modifier.fillMaxWidth().padding(start = 50.dp, end = 50.dp),) {
         Column(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).padding(start = 13.dp),
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -158,25 +165,21 @@ fun PlayerHero(currentSong: Song?, playbackViewModel: PlaybackViewModel = hiltVi
                 )
             }
         }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(start = 4.dp)
-        ) {
-            IconButton(
-                onClick = {
-                    playbackViewModel.toggleFavorite()
-                },
-                modifier = Modifier.padding(0.dp)
-            ) {
-                Icon(
-                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = "Favorite Icon",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(26.dp)
-                )
+        IconButton(
+            onClick = {
+                playbackViewModel.toggleFavorite()
             }
+        ) {
+            Icon(
+                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Favorite Icon",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(26.dp)
+            )
         }
+
+        AddSongMenu(currentSong ?: Song())
+
     }
 }
 
@@ -208,6 +211,36 @@ fun PlayerButtons(
             NextButton(player)
             RepeatButton(player)
         }
+    }
+}
+
+@Composable
+fun AddSongMenu(
+    song: Song
+){
+    var openAddToPlaylistDialog by remember(song.id) {
+        mutableStateOf(false)
+    }
+
+    when {
+        openAddToPlaylistDialog -> {
+            AddSongToPlaylistDialog(onDismissRequest = {
+                openAddToPlaylistDialog = false
+            }, song = song)
+        }
+    }
+
+    IconButton(
+        onClick = {
+            openAddToPlaylistDialog = true
+        },
+    ) {
+        Icon(
+            imageVector = Icons.Default.LibraryAdd,
+            contentDescription = "Add Song to Playlist",
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(26.dp)
+        )
     }
 }
 

@@ -14,10 +14,19 @@ import de.hsb.vibeify.services.PlaylistService
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+data class MainViewUIState(
+    val recentActivityItems: List<RecentActivityItem> = emptyList(),
+    val recommendations: List<Song> = emptyList(),
+    val isLoadingActivities: Boolean = true,
+    val isLoadingRecommendations: Boolean = true
+)
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -26,31 +35,45 @@ class MainViewModel @Inject constructor(
     private val songRepository: SongRepository,
     private val discoveryService: DiscoveryService
 ) : ViewModel() {
+    private val _uiState = MutableStateFlow(
+        MainViewUIState(
+            isLoadingActivities = true,
+            isLoadingRecommendations = true
+        )
+    )
+    val uiState: StateFlow<MainViewUIState> = _uiState
 
-    val recentActivityItems = MutableStateFlow<List<RecentActivityItem>>(emptyList())
-    val recommendations = MutableStateFlow<List<Song>>(emptyList())
-    val isLoading = MutableStateFlow(true)
 
     init {
         viewModelScope.launch {
             launch {
                 userRepository.state.map { it.currentUser }.distinctUntilChanged().collect { user ->
-                    if (user != null) {
+                    val recentActivityItems = if (user != null) {
                         loadRecentActivities(user.recentActivities)
                     } else {
-                        recentActivityItems.value = emptyList()
+                        emptyList<RecentActivityItem>()
                     }
-                    isLoading.value = false
+                    _uiState.update {
+                        it.copy(
+                            recentActivityItems = recentActivityItems,
+                            isLoadingActivities = false
+                        )
+                    }
                 }
             }
             launch {
-                recommendations.value = discoveryService.generateRandomSongs(10)
+                val recommendations = discoveryService.generateRandomSongs(10)
+                _uiState.update {
+                    it.copy(
+                        recommendations = recommendations,
+                        isLoadingRecommendations = false
+                    )
+                }
             }
         }
-
     }
 
-    private suspend fun loadRecentActivities(activities: List<RecentActivity>) {
+    private suspend fun loadRecentActivities(activities: List<RecentActivity>): List<RecentActivityItem> {
         Log.d("MainViewModel", "Loading recent activities: ${activities.size} activities found")
         val sortedActivities =
             activities.sortedByDescending { it.timestamp }.distinctBy { it.id }
@@ -101,6 +124,6 @@ class MainViewModel @Inject constructor(
             }
         }
         Log.d("MainViewModel", "Mapped activities: ${activityItems.size} activity items created")
-        recentActivityItems.value = activityItems
+        return activityItems
     }
 }

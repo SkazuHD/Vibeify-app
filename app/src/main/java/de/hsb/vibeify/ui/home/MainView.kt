@@ -34,6 +34,7 @@ import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 import de.hsb.vibeify.ui.components.songCard.TrendingSongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 
+
 @Composable
 fun MainView(
     navController: NavController,
@@ -41,10 +42,10 @@ fun MainView(
     mainViewModel: MainViewModel = hiltViewModel(),
     playbackViewModel: PlaybackViewModel = hiltViewModel()
 ) {
+    val uiState = mainViewModel.uiState.collectAsState()
+    val recentActivityItems = uiState.value.recentActivityItems
+    val recommendations = uiState.value.recommendations
 
-    val recentActivityItems = mainViewModel.recentActivityItems.collectAsState()
-    val recommendations = mainViewModel.recommendations.collectAsState()
-    val isLoading = mainViewModel.isLoading.collectAsState()
 
     LazyColumn(
         modifier = modifier.padding(16.dp),
@@ -63,24 +64,14 @@ fun MainView(
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
                     .size(160.dp)
-
             ) {
+                LiveFriendView(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { friendId ->
+                        navController.navigateToPublicProfile(friendId)
+                    }
+                )
 
-                if (isLoading.value) {
-                    LoadingIndicator(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .padding(16.dp),
-                    )
-                } else {
-                    LiveFriendView(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = { friendId ->
-                            navController.navigateToPublicProfile(friendId)
-                        }
-                    )
-                }
             }
         }
         item {
@@ -101,7 +92,7 @@ fun MainView(
             )
         }
         item {
-            if (isLoading.value) {
+            if (uiState.value.isLoadingActivities) {
                 LoadingIndicator(
                     Modifier
                         .fillMaxWidth()
@@ -110,14 +101,36 @@ fun MainView(
                 )
             } else {
                 RecentActivityGrid(
-                    recentActivityItems = recentActivityItems.value,
+                    recentActivityItems = recentActivityItems,
                     navController = navController,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
         }
-
-        if (recommendations.value.isNotEmpty()) {
+        if (uiState.value.isLoadingRecommendations) {
+            item {
+                LoadingIndicator(
+                    Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(16.dp),
+                )
+            }
+        } else if (recommendations.isEmpty()) {
+            item {
+                NoContentCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.SentimentNeutral,
+                            contentDescription = " No recommendations",
+                            modifier = Modifier.size(64.dp),
+                        )
+                    },
+                    title = "No Recommendations",
+                )
+            }
+        } else {
             item {
                 ListItem(
                     modifier = Modifier.fillMaxWidth(),
@@ -128,7 +141,7 @@ fun MainView(
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    items(recommendations.value) { song ->
+                    items(recommendations) { song ->
                         TrendingSongCard(
                             song = song,
                             onClick = {

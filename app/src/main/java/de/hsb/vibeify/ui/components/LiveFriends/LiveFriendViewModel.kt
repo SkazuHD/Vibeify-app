@@ -26,7 +26,7 @@ data class LiveFriend(
 
 data class LiveFriendUiState(
     val liveFriends: List<LiveFriend> = emptyList(),
-    val isLoading: Boolean = false,
+    val isLoading: Boolean = true,
     val error: String? = null
 )
 
@@ -40,6 +40,7 @@ class LiveFriendsViewModel @Inject constructor(
     val uiState: StateFlow<LiveFriendUiState> = _uiState.asStateFlow()
 
     init {
+        _uiState.value = LiveFriendUiState(isLoading = true)
         observeLiveFriends()
     }
 
@@ -48,7 +49,7 @@ class LiveFriendsViewModel @Inject constructor(
             presenceService.getLiveFriendsFlow().map { it ->
                 it.sortedByDescending { it.lastSeen }.distinctBy { it.id }
             }.distinctUntilChanged().collect { friends ->
-                _uiState.value = LiveFriendUiState(liveFriends = friends)
+                _uiState.value = LiveFriendUiState(liveFriends = friends, isLoading = false)
             }
         }
     }

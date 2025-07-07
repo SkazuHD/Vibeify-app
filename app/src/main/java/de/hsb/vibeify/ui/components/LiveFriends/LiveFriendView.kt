@@ -16,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.hsb.vibeify.ui.components.LoadingIndicator
 import de.hsb.vibeify.ui.components.NoContentCard
 
 @Composable
@@ -26,38 +27,43 @@ fun LiveFriendView(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val friends = uiState.liveFriends
-    if (friends.isNotEmpty()) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = modifier
-                .fillMaxSize()
-                .horizontalScroll(rememberScrollState())
-        ) {
-            friends.forEach { friend ->
-                LiveFriendCard(
-                    name = friend.name,
-                    status = friend.isOnline,
-                    currentSong = friend.currentSong?.name ?: "N/A",
-                    imageUrl = friend.imageUrl,
-                    email = friend.email,
-                    modifier = Modifier.clickable {
-                        onClick(friend.id)
-                    }
-                )
-            }
-        }
-    } else {
-        NoContentCard(
-            modifier = Modifier,
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.SentimentVeryDissatisfied,
-                    contentDescription = "No Friends",
-                    modifier = Modifier.size(64.dp),
-                )
-            },
-            title = "You have 0 Bitches",
+    if (uiState.isLoading) {
+        LoadingIndicator(
+            modifier = modifier.fillMaxSize(),
         )
+    } else
+        if (friends.isNotEmpty()) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = modifier
+                    .fillMaxSize()
+                    .horizontalScroll(rememberScrollState())
+            ) {
+                friends.forEach { friend ->
+                    LiveFriendCard(
+                        name = friend.name,
+                        status = friend.isOnline,
+                        currentSong = friend.currentSong?.name ?: "N/A",
+                        imageUrl = friend.imageUrl,
+                        email = friend.email,
+                        modifier = Modifier.clickable {
+                            onClick(friend.id)
+                        }
+                    )
+                }
+            }
+        } else {
+            NoContentCard(
+                modifier = Modifier,
+                icon = {
+                    Icon(
+                        imageVector = Icons.Default.SentimentVeryDissatisfied,
+                        contentDescription = "No Friends",
+                        modifier = Modifier.size(64.dp),
+                    )
+                },
+                title = "You have 0 Bitches",
+            )
 
-    }
+        }
 }

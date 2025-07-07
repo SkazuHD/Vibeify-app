@@ -37,7 +37,7 @@ fun LiveFriendView(
                 LiveFriendCard(
                     name = friend.name,
                     status = friend.isOnline,
-                    currentSong = friend.currentSong ?: "N/A",
+                    currentSong = friend.currentSong?.name ?: "N/A",
                     imageUrl = friend.imageUrl,
                     email = friend.email,
                     modifier = Modifier.clickable {

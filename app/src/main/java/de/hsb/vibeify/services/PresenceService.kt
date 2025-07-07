@@ -210,29 +210,7 @@ class PresenceService @OptIn(UnstableApi::class)
                         flow { emit(emptyList<LiveFriend>()) }
                     } else {
                         combine(friendIds.map { friendId ->
-                            combine(
-                                flow {
-                                    val friendUser = userRepository.getUserById(friendId)
-                                    emit(friendUser)
-                                },
-                                presenceRepository.getOnlineStatusFlow(friendId),
-                                presenceRepository.getCurrentlyPlayingFlow(friendId),
-                                presenceRepository.getLastSeenFlow(friendId)
-
-                            ) { friendUser, isOnline, currentlyPlaying, lastSeen ->
-                                friendUser?.let {
-                                    LiveFriend(
-                                        id = it.id,
-                                        name = it.name,
-                                        imageUrl = it.imageUrl,
-                                        isOnline = isOnline,
-                                        currentSong = currentlyPlaying?.songName
-                                            ?: "No Song currently playing",
-                                        email = it.email,
-                                        lastSeen = lastSeen,
-                                    )
-                                }
-                            }
+                            getFriendFlow(friendId)
                         }) { friends ->
                             friends.filterNotNull()
                         }
@@ -240,6 +218,30 @@ class PresenceService @OptIn(UnstableApi::class)
                 }
             }
         }
+
+    fun getFriendFlow(userId: String): Flow<LiveFriend?> {
+        return combine(
+            flow {
+                val friendUser = userRepository.getUserById(userId)
+                emit(friendUser)
+            },
+            flow2 = presenceRepository.getOnlineStatusFlow(userId),
+            flow3 = presenceRepository.getCurrentlyPlayingFlow(userId),
+            flow4 = presenceRepository.getLastSeenFlow(userId)
+        ) { friendUser, isOnline, currentlyPlaying, lastSeen ->
+            friendUser?.let {
+                LiveFriend(
+                    id = it.id,
+                    name = it.name,
+                    imageUrl = it.imageUrl,
+                    isOnline = isOnline,
+                    currentSong = currentlyPlaying as? Song,
+                    email = it.email,
+                    lastSeen = lastSeen,
+                )
+            }
+        }
+    }
 
     fun cleanup() {
         try {

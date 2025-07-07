@@ -1,15 +1,20 @@
 package de.hsb.vibeify.ui.publicProfile
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.SentimentNeutral
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -20,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,6 +34,7 @@ import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
 import de.hsb.vibeify.ui.components.Avatar
 import de.hsb.vibeify.ui.components.NoContentCard
 import de.hsb.vibeify.ui.components.playlistCard.PlaylistCardVM
+import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 import de.hsb.vibeify.ui.profile.CollapsableList
 
 @Composable
@@ -48,6 +55,9 @@ fun PublicProfileView(
     val isFollowing = viewModel.isFollowing.collectAsState(initial = false).value
     val followers = viewModel.followersFlow.collectAsState().value
     val following = viewModel.followingFlow.collectAsState().value
+    val liveFriend = viewModel.liveFriendFlow.collectAsState().value
+    val status = liveFriend?.isOnline ?: false
+    val currentSong = liveFriend?.currentSong
 
     when {
         uiState.isLoading -> {
@@ -76,36 +86,44 @@ fun PublicProfileView(
                 // Profile Header Section
                 item {
                     Row {
-                        if (uiState.user?.imageUrl?.isNotBlank() == true) {
+
+                        Box(
+                            modifier = Modifier.padding(4.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Avatar(
                                 modifier = Modifier
                                     .padding(bottom = 16.dp, top = 16.dp)
                                     .size(170.dp),
                                 initials = "JL",
-                                imageUrl = uiState.user.imageUrl,
+                                imageUrl = uiState.user?.imageUrl,
                             )
-                        } else {
-                            Avatar(
+
+                            Icon(
+                                imageVector = Icons.Default.Circle,
+                                contentDescription = "Online Status",
+                                tint = if (status) Color(0xFF5afc03) else Color.Gray,
                                 modifier = Modifier
-                                    .padding(bottom = 16.dp)
-                                    .size(170.dp)
-                                    .padding(top = 16.dp),
-                                initials = uiState.user?.name?.take(2) ?: "AB",
+                                    .size(24.dp)
+                                    .align(Alignment.BottomEnd)
+                                    .offset(x = (-24).dp, y = (-12).dp)
                             )
+
                         }
 
                         uiState.user?.let { user ->
                             Column(
                                 modifier = Modifier
                                     .align(Alignment.CenterVertically)
-                                    .padding(start = 16.dp, end = 16.dp)
+                                    .padding(start = 16.dp, end = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Text(
                                     text = user.name.ifBlank { user.email },
                                     modifier = Modifier.padding(start = 8.dp),
                                     fontSize = 24.sp,
                                 )
-                                Row {
+                                FlowRow {
                                     Text(
                                         "Followers: ${followers.size}",
                                         fontSize = 14.sp,
@@ -122,7 +140,6 @@ fun PublicProfileView(
                     }
                 }
 
-                // Follow/Unfollow Button Section
                 item {
                     Row {
                         Button(
@@ -145,8 +162,18 @@ fun PublicProfileView(
                         }
                     }
                 }
+                item {
+                    Text(
+                        text = "Currently Listening to",
+                        modifier = Modifier.padding(top = 30.dp, bottom = 8.dp),
+                        fontSize = 20.sp
+                    )
+                    if (currentSong != null)
+                        SmartSongCard(
+                            song = currentSong
+                        )
+                }
 
-                // Playlists Section Header
                 item {
                     Text(
                         text = "Their Playlists",

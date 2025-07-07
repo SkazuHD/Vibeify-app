@@ -1,7 +1,6 @@
 package de.hsb.vibeify.ui.components
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -30,18 +29,13 @@ fun Avatar(
     size: Dp = 50.dp,
     imageUrl: String? = null,
     initials: String? = null,
-    onClick: (() -> Unit)? = null,
     isCircle: Boolean = true
 ) {
     Box(
         modifier
-            .size(size)
-            .clickable(
-                enabled = onClick != null,
-                onClick = {
-                    onClick?.invoke()
-                }
-            ), contentAlignment = Alignment.Center)
+            .size(size),
+        contentAlignment = Alignment.Center
+    )
     {
         val color = MaterialTheme.colorScheme.primary
         val initials = initials?.uppercase() ?: "AB"

@@ -73,7 +73,7 @@ class UserStatusRepository @Inject constructor(
                 database.getReference("$USERS_PATH/$userId/$CURRENTLY_PLAYING_PATH")
 
             if (song != null) {
-                val playbackData = CurrentlyPlaying.from(song)
+                val playbackData = song
                 currentlyPlayingRef.setValue(playbackData).await()
                 Log.d(TAG, "Updated currently playing: ${song.name}")
             } else {
@@ -262,12 +262,12 @@ class UserStatusRepository @Inject constructor(
         awaitClose { followingRef.removeEventListener(listener) }
     }
 
-    fun getCurrentlyPlayingFlow(userId: String): Flow<CurrentlyPlaying?> = callbackFlow {
+    fun getCurrentlyPlayingFlow(userId: String): Flow<Song?> = callbackFlow {
         val currentlyPlayingRef =
             database.getReference("$USERS_PATH/$userId/$CURRENTLY_PLAYING_PATH")
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val currentlyPlaying = snapshot.getValue(CurrentlyPlaying::class.java)
+                val currentlyPlaying = snapshot.getValue(Song::class.java)
                 trySend(currentlyPlaying)
             }
 

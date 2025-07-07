@@ -3,6 +3,7 @@ package de.hsb.vibeify.ui.components.LiveFriends
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.services.PresenceService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +19,7 @@ data class LiveFriend(
     val name: String,
     val imageUrl: String?,
     val isOnline: Boolean,
-    val currentSong: String?,
+    val currentSong: Song?,
     val email: String,
     val lastSeen: Long,
 )

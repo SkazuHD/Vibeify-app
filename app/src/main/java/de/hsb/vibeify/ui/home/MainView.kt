@@ -11,6 +11,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SentimentNeutral
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,6 +27,7 @@ import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
 import de.hsb.vibeify.core.navigation.navigateToPublicProfile
 import de.hsb.vibeify.ui.components.LiveFriends.LiveFriendView
 import de.hsb.vibeify.ui.components.LoadingIndicator
+import de.hsb.vibeify.ui.components.NoContentCard
 import de.hsb.vibeify.ui.components.SurpriseCard
 import de.hsb.vibeify.ui.components.playlistCard.PlaylistCardVM
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
@@ -145,34 +149,50 @@ fun RecentActivityGrid(
     navController: NavController,
     modifier: Modifier = Modifier
 ) {
-    FlowRow(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        maxItemsInEachRow = 2
-    ) {
-        recentActivityItems.forEach { activityItem ->
-            when (activityItem) {
-                is RecentActivityItem.SongActivity -> {
-                    SmartSongCard(
-                        song = activityItem.song,
-                        showMenu = false,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+    if (recentActivityItems.isEmpty()) {
+        NoContentCard(
+            modifier = modifier.fillMaxWidth(),
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.SentimentNeutral,
+                    contentDescription = " No recent activities",
+                    modifier = Modifier.size(64.dp),
+                )
+            },
+            title = "No Recent Activities",
+        )
 
-                is RecentActivityItem.PlaylistActivity -> {
-                    PlaylistCardVM(
-                        playlistName = activityItem.playlist.title,
-                        playlistDescription = activityItem.playlist.description ?: "",
-                        playlistIcon = R.drawable.ic_launcher_foreground,
-                        playlistImage = activityItem.playlist.imageUrl,
-                        modifier = Modifier.weight(1f),
-                        playlistId = activityItem.playlist.id,
-                        onClick = {
-                            navController.navigateToPlaylistDetail(activityItem.playlist.id)
-                        }
-                    )
+
+    } else {
+        FlowRow(
+            modifier = modifier,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            maxItemsInEachRow = 2
+        ) {
+            recentActivityItems.forEach { activityItem ->
+                when (activityItem) {
+                    is RecentActivityItem.SongActivity -> {
+                        SmartSongCard(
+                            song = activityItem.song,
+                            showMenu = false,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    is RecentActivityItem.PlaylistActivity -> {
+                        PlaylistCardVM(
+                            playlistName = activityItem.playlist.title,
+                            playlistDescription = activityItem.playlist.description ?: "",
+                            playlistIcon = R.drawable.ic_launcher_foreground,
+                            playlistImage = activityItem.playlist.imageUrl,
+                            modifier = Modifier.weight(1f),
+                            playlistId = activityItem.playlist.id,
+                            onClick = {
+                                navController.navigateToPlaylistDetail(activityItem.playlist.id)
+                            }
+                        )
+                    }
                 }
             }
         }

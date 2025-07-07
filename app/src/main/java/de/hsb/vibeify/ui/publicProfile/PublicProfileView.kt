@@ -1,19 +1,18 @@
 package de.hsb.vibeify.ui.publicProfile
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -24,10 +23,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import de.hsb.vibeify.R
 import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
 import de.hsb.vibeify.ui.components.Avatar
+import de.hsb.vibeify.ui.components.NoContentCard
 import de.hsb.vibeify.ui.components.playlistCard.PlaylistCardVM
+import de.hsb.vibeify.ui.profile.CollapsableList
 
 @Composable
 fun PublicProfileView(
@@ -141,33 +141,38 @@ fun PublicProfileView(
                 )
 
                 if (playlists.isEmpty()) {
-                    Text(
-                        text = "This user has no playlists yet.",
-                        modifier = Modifier.padding(bottom = 16.dp, top = 10.dp),
-                        fontSize = 15.sp
+                    NoContentCard(
+                        modifier = Modifier
+                            .padding(8.dp),
+                        icon = {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.PlaylistAdd,
+                                contentDescription = "No Playlists",
+                                modifier = Modifier.size(48.dp)
+                            )
+                        },
+                        title = "This user has no playlists yet.",
                     )
+
                 } else {
-                    Box(modifier = modifier) {
-                        LazyColumn(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(playlists) {
-                                PlaylistCardVM(
-                                    playlistDescription = it.description ?: "",
-                                    playlistName = it.title,
-                                    playlistIcon = R.drawable.ic_launcher_foreground,
-                                    playlistImage = it.imageUrl,
-                                    playlistId = it.id,
-                                    onClick = {
-                                        navController.navigateToPlaylistDetail(it.id)
-                                    }
-                                )
-                            }
+                    val resultLimit = 3
+                    CollapsableList(
+                        resultLimit = resultLimit,
+                        items = playlists,
+                        content = { playlist ->
+                            PlaylistCardVM(
+                                onClick = {
+                                    navController.navigateToPlaylistDetail(playlist.id)
+                                },
+                                playlistDescription = playlist.description ?: "No description",
+                                playlistName = playlist.title,
+                                playlistId = playlist.id,
+                                playlistImage = playlist.imageUrl,
+                                shape = RoundedCornerShape(8.dp),
+                            )
                         }
-                    }
+                    )
+
                 }
             }
         }

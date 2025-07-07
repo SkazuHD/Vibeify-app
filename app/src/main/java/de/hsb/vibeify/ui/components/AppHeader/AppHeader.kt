@@ -15,9 +15,9 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import de.hsb.vibeify.core.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,6 +25,7 @@ import de.hsb.vibeify.core.AuthViewModel
 fun AppHeader(
     scrollBehavior: TopAppBarScrollBehavior,
     modifier: Modifier = Modifier,
+    icon: ImageVector = Icons.Default.ArrowBackIosNew,
     onBackClick: () -> Unit,
     authViewModel: AuthViewModel = hiltViewModel(),
 ) {
@@ -41,9 +42,9 @@ fun AppHeader(
             onClick = { onBackClick() },
         ) {
             Icon(
-                imageVector = Icons.Default.ArrowBackIosNew,
+                imageVector = icon,
                 contentDescription = "Back",
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(24.dp)
             )
         }
     }

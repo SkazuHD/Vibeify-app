@@ -1,14 +1,14 @@
 package de.hsb.vibeify.ui.components.LiveFriends
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.services.PresenceService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -19,7 +19,8 @@ data class LiveFriend(
     val imageUrl: String?,
     val isOnline: Boolean,
     val currentSong: String?,
-    val email : String
+    val email: String,
+    val lastSeen: Long,
 )
 
 data class LiveFriendUiState(
@@ -43,7 +44,9 @@ class LiveFriendsViewModel @Inject constructor(
 
     private fun observeLiveFriends() {
         viewModelScope.launch {
-            presenceService.getLiveFriendsFlow().collect { friends ->
+            presenceService.getLiveFriendsFlow().map { it ->
+                it.sortedByDescending { it.lastSeen }.distinctBy { it.id }
+            }.distinctUntilChanged().collect { friends ->
                 _uiState.value = LiveFriendUiState(liveFriends = friends)
             }
         }

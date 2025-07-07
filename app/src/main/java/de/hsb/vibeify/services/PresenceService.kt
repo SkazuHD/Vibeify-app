@@ -16,7 +16,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -217,16 +216,20 @@ class PresenceService @OptIn(UnstableApi::class)
                                     emit(friendUser)
                                 },
                                 presenceRepository.getOnlineStatusFlow(friendId),
-                                presenceRepository.getCurrentlyPlayingFlow(friendId)
-                            ) { friendUser, isOnline, currentlyPlaying ->
+                                presenceRepository.getCurrentlyPlayingFlow(friendId),
+                                presenceRepository.getLastSeenFlow(friendId)
+
+                            ) { friendUser, isOnline, currentlyPlaying, lastSeen ->
                                 friendUser?.let {
                                     LiveFriend(
                                         id = it.id,
                                         name = it.name,
                                         imageUrl = it.imageUrl,
                                         isOnline = isOnline,
-                                        currentSong = currentlyPlaying?.songName ?: "No Song currently playing",
-                                        email = it.email
+                                        currentSong = currentlyPlaying?.songName
+                                            ?: "No Song currently playing",
+                                        email = it.email,
+                                        lastSeen = lastSeen,
                                     )
                                 }
                             }

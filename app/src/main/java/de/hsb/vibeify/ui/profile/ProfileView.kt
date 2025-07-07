@@ -42,6 +42,7 @@ import de.hsb.vibeify.core.AuthViewModel
 import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
 import de.hsb.vibeify.core.navigation.navigateToPublicProfile
 import de.hsb.vibeify.ui.components.Avatar
+import de.hsb.vibeify.ui.components.LoadingIndicator
 import de.hsb.vibeify.ui.components.NoContentCard
 import de.hsb.vibeify.ui.components.playlistCard.PlaylistCardVM
 
@@ -54,7 +55,7 @@ fun ProfileView(
     navController: NavController
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val playlists = viewModel.playlists
+    val playlists = uiState.playlists
     val followers = viewModel.followersFlow.collectAsState().value
     val following = viewModel.followingFlow.collectAsState().value
 
@@ -200,8 +201,16 @@ fun ProfileView(
                 fontSize = 20.sp
             )
         }
-
-        if (playlists.isEmpty()) {
+        if (uiState.isLoadingPlaylist) {
+            item {
+                LoadingIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(16.dp),
+                )
+            }
+        } else if (playlists.isEmpty()) {
             item {
                 NoContentCard(
                     modifier = Modifier

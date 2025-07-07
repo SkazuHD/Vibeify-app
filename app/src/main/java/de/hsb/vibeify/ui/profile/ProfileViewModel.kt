@@ -22,13 +22,16 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
 data class ProfileUiState(
     val user: User? = null,
+    val playlists: List<Playlist> = emptyList(),
     val isLoading: Boolean = false,
+    val isLoadingPlaylist: Boolean = true,
     val error: String? = null
 )
 
@@ -61,22 +64,32 @@ class ProfileViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             launch {
-                userRepository.state.collect { repositoryState ->
-                    _uiState.value = ProfileUiState(
-                        user = repositoryState.currentUser,
-                        isLoading = repositoryState.isLoading,
-                        error = repositoryState.error
-                    )
-                }
-            }
-            launch {
                 userRepository.state.collect { userState ->
+                    _uiState.update {
+                        it.copy(
+                            user = userState.currentUser,
+                            isLoading = userState.isLoading,
+                            error = userState.error
+                        )
+                    }
                     if (userState.currentUser != null) {
-                        val userPlaylists =
-                            playlistRepository.getPlaylistsByUserId(userState.currentUser.id)
-                        playlists = userPlaylists
+                        launch {
+                            val userPlaylists =
+                                playlistRepository.getPlaylistsByUserId(userState.currentUser.id)
+                            _uiState.update {
+                                it.copy(
+                                    playlists = userPlaylists,
+                                    isLoadingPlaylist = false
+                                )
+                            }
+                        }
                     } else {
-                        playlists = emptyList()
+                        _uiState.update {
+                            it.copy(
+                                playlists = emptyList(),
+                                isLoadingPlaylist = false
+                            )
+                        }
                     }
                 }
             }
@@ -89,10 +102,9 @@ class ProfileViewModel @Inject constructor(
             val currentUser = _uiState.value.user ?: return@launch
             if (currentUser.name == name && url == currentUser.imageUrl) {
                 Log.d("ProfileViewModel", "No changes to save")
-                return@launch // No changes to save
+                return@launch
             } else {
                 var imageUrl = currentUser.imageUrl
-                // Prüfe, ob es sich um einen HTTP/HTTPS-Link handelt
                 if (url.startsWith("http://") || url.startsWith("https://")) {
                     imageUrl = url
                 } else {
@@ -110,7 +122,4 @@ class ProfileViewModel @Inject constructor(
             }
         }
     }
-
-    // Public Zugriff für FollowDialog
-    fun getUserRepository() = userRepository
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.hsb.vibeify.data.model.RecentActivity
 import de.hsb.vibeify.data.model.Song
+import de.hsb.vibeify.data.repository.LIKED_SONGS_PLAYLIST_ID
 import de.hsb.vibeify.data.repository.SongRepository
 import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.services.DiscoveryService
@@ -52,7 +53,10 @@ class MainViewModel @Inject constructor(
     private suspend fun loadRecentActivities(activities: List<RecentActivity>) {
         Log.d("MainViewModel", "Loading recent activities: ${activities.size} activities found")
         val sortedActivities =
-            activities.sortedByDescending { it.timestamp }.distinctBy { it.id }.take(8)
+            activities.sortedByDescending { it.timestamp }.distinctBy { it.id }
+                .filter { it.id != LIKED_SONGS_PLAYLIST_ID }.take(8)
+
+        Log.d("MainViewModel", "Sorted activities: ${sortedActivities.size} unique activities")
 
         val songIds = sortedActivities.filter { it.type == RecentActivity.TYPE_SONG }.map { it.id }
         val playlistIds =
@@ -73,6 +77,7 @@ class MainViewModel @Inject constructor(
         val playlistMap = playlists.associateBy { it.id }
 
         val activityItems = sortedActivities.mapNotNull { activity ->
+            Log.d("MainViewModel", "Processing activity: ${activity.id} of type ${activity.type}")
             when (activity.type) {
                 RecentActivity.TYPE_SONG -> {
                     songMap[activity.id]?.let { song ->
@@ -95,7 +100,7 @@ class MainViewModel @Inject constructor(
                 else -> null
             }
         }
-
+        Log.d("MainViewModel", "Mapped activities: ${activityItems.size} activity items created")
         recentActivityItems.value = activityItems
     }
 }

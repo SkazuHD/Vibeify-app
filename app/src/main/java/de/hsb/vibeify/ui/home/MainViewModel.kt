@@ -74,12 +74,10 @@ class MainViewModel @Inject constructor(
     }
 
     private suspend fun loadRecentActivities(activities: List<RecentActivity>): List<RecentActivityItem> {
-        Log.d("MainViewModel", "Loading recent activities: ${activities.size} activities found")
         val sortedActivities =
             activities.sortedByDescending { it.timestamp }.distinctBy { it.id }
                 .filter { it.id != LIKED_SONGS_PLAYLIST_ID }.take(8)
 
-        Log.d("MainViewModel", "Sorted activities: ${sortedActivities.size} unique activities")
 
         val songIds = sortedActivities.filter { it.type == RecentActivity.TYPE_SONG }.map { it.id }
         val playlistIds =

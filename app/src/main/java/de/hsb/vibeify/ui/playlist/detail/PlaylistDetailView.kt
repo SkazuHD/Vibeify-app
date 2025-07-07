@@ -78,8 +78,6 @@ fun PlaylistDetailView(
 
     val openEditDialog = remember { mutableStateOf(false) }
 
-
-
     when {
         openEditDialog.value -> {
             EditPlaylistDialog(
@@ -97,6 +95,10 @@ fun PlaylistDetailView(
 
     //Playlist Header
     Column(modifier = modifier) {
+        FilterSortControls(
+            viewModel = playlistDetailViewModel,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        )
 
         Box(modifier = Modifier.fillMaxWidth())
         {
@@ -222,6 +224,7 @@ fun PlaylistDetailView(
 
             }
         }
+
         if (isLoadingSongs) {
             Box(
                 modifier = Modifier

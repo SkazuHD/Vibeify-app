@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -28,8 +29,30 @@ class PlaylistDetailViewModel @Inject constructor(
         private set
     var playlistImage by mutableStateOf("")
         private set
-    private val _songs = MutableStateFlow<List<Song>>(emptyList())
-    val songs: StateFlow<List<Song>> = _songs.asStateFlow()
+    private val _originalSongs = MutableStateFlow<List<Song>>(emptyList())
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    val songs: StateFlow<List<Song>> = combine(
+        _originalSongs,
+        _searchQuery,
+    ) { originalSongs, searchQuery ->
+        var filteredSongs = originalSongs
+        if (searchQuery.isNotBlank()) {
+            filteredSongs = filteredSongs.filter { song ->
+                song.name.contains(searchQuery, ignoreCase = true) ||
+                        song.artist?.contains(searchQuery, ignoreCase = true) == true ||
+                        song.album?.contains(searchQuery, ignoreCase = true) == true ||
+                        song.genre?.contains(searchQuery, ignoreCase = true) == true
+                song.year?.contains(searchQuery, ignoreCase = true) == true
+            }
+        }
+        filteredSongs
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
 
     val playlistDurationText: StateFlow<String> = songs.map { songList ->
         if (songList.isEmpty()) {
@@ -72,7 +95,7 @@ class PlaylistDetailViewModel @Inject constructor(
                 isLoadingPlayList = false
                 isLoadingSongs = true
 
-                _songs.value = it?.songs ?: emptyList()
+                _originalSongs.value = it?.songs ?: emptyList()
                 isLoadingSongs = false
                 isFavorite = it?.isFavorite ?: false
                 isFavoriteAble = it?.isFavoriteAble ?: true
@@ -81,23 +104,20 @@ class PlaylistDetailViewModel @Inject constructor(
         }
     }
 
+    fun setSearchQuery(query: String) {
+        _searchQuery.value = query
+    }
+
     fun togglePlaylistFavorite(playlistId: String) {
         viewModelScope.launch {
             isFavorite = playlistService.togglePlaylistFavorite(playlistId)
         }
     }
 
-    fun addSongToPlaylist(playlistId: String, song: Song) {
-        viewModelScope.launch {
-            playlistService.addSongToPlaylist(playlistId, song.id)
-            _songs.value = _songs.value + song
-        }
-    }
-
     fun removeSongFromPlaylist(playlistId: String, song: Song) {
         viewModelScope.launch {
             playlistService.removeSongFromPlaylist(playlistId, song.id)
-            _songs.value = _songs.value.filter { it.id != song.id }
+            _originalSongs.value = _originalSongs.value.filter { it.id != song.id }
         }
     }
 

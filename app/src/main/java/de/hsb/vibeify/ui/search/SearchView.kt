@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import de.hsb.vibeify.core.navigation.navigateToArtistDetail
 import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
 import de.hsb.vibeify.core.navigation.navigateToPublicProfile
 import de.hsb.vibeify.ui.player.PlaybackViewModel
@@ -62,6 +63,10 @@ fun SearchView(
                 },
                 onProfileClick = { profile ->
                     navController?.navigateToPublicProfile(profile.id)
+                    vm.clearSearchResults()
+                },
+                onArtistClick = { artist ->
+                    navController?.navigateToArtistDetail(artist.id)
                     vm.clearSearchResults()
                 },
                 onClose = {

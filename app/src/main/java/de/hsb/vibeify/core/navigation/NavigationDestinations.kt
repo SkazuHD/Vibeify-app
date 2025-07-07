@@ -41,6 +41,13 @@ sealed class NavigationDestination(val route: String) {
             }
         }
 
+        data class ArtistDetail(val artistId: String) : Detail("detail/artist/{artistId}") {
+            companion object {
+                const val ROUTE_TEMPLATE = "detail/artist/{artistId}"
+                fun createRoute(artistId: String) = "detail/artist/${artistId.urlEncode()}"
+            }
+        }
+
         data object Playback : Detail("detail/playback")
     }
 }
@@ -64,3 +71,6 @@ fun NavigationDestination.Detail.PlaylistDetail.Companion.fromRoute(playlistId: 
     return NavigationDestination.Detail.PlaylistDetail(playlistId)
 }
 
+fun NavigationDestination.Detail.ArtistDetail.Companion.fromRoute(artistId: String): NavigationDestination.Detail.ArtistDetail {
+    return NavigationDestination.Detail.ArtistDetail(artistId)
+}

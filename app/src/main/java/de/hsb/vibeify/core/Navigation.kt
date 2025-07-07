@@ -43,6 +43,7 @@ import de.hsb.vibeify.core.navigation.NavigationDestination
 import de.hsb.vibeify.core.navigation.bottomNavDestinations
 import de.hsb.vibeify.core.navigation.rememberVibeifyNavigationController
 import de.hsb.vibeify.core.navigation.urlDecode
+import de.hsb.vibeify.ui.artist.ArtistView
 import de.hsb.vibeify.ui.components.AppHeader.AppHeader
 import de.hsb.vibeify.ui.components.StickyBar.StickyBar
 import de.hsb.vibeify.ui.home.MainView
@@ -331,6 +332,20 @@ private fun AuthenticatedNavigation() {
                 PlaylistDetailView(
                     modifier = Modifier,
                     playlistId = urlDecodedId,
+                    navController = navController
+                )
+            }
+
+            composable(
+                route = NavigationDestination.Detail.ArtistDetail.ROUTE_TEMPLATE,
+                enterTransition = { slideInHorizontally(initialOffsetX = { 300 }) },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { 300 }) },
+                arguments = listOf(navArgument("artistId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val artistId = backStackEntry.arguments?.getString("artistId") ?: ""
+                val urlDecodedId = artistId.urlDecode()
+                ArtistView(
+                    artistId = urlDecodedId,
                     navController = navController
                 )
             }

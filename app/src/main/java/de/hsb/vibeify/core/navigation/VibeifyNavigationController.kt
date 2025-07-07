@@ -20,6 +20,11 @@ class VibeifyNavigationController(private val navController: NavController) {
                 navController.navigate("detail/playlist/$encodedPlaylistId")
             }
 
+            is NavigationDestination.Detail.ArtistDetail -> {
+                val encodedArtistId = destination.artistId.urlEncode()
+                navController.navigate("detail/artist/$encodedArtistId")
+            }
+
             else -> navController.navigate(destination.route)
         }
     }
@@ -62,6 +67,12 @@ class VibeifyNavigationController(private val navController: NavController) {
                 NavigationDestination.Detail.PlaylistDetail(playlistId)
             }
 
+            NavigationDestination.Detail.ArtistDetail.ROUTE_TEMPLATE -> {
+                val artistId =
+                    navBackStackEntry?.arguments?.getString("artistId")?.urlDecode() ?: ""
+                NavigationDestination.Detail.ArtistDetail(artistId)
+            }
+
             NavigationDestination.Detail.Playback.route -> NavigationDestination.Detail.Playback
             else -> null
         }
@@ -86,4 +97,3 @@ fun rememberVibeifyNavigationController(navController: NavController): VibeifyNa
         VibeifyNavigationController(navController)
     }
 }
-

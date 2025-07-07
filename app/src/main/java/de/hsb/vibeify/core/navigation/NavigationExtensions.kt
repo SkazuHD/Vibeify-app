@@ -14,6 +14,10 @@ fun NavController.navigateToPlaylistDetail(playlistId: String) {
     navigate(NavigationDestination.Detail.PlaylistDetail.createRoute(playlistId))
 }
 
+fun NavController.navigateToArtistDetail(artistId: String) {
+    navigate(NavigationDestination.Detail.ArtistDetail.createRoute(artistId))
+}
+
 fun NavController.navigateToPlayback() {
     navigate(NavigationDestination.Detail.Playback.route)
 }

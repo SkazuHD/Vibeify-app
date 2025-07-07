@@ -8,10 +8,13 @@ import de.hsb.vibeify.data.model.User
 import de.hsb.vibeify.data.repository.UserRepository
 import de.hsb.vibeify.services.FollowService
 import de.hsb.vibeify.services.PlaylistService
+import de.hsb.vibeify.services.PresenceService
+import de.hsb.vibeify.ui.components.LiveFriends.LiveFriend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -21,7 +24,8 @@ import javax.inject.Inject
 
 data class PublicProfileUiState(
     val user: User? = null,
-    val playlists: List<Playlist> = emptyList(), // Assuming playlists are represented by their IDs
+    val playlists: List<Playlist> = emptyList(),
+    val liveFriend: LiveFriend? = null,
     val isLoading: Boolean = false,
     val error: String? = null
 )
@@ -31,7 +35,8 @@ data class PublicProfileUiState(
 class PublicProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val playlistService: PlaylistService,
-    private val followService: FollowService
+    private val followService: FollowService,
+    private val presenceService: PresenceService,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(PublicProfileUiState())
@@ -61,6 +66,13 @@ class PublicProfileViewModel @Inject constructor(
         .filterNotNull()
         .flatMapLatest { userId -> followService.followingList(userId) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val liveFriendFlow = uiState.map {
+        it.user?.id
+    }.filterNotNull().distinctUntilChanged().flatMapLatest { userId ->
+        presenceService.getFriendFlow(userId)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
 
     fun loadUser(userId: String) {
         viewModelScope.launch {

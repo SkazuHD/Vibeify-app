@@ -73,7 +73,7 @@ class UserStatusRepository @Inject constructor(
                 database.getReference("$USERS_PATH/$userId/$CURRENTLY_PLAYING_PATH")
 
             if (song != null) {
-                val playbackData = CurrentlyPlaying.from(song)
+                val playbackData = song
                 currentlyPlayingRef.setValue(playbackData).await()
                 Log.d(TAG, "Updated currently playing: ${song.name}")
             } else {
@@ -262,11 +262,12 @@ class UserStatusRepository @Inject constructor(
         awaitClose { followingRef.removeEventListener(listener) }
     }
 
-    fun getCurrentlyPlayingFlow(userId: String): Flow<CurrentlyPlaying?> = callbackFlow {
-        val currentlyPlayingRef = database.getReference("$USERS_PATH/$userId/$CURRENTLY_PLAYING_PATH")
+    fun getCurrentlyPlayingFlow(userId: String): Flow<Song?> = callbackFlow {
+        val currentlyPlayingRef =
+            database.getReference("$USERS_PATH/$userId/$CURRENTLY_PLAYING_PATH")
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val currentlyPlaying = snapshot.getValue(CurrentlyPlaying::class.java)
+                val currentlyPlaying = snapshot.getValue(Song::class.java)
                 trySend(currentlyPlaying)
             }
 
@@ -292,6 +293,22 @@ class UserStatusRepository @Inject constructor(
         }
         onlineRef.addValueEventListener(listener)
         awaitClose { onlineRef.removeEventListener(listener) }
+    }
+
+    fun getLastSeenFlow(userId: String): Flow<Long> = callbackFlow {
+        val lastSeenRef = database.getReference("$USERS_PATH/$userId/$LAST_SEEN_PATH")
+        val listener = object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val lastSeen = snapshot.getValue(Long::class.java) ?: 0L
+                trySend(lastSeen)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                close(error.toException())
+            }
+        }
+        lastSeenRef.addValueEventListener(listener)
+        awaitClose { lastSeenRef.removeEventListener(listener) }
     }
 
 

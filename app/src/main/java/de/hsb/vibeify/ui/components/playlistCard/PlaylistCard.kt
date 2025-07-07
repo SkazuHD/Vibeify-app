@@ -48,7 +48,9 @@ fun PlaylistCard(
     playlistIcon: Int = R.drawable.ic_launcher_foreground,
     playlistImage: String? = null,
     shape: RoundedCornerShape = RoundedCornerShape(8.dp),
-    isFavorite: Boolean = false
+    isFavorite: Boolean = false,
+    showArrow: Boolean = true
+
 ) {
     PlaylistCardContent(
         modifier = modifier,
@@ -58,7 +60,8 @@ fun PlaylistCard(
         playlistIcon = playlistIcon,
         playlistImage = playlistImage,
         shape = shape,
-        isFavorite = isFavorite
+        isFavorite = isFavorite,
+        showArrow = showArrow
     )
 }
 
@@ -71,6 +74,7 @@ fun PlaylistCardVM(
     playlistName: String = "Absolute banger",
     playlistIcon: Int = R.drawable.ic_launcher_foreground,
     playlistImage: String? = null,
+    showArrow: Boolean = true,
     shape: RoundedCornerShape = RoundedCornerShape(8.dp),
     playlistCardViewModel: PlaylistCardViewModel = hiltViewModel()
 ) {
@@ -88,7 +92,8 @@ fun PlaylistCardVM(
         playlistIcon = playlistIcon,
         playlistImage = playlistImage,
         shape = shape,
-        isFavorite = isFavorite
+        isFavorite = isFavorite,
+        showArrow = showArrow
     )
 }
 

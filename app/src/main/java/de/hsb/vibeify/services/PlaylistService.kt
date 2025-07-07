@@ -86,15 +86,15 @@ class PlaylistServiceImpl @Inject constructor(
     init {
         scope.launch {
             userRepository.state
-                .map { it.currentUser?.id }
+                .map { it.currentUser }
                 .distinctUntilChanged()
-                .collect { userId ->
-                    if (userId == null) {
+                .collect { user ->
+                    if (user == null) {
                         playlists.value = emptyList()
                     } else {
                         launch {
                             try {
-                                playlists.value = getUserPlaylists(userId)
+                                playlists.value = getUserPlaylists(user.id)
                             } catch (e: Exception) {
                                 Log.e("PlaylistService", "Error loading playlists", e)
                             }
@@ -108,7 +108,6 @@ class PlaylistServiceImpl @Inject constructor(
         return if (userId != null) {
             val currentUser = userRepository.state.value.currentUser
             if (currentUser != null) {
-                // Use async to load both concurrently
                 val userPlaylistsDeferred = scope.async {
                     playlistRepository.getPlaylistsByIds(currentUser.playlists)
                 }

@@ -26,7 +26,7 @@ class StickyBarViewModel @Inject constructor(
 
     private val _playerState = playerServiceV2.playerState
 
-
+    val mediaController = playerServiceV2.player
     val playerState: StateFlow<Int> = _playerState
 
     val currentSong = playerServiceV2.currentSong
@@ -42,18 +42,6 @@ class StickyBarViewModel @Inject constructor(
 
     fun play() {
         playerServiceV2.resume()
-    }
-
-    fun pause() {
-        playerServiceV2.pause()
-    }
-
-    fun stop() {
-        playerServiceV2.stop()
-    }
-
-    fun clearMediaItems() {
-        playerServiceV2.clearMediaItems()
     }
 
     fun seekTo(pos: Long) {

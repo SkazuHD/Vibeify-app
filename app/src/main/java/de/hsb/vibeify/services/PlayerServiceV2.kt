@@ -2,6 +2,7 @@ package de.hsb.vibeify.services
 
 import android.content.ComponentName
 import android.content.Context
+import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
@@ -20,7 +21,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,11 +28,8 @@ import javax.inject.Singleton
 class PlayerServiceV2 {
 
     private var context: Context
-    private var wasPlayingBeforeViewChange = false
-
     private val controllerReadyActions = mutableListOf<(MediaController) -> Unit>()
-    private var mediaController: MediaController? = null
-
+    private var _mediaController: MutableStateFlow<Player?> = MutableStateFlow(null)
     private val _currentSongList = MutableStateFlow(emptyList<Song>())
     val currentSongList: StateFlow<List<Song>> = _currentSongList
 
@@ -52,26 +49,19 @@ class PlayerServiceV2 {
         SHUFFLE, NONE
     }
 
-    enum class RepeatMode {
-        ALL, LOOP, NONE
-    }
-
     private val _playbackMode = MutableStateFlow(PlaybackMode.NONE)
     val playbackMode: StateFlow<PlaybackMode> = _playbackMode
-
-    private val _repeatMode = MutableStateFlow(RepeatMode.NONE)
-    val repeatMode: StateFlow<RepeatMode> = _repeatMode
-
 
     val upcomingSongs: StateFlow<List<Song>> = combine(
         currentSongList,
         currentSong,
         playbackMode
     ) { songList, _, mode ->
-        mediaController?.let { controller ->
+        _mediaController.value?.let { controller ->
             val currentIndex = controller.currentMediaItemIndex
 
             if (mode == PlaybackMode.SHUFFLE) {
+                Log.d("PlayerServiceV2", "Fetching next song in SHUFFLE mode")
                 val nextIndex = controller.getNextMediaItemIndex().coerceIn(0, songList.size)
 
 
@@ -95,12 +85,13 @@ class PlayerServiceV2 {
         initialValue = emptyList()
     )
 
-
     private val _duration = MutableStateFlow(1L)
     val duration: StateFlow<Long> = _duration
 
     private val _playerState = MutableStateFlow(Player.STATE_IDLE)
     val playerState: StateFlow<Int> = _playerState
+
+    val player: StateFlow<Player?> = _mediaController
 
     private var positionTrackingJob: Job? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main)
@@ -131,13 +122,14 @@ class PlayerServiceV2 {
         val controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
         controllerFuture.addListener({
             val controller = controllerFuture.get()
-            mediaController = controller
+            _mediaController.value = controller
             controllerReadyActions.forEach { it(controller) }
             controllerReadyActions.clear()
 
+
             controller.addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(playbackState: Int) {
-                    _isPlaying.value = controller.isPlaying && playbackState == Player.STATE_READY
+                    _isPlaying.value = controller.isPlaying
                     _playerState.value = playbackState
                 }
 
@@ -160,39 +152,28 @@ class PlayerServiceV2 {
                 override fun onEvents(player: Player, events: Player.Events) {
                     updatePositionAndDuration()
                 }
+
+                override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+                    super.onShuffleModeEnabledChanged(shuffleModeEnabled)
+                    _playbackMode.value = if (shuffleModeEnabled) {
+                        PlaybackMode.SHUFFLE
+                    } else {
+                        PlaybackMode.NONE
+                    }
+                }
             })
             updatePositionAndDuration()
 
         }, ContextCompat.getMainExecutor(context))
     }
 
-
-    fun savePlaybackState() {
-        mediaController?.let {
-            wasPlayingBeforeViewChange = it.isPlaying
-        }
-    }
-
-    fun shouldResumePlayback(): Boolean {
-        return wasPlayingBeforeViewChange
-    }
-
-    fun withController(action: (MediaController) -> Unit) {
-        val controller = mediaController
+    fun withController(action: (Player) -> Unit) {
+        val controller = _mediaController.value
         if (controller != null) {
             action(controller)
         } else {
             controllerReadyActions.add(action)
         }
-    }
-
-    suspend fun awaitController(): MediaController {
-        return mediaController
-            ?: suspendCancellableCoroutine { continuation ->
-                controllerReadyActions.add { controller ->
-                    continuation.resume(controller) { cause, _, _ -> }
-                }
-            }
     }
 
     fun play(song: Song) {
@@ -222,46 +203,9 @@ class PlayerServiceV2 {
         startPositionTracking()
     }
 
-    fun changeRepeatMode(mode: Int) {
-        withController { controller ->
-            if (mode !in Player.REPEAT_MODE_OFF..Player.REPEAT_MODE_ALL) {
-                throw IllegalArgumentException("Invalid repeat mode: $mode")
-            }
-            controller.repeatMode = mode
-            // _repeatMode.value = mode
-        }
-    }
-
-    fun pause() {
-        withController { controller ->
-            controller.pause()
-        }
-        stopPositionTracking()
-    }
-
-    fun stop() {
-        withController { controller ->
-            controller.stop()
-        }
-        stopPositionTracking()
-        _currentSong.value = null
-        _currentSongList.value = emptyList()
-        _currentPlaylistId.value = null
-        _position.value = 0L
-        _duration.value = 1L
-        _isPlaying.value = false
-    }
-
-
     fun resume() {
         withController { controller ->
             controller.play()
-        }
-    }
-
-    fun clearMediaItems() {
-        withController { controller ->
-            controller.clearMediaItems()
         }
     }
 
@@ -269,18 +213,6 @@ class PlayerServiceV2 {
         withController { controller ->
             controller.seekTo(positionMs)
             _position.value = positionMs
-        }
-    }
-
-    fun skipToNext() {
-        withController { controller ->
-            controller.seekToNextMediaItem()
-        }
-    }
-
-    fun skipToPrevious() {
-        withController { controller ->
-            controller.seekToPreviousMediaItem()
         }
     }
 
@@ -293,7 +225,7 @@ class PlayerServiceV2 {
 
     fun release() {
         stopPositionTracking()
-        mediaController?.release()
+        _mediaController.value?.release()
     }
 
     private fun updatePositionAndDuration() {
@@ -319,61 +251,8 @@ class PlayerServiceV2 {
     }
 
 
-    fun togglePlaybackMode() {
-        withController { controller ->
-            _playbackMode.value = when (_playbackMode.value) {
-                PlaybackMode.NONE -> {
-                    controller.shuffleModeEnabled = true
-                    PlaybackMode.SHUFFLE
-                }
-
-                PlaybackMode.SHUFFLE -> {
-
-                    controller.shuffleModeEnabled = false
-
-                    PlaybackMode.NONE
-                }
-
-            }
-        }
-    }
-
-    fun toggleRepeatMode() {
-        withController { controller ->
-            _repeatMode.value = when (_repeatMode.value) {
-                RepeatMode.NONE -> {
-                    controller.repeatMode = Player.REPEAT_MODE_ALL
-                    println()
-                    println("1")
-                    RepeatMode.ALL
-                }
-
-                RepeatMode.ALL -> {
-                    controller.repeatMode = Player.REPEAT_MODE_ONE
-                    println("2")
-
-                    RepeatMode.LOOP
-                }
-
-                RepeatMode.LOOP -> {
-                    controller.repeatMode = Player.REPEAT_MODE_OFF
-                    println("3")
-
-                    RepeatMode.NONE
-                }
-
-
-            }
-        }
-    }
-
-
     fun getPlaybackMode(): PlaybackMode {
         return _playbackMode.value
-    }
-
-    fun getRepeatMode(): RepeatMode {
-        return _repeatMode.value
     }
 
 

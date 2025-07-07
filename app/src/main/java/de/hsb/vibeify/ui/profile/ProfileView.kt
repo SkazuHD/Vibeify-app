@@ -1,6 +1,7 @@
 package de.hsb.vibeify.ui.profile
 
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,14 +36,17 @@ import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavController
 import de.hsb.vibeify.core.AuthViewModel
+import de.hsb.vibeify.core.navigation.NavigationDestination
 import de.hsb.vibeify.core.navigation.navigateToPlaylistDetail
 import de.hsb.vibeify.core.navigation.navigateToPublicProfile
 import de.hsb.vibeify.ui.components.Avatar
 import de.hsb.vibeify.ui.components.NoContentCard
 import de.hsb.vibeify.ui.components.playlistCard.PlaylistCardVM
 
+@OptIn(UnstableApi::class)
 @Composable
 fun ProfileView(
     modifier: Modifier = Modifier,
@@ -243,6 +247,19 @@ fun ProfileView(
                     .padding(top = 16.dp)
             ) {
                 Text(text = "Sign Out")
+            }
+        }
+        item {
+            Button(
+                onClick = {
+                    navController.navigate(NavigationDestination.Main.Player2.route)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+            )
+            {
+                Text("Open Player")
             }
         }
     }

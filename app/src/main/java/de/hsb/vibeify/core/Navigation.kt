@@ -343,6 +343,7 @@ private fun AuthenticatedNavigation() {
                     nextSong = "Current Queue"
                 )
             }
+
         }
     }
 }

@@ -17,11 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -40,22 +36,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.media3.common.Player
+import androidx.media3.demo.compose.buttons.PlayPauseButton
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import de.hsb.vibeify.R
 import de.hsb.vibeify.core.navigation.navigateToPlayback
+import de.hsb.vibeify.ui.player.controls.StopButton
 
 
 @Composable
 fun StickyBar(navController: NavController, modifier: Modifier = Modifier) {
     val viewModel: StickyBarViewModel = hiltViewModel()
-    val isPlaying by viewModel.isPlaying.collectAsState()
     val position by viewModel.position.collectAsState()
     val duration by viewModel.duration.collectAsState()
     val song by viewModel.currentSong.collectAsState()
     val playbackState by viewModel.playerState.collectAsState()
+    val player = viewModel.mediaController.collectAsState().value
 
     val isFavorite by viewModel.isCurrentSongFavorite.collectAsState(
         initial = false
@@ -77,7 +75,6 @@ fun StickyBar(navController: NavController, modifier: Modifier = Modifier) {
 
     if (showBar && song != null) {
         Box(
-
             modifier = Modifier
                 .fillMaxWidth()
                 .height(72.dp)
@@ -168,34 +165,12 @@ fun StickyBar(navController: NavController, modifier: Modifier = Modifier) {
 
                     }
                     Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(onClick = {
-                        if (isPlaying) {
-                            viewModel.pause()
-                        } else {
-                            viewModel.play()
-                        }
-                    }) {
-                        Icon(
-                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = if (isPlaying) "Pause" else "Play",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(48.dp)
-                        )
+                    if (player != null) {
+                        PlayPauseButton(player)
+                        StopButton(player)
                     }
+
                     Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(
-                        onClick = {
-                            viewModel.stop()
-                            viewModel.clearMediaItems()
-                        },
-                        modifier = Modifier.size(26.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Stop,
-                            contentDescription = "Terminate",
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
                 }
                 Slider(
                     value = sliderPosition,

@@ -49,7 +49,8 @@ fun PlaylistCard(
     playlistImage: String? = null,
     shape: RoundedCornerShape = RoundedCornerShape(8.dp),
     isFavorite: Boolean = false,
-    showArrow: Boolean = true
+    showArrow: Boolean = true,
+    enabled: Boolean = true
 
 ) {
     PlaylistCardContent(
@@ -61,7 +62,7 @@ fun PlaylistCard(
         playlistImage = playlistImage,
         shape = shape,
         isFavorite = isFavorite,
-        showArrow = showArrow
+        showArrow = showArrow, enabled = enabled
     )
 }
 
@@ -76,6 +77,7 @@ fun PlaylistCardVM(
     playlistImage: String? = null,
     showArrow: Boolean = true,
     shape: RoundedCornerShape = RoundedCornerShape(8.dp),
+    enabled: Boolean = true,
     playlistCardViewModel: PlaylistCardViewModel = hiltViewModel()
 ) {
     var isFavorite by remember { mutableStateOf(false) }
@@ -93,7 +95,8 @@ fun PlaylistCardVM(
         playlistImage = playlistImage,
         shape = shape,
         isFavorite = isFavorite,
-        showArrow = showArrow
+        showArrow = showArrow,
+        enabled = enabled
     )
 }
 
@@ -107,7 +110,8 @@ private fun PlaylistCardContent(
     playlistImage: String?,
     shape: RoundedCornerShape,
     isFavorite: Boolean,
-    showArrow: Boolean = true
+    showArrow: Boolean = true,
+    enabled: Boolean = true
 ) {
 
     val context = LocalContext.current
@@ -132,7 +136,8 @@ private fun PlaylistCardContent(
         shape = shape,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-        )
+        ),
+        enabled = enabled
     ) {
         Row(
             modifier = Modifier

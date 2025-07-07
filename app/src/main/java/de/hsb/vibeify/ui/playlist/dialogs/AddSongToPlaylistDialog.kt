@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.hsb.vibeify.data.model.Song
+import de.hsb.vibeify.ui.components.playlistCard.PlaylistCard
 
 @Composable
 fun AddSongToPlaylistDialog(
@@ -51,17 +51,27 @@ fun AddSongToPlaylistDialog(
                     style = MaterialTheme.typography.headlineMedium,
                     textAlign = TextAlign.Center
                 )
-                LazyColumn {
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     items(items = playlists.value, key = { playlist -> playlist.id }) { playlist ->
-                        Button(
+                        val isInPlaylist = playlist.songIds.contains(song.id)
+                        PlaylistCard(
+                            playlistId = playlist.id,
+                            playlistName = playlist.title,
+                            playlistImage = playlist.imageUrl,
+                            showArrow = !isInPlaylist,
+                            enabled = !isInPlaylist,
                             onClick = {
+                                if (isInPlaylist) return@PlaylistCard
                                 addSongToPlaylistViewModel.addSongToPlaylist(playlist.id, song.id)
                                 onDismissRequest()
                             },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(text = playlist.title)
-                        }
+                            playlistDescription = playlist.description ?: "",
+                            isFavorite = false,
+                        )
                     }
                 }
             }

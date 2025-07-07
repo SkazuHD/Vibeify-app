@@ -188,6 +188,7 @@ fun RecentActivityGrid(
                             playlistImage = activityItem.playlist.imageUrl,
                             modifier = Modifier.weight(1f),
                             playlistId = activityItem.playlist.id,
+                            showArrow = false,
                             onClick = {
                                 navController.navigateToPlaylistDetail(activityItem.playlist.id)
                             }

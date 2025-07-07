@@ -75,7 +75,6 @@ fun PlaylistView(
                 }
             }
 
-            // Simplified LazyColumn - removed contentType which might cause overhead
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),

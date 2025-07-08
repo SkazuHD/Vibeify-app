@@ -50,7 +50,12 @@ import java.net.URLDecoder
 
 
 @Composable
-fun AppRouter(authViewModel: AuthViewModel = hiltViewModel()) {
+fun AppRouter(
+    startDestinationOverride: String? = null,
+    authViewModel: AuthViewModel = hiltViewModel()
+)
+ {
+
     val authState by authViewModel.authState.collectAsState()
 
     val destination = when {
@@ -58,6 +63,7 @@ fun AppRouter(authViewModel: AuthViewModel = hiltViewModel()) {
         authState.currentUser != null -> "root"
         else -> "auth"
     }
+
 
     Log.d("AppRouter", "Navigating to destination: $destination")
 
@@ -84,7 +90,7 @@ fun AppRouter(authViewModel: AuthViewModel = hiltViewModel()) {
         }
 
         "root" -> {
-            RootNavHost()
+            RootNavHost(startDestinationOverride)
         }
     }
 }
@@ -100,7 +106,7 @@ fun AuthNavHost() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RootNavHost() {
+fun RootNavHost(startDestinationOverride: String? = null) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -109,6 +115,7 @@ fun RootNavHost() {
         Destinations.PlaylistDetailView,
         Destinations.PlaybackView
     )
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -150,7 +157,7 @@ fun RootNavHost() {
     ) { contentPadding ->
         NavHost(
             navController = navController,
-            startDestination = NavbarDestinations.SONGS.route,
+            startDestination = startDestinationOverride  ?: NavbarDestinations.SONGS.route,
             modifier = Modifier.padding(contentPadding)
         ) {
             NavbarDestinations.entries.forEach { destination ->

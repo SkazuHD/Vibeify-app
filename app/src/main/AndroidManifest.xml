@@ -55,6 +55,17 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/my_app_widget_info" />
         </receiver>
+        <activity
+            android:name=".widget.myActivities.NavigationActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="myapp" android:host="playback"/>
+            </intent-filter>
+        </activity>
 
     </application>
 

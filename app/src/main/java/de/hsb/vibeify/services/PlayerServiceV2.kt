@@ -4,12 +4,15 @@ import android.content.ComponentName
 import android.content.Context
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import de.hsb.vibeify.data.model.Song
+import de.hsb.vibeify.widget.MyAppWidget
+import de.hsb.vibeify.widget.MyAppWidgetReceiver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -218,6 +221,7 @@ class PlayerServiceV2 {
             controller.seekTo(startIndex, 0L)
             controller.prepare()
             controller.play()
+            updateWidget()
         }
         startPositionTracking()
     }
@@ -235,6 +239,7 @@ class PlayerServiceV2 {
     fun pause() {
         withController { controller ->
             controller.pause()
+            updateWidget()
         }
         stopPositionTracking()
     }
@@ -242,6 +247,7 @@ class PlayerServiceV2 {
     fun stop() {
         withController { controller ->
             controller.stop()
+            updateWidget()
         }
         stopPositionTracking()
         _currentSong.value = null
@@ -256,6 +262,7 @@ class PlayerServiceV2 {
     fun resume() {
         withController { controller ->
             controller.play()
+            updateWidget()
         }
     }
 
@@ -275,12 +282,14 @@ class PlayerServiceV2 {
     fun skipToNext() {
         withController { controller ->
             controller.seekToNextMediaItem()
+            updateWidget()
         }
     }
 
     fun skipToPrevious() {
         withController { controller ->
             controller.seekToPreviousMediaItem()
+            updateWidget()
         }
     }
 
@@ -288,6 +297,7 @@ class PlayerServiceV2 {
         val currentIndex = controller.currentMediaItemIndex
         if (currentIndex >= 0 && currentIndex < currentSongList.value.size) {
             _currentSong.value = currentSongList.value[currentIndex]
+            updateWidget()
         }
     }
 
@@ -374,6 +384,11 @@ class PlayerServiceV2 {
 
     fun getRepeatMode(): RepeatMode {
         return _repeatMode.value
+    }
+
+
+    fun updateWidget() {
+        MyAppWidgetReceiver.update(context, this)
     }
 
 

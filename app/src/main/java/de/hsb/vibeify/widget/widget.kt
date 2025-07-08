@@ -33,17 +33,24 @@ import androidx.glance.text.TextStyle
 import androidx.glance.text.FontWeight
 import androidx.glance.unit.ColorProvider
 import de.hsb.vibeify.widget.myActivities.NavigationActivity
-
+import androidx.datastore.preferences.core.Preferences
+import androidx.glance.currentState
 
 
 class MyAppWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-
-
-
         provideContent {
-            MusicWidgetLayout()
+            val prefs = currentState<Preferences>()
+            val songTitle = prefs[WidgetPreferencesKeys.SONG_TITLE] ?: "No song"
+            val artist = prefs[WidgetPreferencesKeys.ARTIST] ?: "Unknown Artist"
+            val isPlaying = prefs[WidgetPreferencesKeys.IS_PLAYING] ?: false
+
+            MusicWidgetLayout(
+                songTitle = songTitle,
+                artist = artist,
+                isPlaying = isPlaying
+            )
         }
     }
 }
@@ -53,8 +60,9 @@ class MyAppWidget : GlanceAppWidget() {
 @SuppressLint("RestrictedApi")
 @Composable
 fun MusicWidgetLayout(
-    songTitle: String = "Hey Ya!",
-    artist: String = "Outkast"
+    songTitle: String,
+    artist: String,
+    isPlaying: Boolean
 ) {
     val whiteText = TextStyle(
         color = ColorProvider(Color.White),
@@ -96,8 +104,6 @@ fun MusicWidgetLayout(
         ProgressBar(progress = 0.5f, modifier = GlanceModifier.padding(vertical = 8.dp))
         Spacer(modifier = GlanceModifier.height(16.dp))
 
-
-
         Row(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = GlanceModifier.fillMaxWidth()
@@ -108,7 +114,7 @@ fun MusicWidgetLayout(
                 modifier = GlanceModifier.defaultWeight()
             )
             Button(
-                text = if (true) "⏸" else "▶️",
+                text = if (isPlaying) "⏸" else "▶️",
                 onClick = actionStartActivity<MyActivity>(),
                 modifier = GlanceModifier.defaultWeight()
             )
@@ -124,6 +130,7 @@ fun MusicWidgetLayout(
         Text(text = "Next: Roses", style = whiteText, maxLines = 1)
     }
 }
+
 
 @Composable
 fun ProgressBar(

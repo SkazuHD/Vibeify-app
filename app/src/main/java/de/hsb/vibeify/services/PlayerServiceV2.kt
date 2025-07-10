@@ -205,6 +205,19 @@ class PlayerServiceV2 {
         startPositionTracking()
     }
 
+    fun insertIntoQueue(song: Song) {
+        _currentSongList.value = _currentSongList.value.toMutableList().apply {
+            add(1, song)
+        }
+        val mediaItem = buildMediaItem(song)
+        withController { controller ->
+            controller.addMediaItem(1, mediaItem)
+            if (controller.playbackState == Player.STATE_IDLE) {
+                controller.prepare()
+            }
+        }
+    }
+
     fun resume() {
         withController { controller ->
             controller.play()

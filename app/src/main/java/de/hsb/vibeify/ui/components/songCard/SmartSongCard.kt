@@ -49,6 +49,12 @@ fun SmartSongCard(
             MenuOption(text = "Abspielen", icon = Icons.Default.PlayArrow, onClick = {
                 playbackViewModel.play(song)
             }),
+            MenuOption(
+                text = "Zur Warteschlange hinzufügen",
+                icon = Icons.Default.LibraryAdd,
+                onClick = {
+                    playbackViewModel.addToQueue(song)
+                }),
             if (isSongFavorite) {
                 MenuOption(
                     text = "Aus Favoriten entfernen",

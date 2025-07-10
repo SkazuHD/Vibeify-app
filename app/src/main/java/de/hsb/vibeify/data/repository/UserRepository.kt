@@ -137,12 +137,16 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun searchUsers(query: String): List<User> {
         Log.d("UserRepository", "searchUsers called with query: $query")
         val res = db.collection(collectionName).where(
-
-            Filter.and(
-                Filter.greaterThanOrEqualTo("email", query),
-                Filter.lessThanOrEqualTo("email", query + "\uf8ff")
+            Filter.or(
+                Filter.and(
+                    Filter.greaterThanOrEqualTo("email", query),
+                    Filter.lessThanOrEqualTo("email", query + "\uf8ff")
+                ),
+                Filter.and(
+                    Filter.greaterThanOrEqualTo("name", query),
+                    Filter.lessThanOrEqualTo("name", query + "\uf8ff")
+                )
             )
-
         ).get().await()
         Log.d("UserRepository", "searchUsers result size: ${res.size()}")
         if (res.isEmpty) {

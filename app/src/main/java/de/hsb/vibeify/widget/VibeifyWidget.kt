@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
 import androidx.glance.GlanceId
@@ -62,7 +63,7 @@ class VibeifyWidget @Inject constructor() :
 
         provideContent {
             GlanceTheme {
-                WidgetContent(playerServiceV2)
+                WidgetContent(playerServiceV2, initialAlbumArt = null)
             }
         }
     }
@@ -88,6 +89,7 @@ class VibeifyWidget @Inject constructor() :
     @Composable
     private fun WidgetContent(
         playerServiceV2: PlayerServiceV2,
+        initialAlbumArt: ImageProvider? = null
     ) {
         val currentSong = playerServiceV2.currentSong.collectAsState(initial = Song()).value
         val isPlaying = playerServiceV2.isPlaying.collectAsState(initial = false).value

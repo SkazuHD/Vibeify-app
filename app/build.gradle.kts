@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "de.hsb.vibeify"
-        minSdk = 30
+        minSdk = 31
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -39,6 +39,9 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.15"
     }
 }
 
@@ -98,5 +101,12 @@ dependencies {
 
     // lifecycle
     implementation(libs.androidx.lifecycle.process)
+
+    // Jetpack Glances Widgets
+    implementation(libs.androidx.glance.appwidget)
+// For interop APIs with Material 3
+    implementation(libs.androidx.glance.material3)
+// For interop APIs with Material 2
+    // implementation("androidx.glance:glance-material:1.1.1")
 
 }

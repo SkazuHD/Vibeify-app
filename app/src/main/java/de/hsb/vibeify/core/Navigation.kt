@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -57,12 +58,22 @@ import de.hsb.vibeify.ui.register.RegisterView
 import de.hsb.vibeify.ui.search.SearchView
 
 @Composable
-fun AppRouter(authViewModel: AuthViewModel = hiltViewModel()) {
+fun AppRouter(
+    authViewModel: AuthViewModel = hiltViewModel(),
+    initialDestination: String? = null,
+    pendingDestination: String? = null,
+    onNavigationHandled: () -> Unit = {}
+) {
     val authState by authViewModel.authState.collectAsState()
 
     when {
         !authState.isAuthResolved -> LoadingScreen()
-        authState.currentUser != null -> AuthenticatedNavigation()
+        authState.currentUser != null -> AuthenticatedNavigation(
+            initialDestination = initialDestination,
+            pendingDestination = pendingDestination,
+            onNavigationHandled = onNavigationHandled
+        )
+
         else -> UnauthenticatedNavigation()
     }
 }
@@ -105,10 +116,24 @@ private fun UnauthenticatedNavigation() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AuthenticatedNavigation() {
+private fun AuthenticatedNavigation(
+    initialDestination: String? = null,
+    pendingDestination: String? = null,
+    onNavigationHandled: () -> Unit = {}
+) {
     val navController = rememberNavController()
     val navigationController = rememberVibeifyNavigationController(navController)
     val currentDestination = navigationController.getCurrentDestination()
+
+    LaunchedEffect(pendingDestination) {
+        pendingDestination?.let { destination ->
+            navController.navigate(destination) {
+                launchSingleTop = true
+                restoreState = true
+            }
+            onNavigationHandled()
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -146,7 +171,7 @@ private fun AuthenticatedNavigation() {
     ) { contentPadding ->
         NavHost(
             navController = navController,
-            startDestination = NavigationDestination.Main.Home.route,
+            startDestination = initialDestination ?: NavigationDestination.Main.Home.route,
             modifier = Modifier.padding(contentPadding)
         ) {
             composable(

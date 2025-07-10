@@ -54,6 +54,12 @@ class PlaybackViewModel @Inject constructor(
         }
     }
 
+    fun addToQueue(song: Song) {
+        viewModelScope.launch {
+            playerServiceV2.insertIntoQueue(song)
+        }
+    }
+
     fun seekTo(pos: Long) {
         playerServiceV2.seekTo(pos)
     }

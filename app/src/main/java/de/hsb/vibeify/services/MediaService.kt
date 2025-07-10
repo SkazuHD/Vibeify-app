@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import dagger.hilt.android.AndroidEntryPoint
+import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.data.repository.PlaylistRepository
 import de.hsb.vibeify.data.repository.SongRepository
 import kotlinx.coroutines.CoroutineScope
@@ -237,7 +238,7 @@ class MediaService : MediaLibraryService() {
                 songRepository.getAllSongs()
             }
             ImmutableList.copyOf(songs.map { song ->
-                playerServiceV2.buildMediaItem(song)
+                Song.toMediaItem(song)
             })
         } catch (e: Exception) {
             ImmutableList.of()
@@ -348,7 +349,7 @@ class MediaService : MediaLibraryService() {
                     val song = runBlocking {
                         songRepository.getSongById(mediaId)
                     }
-                    song?.let { playerServiceV2.buildMediaItem(it) }
+                    song?.let { Song.toMediaItem(song) }
                 }
             }
         } catch (e: Exception) {
@@ -362,7 +363,7 @@ class MediaService : MediaLibraryService() {
                 songRepository.getSongById(mediaId)
             }
             song?.let {
-                playerServiceV2.buildMediaItem(it)
+                Song.toMediaItem(song)
             } ?: MediaItem.Builder().setMediaId(mediaId).build()
         } catch (e: Exception) {
             MediaItem.Builder().setMediaId(mediaId).build()

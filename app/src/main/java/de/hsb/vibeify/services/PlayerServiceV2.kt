@@ -4,7 +4,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.util.Log
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
@@ -14,6 +13,7 @@ import de.hsb.vibeify.data.model.Song
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -96,21 +96,6 @@ class PlayerServiceV2 {
     private var positionTrackingJob: Job? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main)
 
-    fun buildMediaItem(song: Song): MediaItem {
-        return MediaItem.Builder()
-            .setMediaId(song.id)
-            .setUri("${song.filePath}")
-            .setMediaMetadata(
-                MediaMetadata.Builder()
-                    .setTitle(song.name)
-                    .setArtist(song.artist)
-                    .setAlbumTitle(song.album)
-                    .setArtworkUri(song.imageUrl?.toUri())
-                    .build()
-            )
-            .build()
-    }
-
     @Inject
     constructor(context: Context) {
         this.context = context
@@ -151,6 +136,7 @@ class PlayerServiceV2 {
 
                 override fun onEvents(player: Player, events: Player.Events) {
                     updatePositionAndDuration()
+
                 }
 
                 override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
@@ -179,7 +165,7 @@ class PlayerServiceV2 {
     fun play(song: Song) {
         _currentSong.value = song
         _currentSongList.value = listOf(song)
-        val mediaItem = buildMediaItem(song)
+        val mediaItem = Song.toMediaItem(song)
         withController { controller ->
             controller.setMediaItem(mediaItem)
             controller.prepare()
@@ -193,7 +179,7 @@ class PlayerServiceV2 {
         _currentSong.value = songs[startIndex]
         _currentSongList.value = songs
         _currentPlaylistId.value = playlistId
-        val mediaItems = songs.map { buildMediaItem(it) }
+        val mediaItems = songs.map { Song.toMediaItem(it) }
         withController { controller ->
             controller.setMediaItems(mediaItems)
             controller.seekTo(startIndex, 0L)
@@ -201,6 +187,19 @@ class PlayerServiceV2 {
             controller.play()
         }
         startPositionTracking()
+    }
+
+    fun insertIntoQueue(song: Song) {
+        _currentSongList.value = _currentSongList.value.toMutableList().apply {
+            add(1, song)
+        }
+        val mediaItem = Song.toMediaItem(song)
+        withController { controller ->
+            controller.addMediaItem(1, mediaItem)
+            if (controller.playbackState == Player.STATE_IDLE) {
+                controller.prepare()
+            }
+        }
     }
 
     fun resume() {
@@ -240,7 +239,7 @@ class PlayerServiceV2 {
         positionTrackingJob = serviceScope.launch {
             while (isActive) {
                 updatePositionAndDuration()
-                kotlinx.coroutines.delay(intervalMs)
+                delay(intervalMs)
             }
         }
     }

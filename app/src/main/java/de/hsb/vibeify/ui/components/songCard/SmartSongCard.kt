@@ -2,6 +2,7 @@ package de.hsb.vibeify.ui.components.songCard
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddBox
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.LibraryAdd
@@ -49,6 +50,12 @@ fun SmartSongCard(
             MenuOption(text = "Abspielen", icon = Icons.Default.PlayArrow, onClick = {
                 playbackViewModel.play(song)
             }),
+            MenuOption(
+                text = "Zur Warteschlange hinzufügen",
+                icon = Icons.Default.AddBox,
+                onClick = {
+                    playbackViewModel.addToQueue(song)
+                }),
             if (isSongFavorite) {
                 MenuOption(
                     text = "Aus Favoriten entfernen",

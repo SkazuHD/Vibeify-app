@@ -5,7 +5,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
@@ -31,6 +33,22 @@ import de.hsb.vibeify.services.PlaylistServiceImpl
 import de.hsb.vibeify.services.SearchService
 import de.hsb.vibeify.services.SearchServiceImpl
 import javax.inject.Singleton
+
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+internal interface PlayerServiceEntryPoint {
+    fun getPlayerService(): PlayerServiceV2
+
+    companion object {
+        fun get(context: Context): PlayerServiceV2 {
+            return EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                PlayerServiceEntryPoint::class.java
+            ).getPlayerService()
+        }
+    }
+}
 
 @Module
 @InstallIn(SingletonComponent::class)

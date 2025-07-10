@@ -2,6 +2,7 @@ package de.hsb.vibeify.widget
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
@@ -34,6 +35,7 @@ import androidx.glance.text.FontWeight
 import androidx.glance.unit.ColorProvider
 import de.hsb.vibeify.widget.myActivities.NavigationActivity
 import androidx.datastore.preferences.core.Preferences
+import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.currentState
 
 
@@ -110,17 +112,25 @@ fun MusicWidgetLayout(
         ) {
             Button(
                 text = "⏮",
-                onClick = actionStartActivity<MyActivity>(),
+                onClick = actionSendBroadcast(
+                    Intent(PlayerControlReceiver.ACTION_PREVIOUS).setPackage("de.hsb.vibeify")
+                ),
                 modifier = GlanceModifier.defaultWeight()
             )
+
             Button(
                 text = if (isPlaying) "⏸" else "▶️",
-                onClick = actionStartActivity<MyActivity>(),
+                onClick = actionSendBroadcast(
+                    Intent(PlayerControlReceiver.ACTION_PLAY_PAUSE).setPackage("de.hsb.vibeify")
+                ),
                 modifier = GlanceModifier.defaultWeight()
             )
+
             Button(
                 text = "⏭",
-                onClick = actionStartActivity<MyActivity>(),
+                onClick = actionSendBroadcast(
+                    Intent(PlayerControlReceiver.ACTION_NEXT).setPackage("de.hsb.vibeify")
+                ),
                 modifier = GlanceModifier.defaultWeight()
             )
         }

@@ -55,6 +55,14 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/my_app_widget_info" />
         </receiver>
+        <receiver android:name=".widget.PlayerControlReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="de.hsb.vibeify.ACTION_PLAY_PAUSE" />
+                <action android:name="de.hsb.vibeify.ACTION_NEXT" />
+                <action android:name="de.hsb.vibeify.ACTION_PREVIOUS" />
+            </intent-filter>
+        </receiver>
         <activity
             android:name=".widget.myActivities.NavigationActivity"
             android:exported="true"

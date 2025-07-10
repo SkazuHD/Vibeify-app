@@ -45,9 +45,11 @@ class MainViewModel @Inject constructor(
 
 
     init {
+        _uiState.update { it.copy(isLoadingActivities = true, isLoadingRecommendations = true) }
         viewModelScope.launch {
             launch {
                 userRepository.state.map { it.currentUser }.distinctUntilChanged().collect { user ->
+                    _uiState.update { it.copy(isLoadingActivities = true) }
                     val recentActivityItems = if (user != null) {
                         loadRecentActivities(user.recentActivities)
                     } else {
@@ -62,6 +64,7 @@ class MainViewModel @Inject constructor(
                 }
             }
             launch {
+                _uiState.update { it.copy(isLoadingRecommendations = true) }
                 val recommendations = discoveryService.generateRandomSongs(10)
                 _uiState.update {
                     it.copy(

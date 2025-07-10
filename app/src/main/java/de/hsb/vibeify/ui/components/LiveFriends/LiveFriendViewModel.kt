@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -35,8 +36,12 @@ class LiveFriendsViewModel @Inject constructor(
     private val presenceService: PresenceService
 
 ) : ViewModel() {
-
-    private val _uiState = MutableStateFlow(LiveFriendUiState())
+    private val _uiState = MutableStateFlow(
+        LiveFriendUiState(
+            isLoading = true,
+            error = null
+        )
+    )
     val uiState: StateFlow<LiveFriendUiState> = _uiState.asStateFlow()
 
     init {
@@ -49,7 +54,9 @@ class LiveFriendsViewModel @Inject constructor(
             presenceService.getLiveFriendsFlow().map { it ->
                 it.sortedByDescending { it.lastSeen }.distinctBy { it.id }
             }.distinctUntilChanged().collect { friends ->
-                _uiState.value = LiveFriendUiState(liveFriends = friends, isLoading = false)
+                _uiState.update {
+                    it.copy(liveFriends = friends, isLoading = false, error = null)
+                }
             }
         }
     }

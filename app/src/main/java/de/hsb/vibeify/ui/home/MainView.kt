@@ -43,6 +43,8 @@ fun MainView(
     playbackViewModel: PlaybackViewModel = hiltViewModel()
 ) {
     val uiState = mainViewModel.uiState.collectAsState()
+    val isLoadingActivities = uiState.value.isLoadingActivities
+    val isLoadingRecommendations = uiState.value.isLoadingRecommendations
     val recentActivityItems = uiState.value.recentActivityItems
     val recommendations = uiState.value.recommendations
 
@@ -92,7 +94,7 @@ fun MainView(
             )
         }
         item {
-            if (uiState.value.isLoadingActivities) {
+            if (isLoadingActivities) {
                 LoadingIndicator(
                     Modifier
                         .fillMaxWidth()
@@ -107,7 +109,7 @@ fun MainView(
                 )
             }
         }
-        if (uiState.value.isLoadingRecommendations) {
+        if (isLoadingRecommendations) {
             item {
                 LoadingIndicator(
                     Modifier

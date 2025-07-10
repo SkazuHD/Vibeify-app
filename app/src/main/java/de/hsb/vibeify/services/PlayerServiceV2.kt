@@ -14,6 +14,7 @@ import de.hsb.vibeify.data.model.Song
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -151,6 +152,7 @@ class PlayerServiceV2 {
 
                 override fun onEvents(player: Player, events: Player.Events) {
                     updatePositionAndDuration()
+
                 }
 
                 override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
@@ -240,7 +242,7 @@ class PlayerServiceV2 {
         positionTrackingJob = serviceScope.launch {
             while (isActive) {
                 updatePositionAndDuration()
-                kotlinx.coroutines.delay(intervalMs)
+                delay(intervalMs)
             }
         }
     }

@@ -46,7 +46,6 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import de.hsb.vibeify.MainActivity
 import de.hsb.vibeify.R
-import de.hsb.vibeify.data.model.Song
 import de.hsb.vibeify.di.PlayerServiceEntryPoint
 import de.hsb.vibeify.services.PlayerServiceV2
 import javax.inject.Inject
@@ -74,7 +73,10 @@ class VibeifyWidget @Inject constructor() :
         val result = ImageLoader(context).execute(
             ImageRequest.Builder(context)
                 .data(url)
+                .memoryCachePolicy(CachePolicy.ENABLED)
+                .diskCachePolicy(CachePolicy.ENABLED)
                 .networkCachePolicy(CachePolicy.ENABLED)
+                .size(100, 100)
                 .target { res: Drawable ->
                     bitmap = (res as BitmapDrawable).bitmap
                 }.build()
@@ -91,7 +93,7 @@ class VibeifyWidget @Inject constructor() :
         playerServiceV2: PlayerServiceV2,
         initialAlbumArt: ImageProvider? = null
     ) {
-        val currentSong = playerServiceV2.currentSong.collectAsState(initial = Song()).value
+        val currentSong = playerServiceV2.currentSong.collectAsState(initial = null).value
         val isPlaying = playerServiceV2.isPlaying.collectAsState(initial = false).value
         val player = playerServiceV2.player.collectAsState(initial = null).value
         var albumArt by remember { mutableStateOf(initialAlbumArt) }
@@ -164,7 +166,7 @@ class VibeifyWidget @Inject constructor() :
                             fontWeight = FontWeight.Bold,
                             color = GlanceTheme.colors.onSurface
                         ),
-                        maxLines = 1
+                        maxLines = 1,
                     )
 
                     Spacer(modifier = GlanceModifier.height(4.dp))

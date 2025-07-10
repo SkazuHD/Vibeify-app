@@ -20,7 +20,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Vibeify"
         android:enableOnBackInvokedCallback="true"
-        tools:targetApi="33">
+        tools:targetApi="36">
         <activity
             android:name=".MainActivity"
             android:exported="true"

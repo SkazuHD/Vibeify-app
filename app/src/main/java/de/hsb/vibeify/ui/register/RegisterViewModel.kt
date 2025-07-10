@@ -37,6 +37,14 @@ class RegisterViewModel @Inject constructor(private val authRepository: Firebase
         val confirmEmailState = TextFieldState()
         val passwordState = TextFieldState()
         val confirmPasswordState = TextFieldState()
+        val emailTouched = mutableStateOf(false)
+        val confirmEmailTouched = mutableStateOf(false)
+        val passwordTouched = mutableStateOf(false)
+        val confirmPasswordTouched = mutableStateOf(false)
+        val emailHadFocus = mutableStateOf(false)
+        val confirmEmailHadFocus = mutableStateOf(false)
+        val passwordHadFocus = mutableStateOf(false)
+        val confirmPasswordHadFocus = mutableStateOf(false)
 
     init {
         viewModelScope.launch {

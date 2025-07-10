@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -51,10 +52,17 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
             OutlinedTextField(
                 state = vm.emailState,
                 label = { Text("Email") },
-                isError = uiState.emailError.isNotEmpty(),
+                isError = uiState.emailError.isNotEmpty() && vm.emailTouched.value,
                 supportingText = {
-                    if (uiState.emailError.isNotEmpty()) {
-                        Text(uiState.emailError.toString())
+                    if (uiState.emailError.isNotEmpty() && vm.emailTouched.value) {
+                        Text(uiState.emailError)
+                    }
+                },
+                modifier = Modifier.onFocusChanged { focusState ->
+                    if (focusState.isFocused) {
+                        vm.emailHadFocus.value = true
+                    } else if (vm.emailHadFocus.value) {
+                        vm.emailTouched.value = true
                     }
                 }
             )
@@ -62,10 +70,17 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
             OutlinedTextField(
                 state = vm.confirmEmailState,
                 label = { Text("Confirm Email") },
-                isError = uiState.confirmEmailError.isNotEmpty(),
+                isError = uiState.confirmEmailError.isNotEmpty() && vm.confirmEmailTouched.value,
                 supportingText = {
-                    if (uiState.confirmEmailError.isNotEmpty()) {
-                        Text(uiState.confirmEmailError.toString())
+                    if (uiState.confirmEmailError.isNotEmpty() && vm.confirmEmailTouched.value) {
+                        Text(uiState.confirmEmailError)
+                    }
+                },
+                modifier = Modifier.onFocusChanged { focusState ->
+                    if (focusState.isFocused) {
+                        vm.confirmEmailHadFocus.value = true
+                    } else if (vm.confirmEmailHadFocus.value) {
+                        vm.confirmEmailTouched.value = true
                     }
                 }
             )
@@ -73,10 +88,17 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
             OutlinedSecureTextField(
                 state = vm.passwordState,
                 label = { Text("Password") },
-                isError = uiState.passwordError.isNotEmpty(),
+                isError = uiState.passwordError.isNotEmpty() && vm.passwordTouched.value,
                 supportingText = {
-                    if (uiState.passwordError.isNotEmpty()) {
-                        Text(uiState.passwordError.toString())
+                    if (uiState.passwordError.isNotEmpty() && vm.passwordTouched.value) {
+                        Text(uiState.passwordError)
+                    }
+                },
+                modifier = Modifier.onFocusChanged { focusState ->
+                    if (focusState.isFocused) {
+                        vm.passwordHadFocus.value = true
+                    } else if (vm.passwordHadFocus.value) {
+                        vm.passwordTouched.value = true
                     }
                 }
             )
@@ -84,10 +106,17 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
             OutlinedSecureTextField(
                 state = vm.confirmPasswordState,
                 label = { Text("Confirm Password") },
-                isError = uiState.confirmPasswordError.isNotEmpty(),
+                isError = uiState.confirmPasswordError.isNotEmpty() && vm.confirmPasswordTouched.value,
                 supportingText = {
-                    if (uiState.confirmPasswordError.isNotEmpty()) {
-                        Text(uiState.confirmPasswordError.toString())
+                    if (uiState.confirmPasswordError.isNotEmpty() && vm.confirmPasswordTouched.value) {
+                        Text(uiState.confirmPasswordError)
+                    }
+                },
+                modifier = Modifier.onFocusChanged { focusState ->
+                    if (focusState.isFocused) {
+                        vm.confirmPasswordHadFocus.value = true
+                    } else if (vm.confirmPasswordHadFocus.value) {
+                        vm.confirmPasswordTouched.value = true
                     }
                 }
             )
@@ -106,4 +135,3 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
 
     }
 }
-

@@ -1,6 +1,7 @@
 package de.hsb.vibeify.widget
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -14,15 +15,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
+import androidx.core.net.toUri
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
-import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.components.SquareIconButton
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -44,7 +46,6 @@ import androidx.glance.text.TextStyle
 import coil.ImageLoader
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import de.hsb.vibeify.MainActivity
 import de.hsb.vibeify.R
 import de.hsb.vibeify.di.PlayerServiceEntryPoint
 import de.hsb.vibeify.services.PlayerServiceV2
@@ -116,7 +117,12 @@ class VibeifyWidget @Inject constructor() :
                 .background(GlanceTheme.colors.surface)
                 .cornerRadius(16.dp)
                 .padding(16.dp)
-                .clickable(actionStartActivity<MainActivity>()),
+                .clickable(
+                    actionStartActivity(
+                        Intent(Intent.ACTION_VIEW, "vibeify://playback".toUri())
+                            .setPackage(context.packageName)
+                    )
+                ),
             contentAlignment = Alignment.Center
         ) {
             Row(

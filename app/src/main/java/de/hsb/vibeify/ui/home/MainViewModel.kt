@@ -49,7 +49,6 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             launch {
                 userRepository.state.map { it.currentUser }.distinctUntilChanged().collect { user ->
-                    _uiState.update { it.copy(isLoadingActivities = true) }
                     val recentActivityItems = if (user != null) {
                         loadRecentActivities(user.recentActivities)
                     } else {

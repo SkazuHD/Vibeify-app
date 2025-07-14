@@ -18,6 +18,7 @@ import androidx.media3.common.util.UnstableApi
 
 @OptIn(UnstableApi::class)
 @Composable
+// StopButton is a composable that provides a button to stop playback in the player.
 internal fun StopButton(player: Player, modifier: Modifier = Modifier) {
     val state = rememberStopButtonState(player)
     val icon = Icons.Default.Stop
@@ -31,7 +32,7 @@ internal fun StopButton(player: Player, modifier: Modifier = Modifier) {
         Icon(icon, contentDescription = contentDescription, modifier = modifier)
     }
 }
-
+// This composable uses the StopButtonState to manage the state of the stop button,
 @OptIn(UnstableApi::class)
 @Composable
 fun rememberStopButtonState(player: Player): StopButtonState {
@@ -40,6 +41,7 @@ fun rememberStopButtonState(player: Player): StopButtonState {
     return stopButtonState
 }
 
+// StopButtonState is a state holder for the stop button, managing its enabled state and whether playback has stopped.
 @UnstableApi
 class StopButtonState(private val player: Player) {
     var isEnabled by mutableStateOf(player.isCommandAvailable(Player.COMMAND_STOP))
@@ -55,6 +57,7 @@ class StopButtonState(private val player: Player) {
         }
     }
 
+    // observe listens to player events and updates the state accordingly.
     suspend fun observe(): Nothing =
         player.listen { events ->
             if (

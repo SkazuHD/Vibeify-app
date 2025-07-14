@@ -62,10 +62,12 @@ fun PlaylistDetailView(
     playlistDetailViewModel: PlaylistDetailViewModel = hiltViewModel(),
     playbackViewModel: PlaybackViewModel = hiltViewModel()
 ) {
+    // Load the playlist details when the view is first composed
     LaunchedEffect(playlistId) {
         playlistDetailViewModel.loadPlaylist(playlistId)
     }
 
+    // Collecting state from the ViewModel
     val playlistTitle = playlistDetailViewModel.playlistTitle
     val playlistDescription = playlistDetailViewModel.playlistDescription
     val playlistImage = playlistDetailViewModel.playlistImage
@@ -78,6 +80,7 @@ fun PlaylistDetailView(
 
     val openEditDialog = remember { mutableStateOf(false) }
 
+    // Check if the playlist is liked songs playlist
     when {
         openEditDialog.value -> {
             EditPlaylistDialog(
@@ -174,6 +177,7 @@ fun PlaylistDetailView(
 
                     }
                 }
+                // Favorite or Options Menu
                 if (isFavoriteAble) {
                     Column {
                         Box {
@@ -225,6 +229,7 @@ fun PlaylistDetailView(
             }
         }
 
+        // Loading indicator while songs are being fetched
         if (isLoadingSongs) {
             Box(
                 modifier = Modifier

@@ -29,6 +29,7 @@ fun AddSongToPlaylistDialog(
     addSongToPlaylistViewModel: AddSongToPlaylistViewModel = hiltViewModel()
 ) {
 
+    // Collect the list of playlists from the ViewModel
     val playlists = addSongToPlaylistViewModel.playlists.collectAsState()
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
@@ -56,6 +57,7 @@ fun AddSongToPlaylistDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // Display each playlist as a card
                     items(items = playlists.value, key = { playlist -> playlist.id }) { playlist ->
                         val isInPlaylist = playlist.songIds.contains(song.id)
                         PlaylistCard(

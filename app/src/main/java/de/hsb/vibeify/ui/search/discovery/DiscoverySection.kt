@@ -54,6 +54,7 @@ fun DiscoverySection(
     onGenreClick: (Genre) -> Unit = {},
     discoveryViewModel: DiscoveryViewModel = hiltViewModel(),
 ) {
+    // Collect state flows from ViewModel
     val trendingSongs by discoveryViewModel.trendingSongs
     val featuredPlaylists by discoveryViewModel.featuredPlaylists
     val randomSongs by discoveryViewModel.randomSongs
@@ -63,6 +64,7 @@ fun DiscoverySection(
     val isLoading by discoveryViewModel.isLoading
 
     if (isLoading) {
+        // Show loading spinner while content loads
         Box(
             modifier = modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -70,6 +72,7 @@ fun DiscoverySection(
             LoadingIndicator()
         }
     } else {
+        // Header row with title and refresh button
         LazyColumn(
             modifier = modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -96,6 +99,7 @@ fun DiscoverySection(
                 }
             }
 
+            // Trending songs section
             if (trendingSongs.isNotEmpty()) {
                 item {
                     SectionHeader(title = "🔥 Trending Songs")
@@ -114,6 +118,7 @@ fun DiscoverySection(
                 }
             }
 
+            // Genres browse section
             if (availableGenres.isNotEmpty()) {
                 item {
                     SectionHeader(title = "🎵 Browse Genres")
@@ -126,6 +131,7 @@ fun DiscoverySection(
                 }
             }
 
+            // Featured playlists section
             if (featuredPlaylists.isNotEmpty()) {
                 item {
                     SectionHeader(title = "⭐ Recommended Playlists")
@@ -144,6 +150,7 @@ fun DiscoverySection(
                 }
             }
 
+            // Random songs section
             if (randomSongs.isNotEmpty()) {
                 item {
                     SectionHeader(title = "🎲 Surprise Selection")
@@ -159,6 +166,8 @@ fun DiscoverySection(
     }
 }
 
+
+// Simple styled title for each section
 @Composable
 fun SectionHeader(title: String) {
     Text(
@@ -170,6 +179,7 @@ fun SectionHeader(title: String) {
 }
 
 
+// Display genres in rows, with toggle for showing all or limited to 4 rows
 @Composable
 private fun GenreGrid(
     genres: List<Genre>,
@@ -217,6 +227,8 @@ private fun GenreGrid(
     }
 }
 
+
+//playlists with genre name and count
 @Composable
 private fun GenreChip(
     genre: String,
@@ -246,6 +258,8 @@ private fun GenreChip(
     }
 }
 
+
+// Card displaying playlist title and placeholder image
 @Composable
 private fun PlaylistDiscoveryCard(
     playlist: Playlist,
@@ -261,7 +275,7 @@ private fun PlaylistDiscoveryCard(
         Column(
             modifier = Modifier.padding(12.dp)
         ) {
-            // Placeholder für Playlist Image
+            // Placeholder for Playlist Image
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

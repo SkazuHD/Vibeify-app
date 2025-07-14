@@ -23,6 +23,7 @@ class DiscoveryViewModel @Inject constructor(
 
     var randomSongs = discoveryService.randomSongs
 
+    // Provide genres sorted by popularity (descending by count)
     val availableGenres: StateFlow<List<Genre>> =
         discoveryService.genreList.map { list -> list.sortedByDescending { it.count } }.stateIn(
             scope = viewModelScope,
@@ -34,6 +35,7 @@ class DiscoveryViewModel @Inject constructor(
         private set
 
 
+    // Refresh discovery content by calling the service asynchronously
     fun refreshContent() {
         viewModelScope.launch {
             discoveryService.refreshContent()

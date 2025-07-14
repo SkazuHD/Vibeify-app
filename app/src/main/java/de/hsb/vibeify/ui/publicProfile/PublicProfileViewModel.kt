@@ -42,6 +42,7 @@ class PublicProfileViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PublicProfileUiState())
     val uiState = _uiState.asStateFlow()
 
+    // Tracks if the current user follows the profile user
     val isFollowing = uiState
         .map { it.user?.id }
         .filterNotNull()
@@ -55,6 +56,7 @@ class PublicProfileViewModel @Inject constructor(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    // Flow of followers and following lists for the profile user
     val followersFlow = uiState
         .map { it.user?.id }
         .filterNotNull()
@@ -67,6 +69,7 @@ class PublicProfileViewModel @Inject constructor(
         .flatMapLatest { userId -> followService.followingList(userId) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    // Live friend presence tracking for the profile user
     val liveFriendFlow = uiState.map {
         it.user?.id
     }.filterNotNull().distinctUntilChanged().flatMapLatest { userId ->
@@ -74,6 +77,7 @@ class PublicProfileViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
 
+    // Load user data asynchronously, update UI state accordingly
     fun loadUser(userId: String) {
         viewModelScope.launch {
             _uiState.value = PublicProfileUiState(isLoading = true)
@@ -86,6 +90,7 @@ class PublicProfileViewModel @Inject constructor(
         }
     }
 
+    // Load playlists created by the user and update state
     fun loadPlaylists(userId: String) {
         viewModelScope.launch {
             try {
@@ -97,6 +102,7 @@ class PublicProfileViewModel @Inject constructor(
         }
     }
 
+    // Follow/unfollow operations with error handling and current user checks
     fun followUser(userId: String) {
         viewModelScope.launch {
             try {

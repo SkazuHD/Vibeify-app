@@ -27,6 +27,7 @@ class FollowDialogViewModel @Inject constructor(
     private val _followList = MutableStateFlow<List<User>>(emptyList())
     val followList: StateFlow<List<User>> = _followList.asStateFlow()
 
+    // Function to load the follow list based on user ID and type
     fun loadFollowList(userId: String, type: FollowType) {
         viewModelScope.launch {
             val userIds = when (type) {

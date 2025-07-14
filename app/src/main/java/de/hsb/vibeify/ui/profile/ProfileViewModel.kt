@@ -49,6 +49,7 @@ class ProfileViewModel @Inject constructor(
     var playlists by mutableStateOf(emptyList<Playlist>())
         private set
 
+    // Followers and following lists from service, reactive to current user
     val followersFlow = uiState
         .map { it.user?.id }
         .filterNotNull()
@@ -61,6 +62,7 @@ class ProfileViewModel @Inject constructor(
         .flatMapLatest { userId -> followService.followingList(userId) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    // Observe user state and load playlists when user available
     init {
         viewModelScope.launch {
             launch {
@@ -96,6 +98,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
+    // Save changes to user profile; handle URL differently if remote or local
     fun onSave(name: String, url: String) {
         Log.d("ProfileViewModel", "onSave called with name: $name, url: $url")
         viewModelScope.launch {

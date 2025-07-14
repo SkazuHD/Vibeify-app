@@ -17,7 +17,7 @@
 package androidx.media3.demo.compose.layout
 
 import androidx.compose.ui.layout.ContentScale
-
+// List of content scales for testing purposes
 val CONTENT_SCALES =
     listOf(
         "Fit" to ContentScale.Fit,

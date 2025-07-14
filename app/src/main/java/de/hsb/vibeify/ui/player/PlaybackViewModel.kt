@@ -17,6 +17,7 @@ class PlaybackViewModel @Inject constructor(
     private val userRepository: UserRepository,
 ) : ViewModel() {
 
+    // Expose the PlayerServiceV2's player as mediaController
     val mediaController = playerServiceV2.player
     private val _isPlaying = playerServiceV2.isPlaying
     val isPlaying: StateFlow<Boolean> = _isPlaying
@@ -32,6 +33,7 @@ class PlaybackViewModel @Inject constructor(
     val upcomingSongs = playerServiceV2.upcomingSongs
     val currentSongList = playerServiceV2.currentSongList
 
+    // Combine current song and user repository state to determine if the current song is a favorite
     val isCurrentSongFavorite = combine(
         _currentSong,
         userRepository.state
@@ -41,29 +43,32 @@ class PlaybackViewModel @Inject constructor(
         } ?: false
     }
 
-
+// Expose playback mode from PlayerServiceV2
     fun play(song: Song) {
         viewModelScope.launch {
             playerServiceV2.play(song)
         }
     }
 
+    // Function to play a list of songs starting from a specific index
     fun play(songs: List<Song>, startIndex: Int = 0, playlistId: String? = null) {
         viewModelScope.launch {
             playerServiceV2.play(songs, startIndex, playlistId)
         }
     }
 
+    // Function to play a song at a specific index in the current song list
     fun addToQueue(song: Song) {
         viewModelScope.launch {
             playerServiceV2.insertIntoQueue(song)
         }
     }
-
+    // Function to play the next song in the queue
     fun seekTo(pos: Long) {
         playerServiceV2.seekTo(pos)
     }
 
+    // Function to toggle playback state
     fun toggleFavorite() {
         _currentSong.value?.let { song ->
             viewModelScope.launch {
@@ -76,6 +81,7 @@ class PlaybackViewModel @Inject constructor(
         }
     }
 
+    // Function to check if a song is a favorite
     fun isSongFavorite(song: Song): Boolean {
         return userRepository.isSongFavorite(song.id)
     }

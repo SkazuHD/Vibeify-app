@@ -32,6 +32,7 @@ import androidx.media3.ui.compose.state.rememberRepeatButtonState
 
 @OptIn(UnstableApi::class)
 @Composable
+// A button that toggles the repeat mode of the player.
 internal fun RepeatButton(player: Player, modifier: Modifier = Modifier) {
     val state = rememberRepeatButtonState(player)
     val icon = repeatModeIcon(state.repeatModeState)
@@ -41,6 +42,7 @@ internal fun RepeatButton(player: Player, modifier: Modifier = Modifier) {
     }
 }
 
+// Returns the appropriate icon based on the repeat mode.
 private fun repeatModeIcon(repeatMode: @Player.RepeatMode Int): ImageVector {
     return when (repeatMode) {
         Player.REPEAT_MODE_OFF -> Icons.Default.Repeat
@@ -49,6 +51,7 @@ private fun repeatModeIcon(repeatMode: @Player.RepeatMode Int): ImageVector {
     }
 }
 
+// Returns the content description for the repeat mode.
 @Composable
 private fun repeatModeContentDescription(repeatMode: @Player.RepeatMode Int): String {
     return when (repeatMode) {

@@ -14,16 +14,17 @@ import javax.inject.Inject
 class AddSongToPlaylistViewModel @Inject constructor(
     private val playlistService: PlaylistService,
 ) : ViewModel() {
-
+// ViewModel for managing the state of adding songs to playlists
     private val _playlists = MutableStateFlow(emptyList<Playlist>())
     val playlists: StateFlow<List<Playlist>> = _playlists
 
+    // Exposes the list of playlists created by the current user
     init {
         viewModelScope.launch {
             _playlists.value = playlistService.getPlaylistsCreatedByCurrentUser()
         }
     }
-
+    // Function to add a song to a specific playlist
     fun addSongToPlaylist(playlistId: String, songId: String) {
         viewModelScope.launch {
             playlistService.addSongToPlaylist(playlistId, songId)

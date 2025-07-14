@@ -33,6 +33,7 @@ class PlaylistDetailViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    // Combine original songs and search query to filter songs based on the query
     val songs: StateFlow<List<Song>> = combine(
         _originalSongs,
         _searchQuery,
@@ -54,6 +55,7 @@ class PlaylistDetailViewModel @Inject constructor(
         initialValue = emptyList()
     )
 
+    // Calculate the total duration of the playlist based on the filtered songs
     val playlistDurationText: StateFlow<String> = songs.map { songList ->
         if (songList.isEmpty()) {
             "0 Sekunden"
@@ -66,6 +68,7 @@ class PlaylistDetailViewModel @Inject constructor(
         initialValue = "0 Sekunden"
     )
 
+    // State variables for UI
     var isFavorite by mutableStateOf(false)
         private set
     var isFavoriteAble by mutableStateOf(true)
@@ -79,6 +82,7 @@ class PlaylistDetailViewModel @Inject constructor(
         private set
 
 
+    // Expose original songs as a StateFlow for external use
     fun loadPlaylist(playlistId: String) {
         viewModelScope.launch {
             isLoadingPlayList = true
@@ -104,16 +108,19 @@ class PlaylistDetailViewModel @Inject constructor(
         }
     }
 
+    // Function to set the search query, which will trigger filtering of songs
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
     }
 
+    // Function to add a song to the playlist
     fun togglePlaylistFavorite(playlistId: String) {
         viewModelScope.launch {
             isFavorite = playlistService.togglePlaylistFavorite(playlistId)
         }
     }
 
+    // Function to add a song to the playlist
     fun removeSongFromPlaylist(playlistId: String, song: Song) {
         viewModelScope.launch {
             playlistService.removeSongFromPlaylist(playlistId, song.id)
@@ -121,6 +128,7 @@ class PlaylistDetailViewModel @Inject constructor(
         }
     }
 
+    // Function to add a song to the playlist
     fun removePlaylist(playlistId: String): Boolean {
         viewModelScope.launch {
             playlistService.removePlaylist(playlistId)

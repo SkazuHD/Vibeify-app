@@ -53,6 +53,8 @@ import javax.inject.Inject
 
 
 class VibeifyWidget @Inject constructor() :
+
+// Called by the system to create the widget UI
     GlanceAppWidget() {
 
     override suspend fun provideGlance(
@@ -61,6 +63,7 @@ class VibeifyWidget @Inject constructor() :
     ) {
         val playerServiceV2 = PlayerServiceEntryPoint.get(context)
 
+        // Inject the widget content into the UI
         provideContent {
             GlanceTheme {
                 WidgetContent(playerServiceV2, initialAlbumArt = null)
@@ -68,6 +71,7 @@ class VibeifyWidget @Inject constructor() :
         }
     }
 
+    // Downloads and converts an image from a URL to a Bitmap for use in the widget.
     private suspend fun getBitMapfromUrl(url: String, context: Context): ImageProvider {
         Log.d("VibeifyWidget", "Fetching album art from URL: $url")
         var bitmap: Bitmap? = null
@@ -89,6 +93,9 @@ class VibeifyWidget @Inject constructor() :
         return ImageProvider(bitmap)
     }
 
+
+    // Core widget logic that reads data from the player service and displays it.
+    // Uses Compose-style Glance Composables to build the UI and control interaction.
     @Composable
     private fun WidgetContent(
         playerServiceV2: PlayerServiceV2,
@@ -100,6 +107,7 @@ class VibeifyWidget @Inject constructor() :
         var albumArt by remember { mutableStateOf(initialAlbumArt) }
         val context = LocalContext.current
 
+        // Load album art whenever the song changes
         LaunchedEffect(currentSong?.id) {
             Log.d("VibeifyWidget", "Current song updated: ${currentSong?.id}")
             if (currentSong?.imageUrl != null && currentSong.imageUrl.isNotEmpty()) {

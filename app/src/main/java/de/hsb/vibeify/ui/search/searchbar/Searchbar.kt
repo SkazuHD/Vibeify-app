@@ -77,6 +77,7 @@ fun SimpleSearchBar(
 
             .semantics { isTraversalGroup = true }
     ) {
+        // Search logic and actions handled in event callbacks
         SearchBar(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -136,6 +137,7 @@ fun SimpleSearchBar(
                     searchResults.playlists.isEmpty() &&
                     searchResults.artists.isEmpty()
                 ) {
+                    // Show recent searches if no results are available
                     return@SearchBar Column {
                         recentSearches?.reversed()?.forEach { recentSearch ->
                             ListItem(
@@ -161,7 +163,7 @@ fun SimpleSearchBar(
                     }
                 } else {
 
-
+                    // Songs Section
                     if (searchResults.songs.isNotEmpty()) {
                         ListItem(
                             modifier = Modifier.semantics { traversalIndex = 1f },
@@ -192,6 +194,8 @@ fun SimpleSearchBar(
                             )
                         }
                     }
+
+                    // Genres Section
                     if (searchResults.genres.isNotEmpty()) {
                         ListItem(
                             modifier = Modifier.semantics { traversalIndex = 1f },
@@ -213,6 +217,7 @@ fun SimpleSearchBar(
                             }
                     }
 
+                    // Artists Section
                     if (searchResults.artists.isNotEmpty()) {
                         ListItem(
                             modifier = Modifier.semantics { traversalIndex = 2f },
@@ -243,6 +248,8 @@ fun SimpleSearchBar(
                             )
                         }
                     }
+
+                    // Playlists Section
                     if (searchResults.playlists.isNotEmpty()) {
                         ListItem(
                             modifier = Modifier.semantics { traversalIndex = 2f },
@@ -275,6 +282,8 @@ fun SimpleSearchBar(
                             )
                         }
                     }
+
+                    // Albums Section
                     if (searchResults.albums.isNotEmpty()) {
                         ListItem(
                             modifier = Modifier.semantics { traversalIndex = 3f },
@@ -299,6 +308,8 @@ fun SimpleSearchBar(
                             )
                         }
                     }
+
+                    // Profiles Section
                     if (searchResults.profiles.isNotEmpty()) {
                         ListItem(
                             modifier = Modifier.semantics { traversalIndex = 4f },
@@ -334,7 +345,7 @@ fun SimpleSearchBar(
     }
 }
 
-
+// Preview to visualize and test the SimpleSearchBar UI in the IDE during development only
 @Preview
 @Composable
 fun SimpleSearchBarPreview() {

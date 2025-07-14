@@ -31,6 +31,7 @@ import de.hsb.vibeify.R
 import de.hsb.vibeify.ui.components.MenuOption
 import de.hsb.vibeify.ui.components.OptionsMenu
 
+// SongCard is a composable function that displays a card for a song with various details and options.
 @Composable
 fun SongCard(
     modifier: Modifier = Modifier,

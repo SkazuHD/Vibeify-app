@@ -1,5 +1,7 @@
 package de.hsb.vibeify.data.model
 
+// Playlist data class representing a playlist in the application
+
 data class Playlist(
     val id: String = "",
     val userId: String = "",

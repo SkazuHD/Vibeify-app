@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/*
+    Following and follower management service.
+    This service provides methods to manage user follow relationships,
+ */
 @Singleton
 class FollowService @Inject constructor(
     private val userStatusRepository: UserStatusRepository,

@@ -1,5 +1,6 @@
 package de.hsb.vibeify.data.model
 
+// Genre data class representing a music genre in the application
 data class Genre(
     val id: String = "",
     val name: String = "",

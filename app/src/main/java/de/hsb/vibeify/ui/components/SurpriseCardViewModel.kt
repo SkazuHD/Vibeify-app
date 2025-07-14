@@ -11,6 +11,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel for managing the state of the SurpriseCard.
+ *
+ * This ViewModel interacts with the RandomSongService to fetch a random song
+ * and provides state flows for the current random song, loading state, and error messages.
+ *
+ * @property randomSongManager The service used to fetch random songs.
+ */
 @HiltViewModel
 class SurpriseCardViewModel @Inject constructor(
     private val randomSongManager: RandomSongService

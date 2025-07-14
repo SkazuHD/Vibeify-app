@@ -5,6 +5,7 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
+//Artist Repository interface for Singleton pattern
 
 interface ArtistRepository {
     suspend fun getArtistById(id: String): Artist?
@@ -12,6 +13,7 @@ interface ArtistRepository {
     suspend fun searchArtists(query: String): List<Artist>
 }
 
+// Artist Repository implementation that uses SongRepository to fetch artists from songs
 @Singleton
 class ArtistRepositoryImpl @Inject constructor(
     private val songRepository: SongRepository
@@ -19,6 +21,12 @@ class ArtistRepositoryImpl @Inject constructor(
 
     private var cachedArtists: List<Artist>? = null
 
+    /**
+     * Fetches artists from songs, caching the result for subsequent calls.
+     * If the cache is not null, it returns the cached artists.
+     * Otherwise, it retrieves all songs, groups them by artist,
+     * and constructs a list of Artist objects.
+     */
     private suspend fun getArtistsFromSongs(): List<Artist> {
         if (cachedArtists != null) {
             return cachedArtists!!

@@ -26,6 +26,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.hsb.vibeify.ui.components.Avatar
 
+
+// This card displays a friend's online status, current song, and avatar.
 @Composable
 fun LiveFriendCard(
     modifier: Modifier = Modifier,

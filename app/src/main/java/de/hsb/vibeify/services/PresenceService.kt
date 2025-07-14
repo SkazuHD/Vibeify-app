@@ -24,6 +24,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// This service manages user presence and status updates, including online/offline status and currently playing song.
+
 @Singleton
 class PresenceService @OptIn(UnstableApi::class)
 @Inject constructor(
@@ -46,6 +48,7 @@ class PresenceService @OptIn(UnstableApi::class)
         initialize()
     }
 
+    // Initializes the service and sets up lifecycle observers and state flows.
     private fun initialize() {
         if (isInitialized) return
 
@@ -61,6 +64,7 @@ class PresenceService @OptIn(UnstableApi::class)
         }
     }
 
+    // Observes the user state to update the current user ID and handle online/offline status.
     private fun observeUserState() {
         scope.launch {
             try {
@@ -82,6 +86,7 @@ class PresenceService @OptIn(UnstableApi::class)
         }
     }
 
+    // Observes the player state to update the music playing status and notify online status changes.
     private fun observePlayerState() {
         scope.launch {
             try {
@@ -100,6 +105,7 @@ class PresenceService @OptIn(UnstableApi::class)
         }
     }
 
+    // Observes the current song being played and updates the currently playing status for the user.
     private fun observeCurrentSong() {
         scope.launch {
             try {
@@ -114,6 +120,7 @@ class PresenceService @OptIn(UnstableApi::class)
         }
     }
 
+    // Lifecycle methods to handle app foreground/background transitions and cleanup.
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
         Log.d(TAG, "App moved to foreground")
@@ -140,6 +147,7 @@ class PresenceService @OptIn(UnstableApi::class)
         cleanup()
     }
 
+    // Updates the online status based on whether the app is in the foreground or if music is playing.
     private fun updateOnlineStatus() {
         currentUserId?.let { userId ->
             scope.launch {
@@ -162,6 +170,7 @@ class PresenceService @OptIn(UnstableApi::class)
         }
     }
 
+    // Updates the currently playing song for the user.
     private fun updateCurrentlyPlaying(userId: String, song: Song?) {
         scope.launch {
             try {
@@ -175,6 +184,7 @@ class PresenceService @OptIn(UnstableApi::class)
         }
     }
 
+    // Sets the user to offline status when they log out or when the app is destroyed.
     private suspend fun setUserOffline(userId: String) {
         try {
             val result = presenceRepository.setUserOffline(userId)
@@ -186,6 +196,7 @@ class PresenceService @OptIn(UnstableApi::class)
         }
     }
 
+    // Handles user logout by setting the user to offline and cleaning up resources.
     private fun handleUserLogout(userId: String) {
         scope.launch {
             try {
@@ -198,6 +209,7 @@ class PresenceService @OptIn(UnstableApi::class)
     }
 
 
+    // Returns a flow of LiveFriend objects representing the user's friends with their online status and currently playing song.
     @kotlin.OptIn(ExperimentalCoroutinesApi::class)
     fun getLiveFriendsFlow(): Flow<List<LiveFriend>> =
         userRepository.state.map { it.currentUser }.flatMapLatest { user ->
@@ -219,6 +231,7 @@ class PresenceService @OptIn(UnstableApi::class)
             }
         }
 
+    // Returns a flow of LiveFriend objects for a specific user ID, including their online status and currently playing song.
     fun getFriendFlow(userId: String): Flow<LiveFriend?> {
         return combine(
             flow {
@@ -242,6 +255,8 @@ class PresenceService @OptIn(UnstableApi::class)
             }
         }
     }
+
+    // Cleans up resources and removes observers when the service is no longer needed.
 
     fun cleanup() {
         try {

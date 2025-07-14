@@ -15,6 +15,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 
+// user status repository for managing user presence, currently playing songs, and followers/following relationships
+// the data is stored in Firebase Realtime Database
 @Singleton
 class UserStatusRepository @Inject constructor(
     private val database: FirebaseDatabase
@@ -87,6 +89,10 @@ class UserStatusRepository @Inject constructor(
         }
     }
 
+    /**
+     * Sets up onDisconnect handlers for the user to mark them as offline and update last seen time
+     * This is useful for ensuring the user's status is updated even if they disconnect unexpectedly
+     */
     fun setupOnDisconnect(userId: String) {
         try {
             val userRef = database.getReference("$USERS_PATH/$userId")
@@ -229,7 +235,7 @@ class UserStatusRepository @Inject constructor(
         }
     }
 
-    // Flows
+    // get followers and following as flows to observe changes in real-time for the live friends element in main view
     fun getFollowersFlow(userId: String): Flow<List<String>> = callbackFlow {
         val followersRef = database.getReference("$USERS_PATH/$userId/$FOLLOWERS_PATH")
         val listener = object : ValueEventListener {
@@ -262,6 +268,7 @@ class UserStatusRepository @Inject constructor(
         awaitClose { followingRef.removeEventListener(listener) }
     }
 
+    // get currently playing song and online status as flows to observe changes in real-time
     fun getCurrentlyPlayingFlow(userId: String): Flow<Song?> = callbackFlow {
         val currentlyPlayingRef =
             database.getReference("$USERS_PATH/$userId/$CURRENTLY_PLAYING_PATH")

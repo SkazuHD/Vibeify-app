@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+// Represents a live friend with their details.
 data class LiveFriend(
     val id: String,
     val name: String,
@@ -25,11 +26,15 @@ data class LiveFriend(
     val lastSeen: Long,
 )
 
+// Represents the UI state for live friends, including a list of friends, loading state, and error message.
 data class LiveFriendUiState(
     val liveFriends: List<LiveFriend> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null
 )
+
+
+// ViewModel for managing the state of live friends.
 
 @HiltViewModel
 class LiveFriendsViewModel @Inject constructor(
@@ -49,6 +54,7 @@ class LiveFriendsViewModel @Inject constructor(
         observeLiveFriends()
     }
 
+    // Observes the live friends from the PresenceService and updates the UI state accordingly.
     private fun observeLiveFriends() {
         viewModelScope.launch {
             presenceService.getLiveFriendsFlow().map { it ->

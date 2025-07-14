@@ -20,6 +20,7 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// This service is responsible for loading and managing discovery content such as trending songs, featured playlists, and genres.
 
 @Singleton
 class DiscoveryService @Inject constructor(
@@ -52,6 +53,7 @@ class DiscoveryService @Inject constructor(
         loadDiscoveryContent()
     }
 
+    // Expose the allSongs state as a StateFlow
     private fun loadDiscoveryContent() {
         _job = scope.launch {
             isLoading.value = true
@@ -64,6 +66,7 @@ class DiscoveryService @Inject constructor(
 
             }
         }
+        // Wait for the initial load to complete before loading other content
         scope.launch {
             _job?.join()
             launch { loadTrendingSongs() }
@@ -82,6 +85,11 @@ class DiscoveryService @Inject constructor(
         }
     }
 
+    /**
+     * Generates a list of random songs from the allSongs list.
+     * @param limit The number of random songs to return.
+     * @return A list of random songs, or an empty list if an error occurs.
+     */
     suspend fun generateRandomSongs(limit: Int): List<Song> {
         _job?.join()
 
@@ -92,6 +100,9 @@ class DiscoveryService @Inject constructor(
         }
     }
 
+    /**
+     * Loads trending songs and updates the trendingSongs state.
+     */
     private suspend fun loadTrendingSongs() {
         try {
             trendingSongs.value = generateRandomSongs(5)
@@ -100,6 +111,9 @@ class DiscoveryService @Inject constructor(
         }
     }
 
+    /**
+     * Loads featured playlists and updates the featuredPlaylists state.
+     */
     private suspend fun loadFeaturedPlaylists() {
         try {
             val playlists = playlistRepository.getAllPlaylists()
@@ -109,6 +123,9 @@ class DiscoveryService @Inject constructor(
         }
     }
 
+    /**
+     * Loads random songs and updates the randomSongs state.
+     */
     private suspend fun loadRandomSongs() {
         try {
             randomSongs.value = generateRandomSongs(3)
@@ -135,6 +152,11 @@ class DiscoveryService @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves a list of genres from the allSongs list.
+     * Each genre is represented by a Genre object with a unique ID, name, description, count, and image URL.
+     * @return A list of Genre objects representing the genres found in the allSongs list.
+     */
     suspend fun getGenreList(): List<Genre> {
         _job?.join()
         val allSongs = _allSongs.value

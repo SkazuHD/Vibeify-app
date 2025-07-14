@@ -1,5 +1,7 @@
 package de.hsb.vibeify.data.model
 
+//Data class representing a user in the application
+
 data class User(
     val id: String = "",
     val email: String = "",
@@ -23,6 +25,7 @@ data class User(
     }
 }
 
+// Data class representing a recent activity of the user shown in the recent activities section of the main page
 data class RecentActivity(
     val type: String = TYPE_SONG,
     val id: String = "",

@@ -23,6 +23,15 @@ import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 
+/**
+ * A composable function that displays an avatar image or initials.
+ *
+ * @param modifier Modifier to be applied to the avatar.
+ * @param size The size of the avatar.
+ * @param imageUrl The URL of the image to be displayed. If null, initials will be shown.
+ * @param initials The initials to be displayed if imageUrl is null.
+ * @param isCircle Whether the avatar should be circular or rounded rectangle.
+ */
 @Composable
 fun Avatar(
     modifier: Modifier = Modifier,

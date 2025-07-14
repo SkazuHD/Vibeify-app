@@ -1,5 +1,7 @@
 package de.hsb.vibeify.data.model
 
+// Artist data class representing an artist in the application
+
 data class Artist(
     val id: String = "",
     val name: String = "",

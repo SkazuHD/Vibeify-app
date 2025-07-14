@@ -7,6 +7,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+
+// This service is responsible for fetching a random song from the discovery service
 @Singleton
 class RandomSongService @Inject constructor(
     private val discoveryService: DiscoveryService

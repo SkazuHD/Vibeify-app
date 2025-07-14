@@ -39,6 +39,8 @@ import de.hsb.vibeify.ui.components.NoContentCard
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 
+// ArtistView is a composable function that displays the details of an artist,
+// including their image, name, song count, and a list of their songs.
 @Composable
 fun ArtistView(
     artistId: String,
@@ -91,6 +93,7 @@ fun ArtistView(
     }
 }
 
+// ArtistContent is a composable function that displays the artist's details
 @Composable
 private fun ArtistContent(
     artist: de.hsb.vibeify.data.model.Artist,
@@ -134,6 +137,7 @@ private fun ArtistContent(
     }
 }
 
+// ArtistHeader is a composable function that displays the artist's image, name, song count, and a play all button.
 @Composable
 private fun ArtistHeader(
     artist: de.hsb.vibeify.data.model.Artist,

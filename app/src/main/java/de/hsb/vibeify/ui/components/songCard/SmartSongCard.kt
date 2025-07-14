@@ -21,6 +21,7 @@ import de.hsb.vibeify.ui.components.MenuOption
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 import de.hsb.vibeify.ui.playlist.dialogs.AddSongToPlaylistDialog
 
+//SmartSongCard is a composable function that displays a song card with various functionalities such as playing the song, adding it to favorites, and adding it to a playlist.
 @Composable
 fun SmartSongCard(
     song: Song,
@@ -45,6 +46,7 @@ fun SmartSongCard(
         mutableStateOf(false)
     }
 
+    // Base menu options that are always available
     val baseMenuOptions = remember(isSongFavorite, song.id) {
         listOf(
             MenuOption(text = "Abspielen", icon = Icons.Default.PlayArrow, onClick = {

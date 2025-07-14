@@ -20,6 +20,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.hsb.vibeify.core.AuthViewModel
 
+/**
+ * AppHeader is a composable function that displays a header with a back button.
+ *
+ * @param scrollBehavior The scroll behavior for the top app bar.
+ * @param icon The icon to be displayed in the header, default is back arrow.
+ * @param onBackClick Callback function to be invoked when the back button is clicked.
+ * @param authViewModel The AuthViewModel instance, provided by Hilt.
+ */
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppHeader(

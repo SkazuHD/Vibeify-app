@@ -46,6 +46,7 @@ import de.hsb.vibeify.core.navigation.navigateToPlayback
 import de.hsb.vibeify.ui.player.controls.StopButton
 
 
+//StickyBar is a composable that displays a sticky bar at the bottom of the screen containing information about the currently playing song.
 @Composable
 fun StickyBar(navController: NavController, modifier: Modifier = Modifier) {
     val viewModel: StickyBarViewModel = hiltViewModel()
@@ -59,16 +60,20 @@ fun StickyBar(navController: NavController, modifier: Modifier = Modifier) {
         initial = false
     )
 
+    // State variables to manage the visibility of the sticky bar and the slider position
     var showBar by remember { mutableStateOf(false) }
     var sliderPosition by remember { mutableStateOf(0f) }
     var isUserSeeking by remember { mutableStateOf(false) }
 
+
+    // Update the slider position based on the current position and duration
     LaunchedEffect(position, duration, isUserSeeking) {
         if (!isUserSeeking && duration > 0) {
             sliderPosition = position / duration.toFloat()
         }
     }
 
+    // Show the sticky bar when the playback state is not idle or ended
     LaunchedEffect(playbackState) {
         showBar = playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED
     }
@@ -172,6 +177,7 @@ fun StickyBar(navController: NavController, modifier: Modifier = Modifier) {
 
                     Spacer(modifier = Modifier.width(8.dp))
                 }
+                // Slider to control the playback position
                 Slider(
                     value = sliderPosition,
                     onValueChange = {

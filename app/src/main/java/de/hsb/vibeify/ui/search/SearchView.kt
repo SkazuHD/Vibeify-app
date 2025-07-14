@@ -25,10 +25,11 @@ import java.net.URLEncoder
 @Composable
 fun SearchView(
     modifier: Modifier = Modifier,
-    vm: SearchbarViewModel = hiltViewModel(),
-    vm2: PlaybackViewModel = hiltViewModel(),
+    vm: SearchbarViewModel = hiltViewModel(),  // ViewModel for handling search state and logic
+    vm2: PlaybackViewModel = hiltViewModel(),  // ViewModel for handling playback control
     navController: NavController? = null
 ) {
+    // Collect state flows from ViewModel
     val textFieldState = remember { TextFieldState("") }
     val searchResults by vm.searchResults
     val recentSearches = vm.recentSearches.collectAsState(initial = emptyList())
@@ -41,6 +42,7 @@ fun SearchView(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.Top
         ) {
+            // Search bar handles user queries, triggers search logic, and processes result item actions
             SimpleSearchBar(
                 textFieldState = textFieldState,
                 onSearch = { query ->

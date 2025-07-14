@@ -71,6 +71,7 @@ fun ProfileView(
             .padding(16.dp),
     ) {
         item {
+            //profile header section: avatar, name, followers/following, edit button
             when {
                 uiState.isLoading -> {
                     CircularProgressIndicator()
@@ -194,6 +195,7 @@ fun ProfileView(
             }
         }
 
+        // Playlists section
         item {
             Text(
                 text = "Your Playlists",
@@ -260,6 +262,7 @@ fun ProfileView(
     }
 }
 
+// CollapsableList is a reusable composable that displays a list of items with a "Show All" toggle
 @Composable
 fun <T> CollapsableList(
     resultLimit: Int = 3,

@@ -36,10 +36,12 @@ fun PlaylistView(
     navController: NavController,
     viewModel: PlaylistViewModel = hiltViewModel()
 ) {
+    // Collect state flows from ViewModel
     val playlists by viewModel.playlists.collectAsState()
     val playlistFavorites by viewModel.playlistFavorites.collectAsState()
     val openDialog = remember { mutableStateOf(false) }
 
+    // Ensure the ViewModel is initialized and fetch playlists
     Box(modifier = modifier) {
         when {
             openDialog.value -> {

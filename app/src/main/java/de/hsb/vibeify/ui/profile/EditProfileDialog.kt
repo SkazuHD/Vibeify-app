@@ -37,7 +37,7 @@ fun EditProfileDialog(
     val pickedImageUri = remember { mutableStateOf(user?.imageUrl) }
 
 
-
+    // Update the ViewModel with the current user data
     Dialog(onDismissRequest = { onDismiss() }) {
         Card {
             Text(
@@ -92,6 +92,7 @@ fun EditProfileDialog(
     }
 }
 
+// Preview function to visualize the dialog in the IDE
 @Preview
 @Composable
 fun EditProfileDialogPreview() {

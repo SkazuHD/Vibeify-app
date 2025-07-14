@@ -34,16 +34,20 @@ fun FollowDialog(
     followDialogViewModel: FollowDialogViewModel = hiltViewModel()
 ) {
 
+
     val followList = followDialogViewModel.followList.collectAsState().value
+    // Check if the user is null before proceeding
     val title = when (followType) {
         FollowType.FOLLOWERS -> "Followers"
         FollowType.FOLLOWING -> "Following"
     }
+    // Subtitle text based on follow type and user information
     val subtitle = when (followType) {
         FollowType.FOLLOWERS -> "People who follow ${user?.name}"
         FollowType.FOLLOWING -> "People ${user?.name} follows"
     }
 
+    // Load the follow list when the dialog is launched or when followType or user changes
     LaunchedEffect(
         followType, user,
     ) {
@@ -52,6 +56,7 @@ fun FollowDialog(
     }
 
 
+    // Show the dialog with a card containing the follow list
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
@@ -85,6 +90,7 @@ fun FollowDialog(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        // Display each user in the follow list
                         items(followList) { followUser ->
                             ListItem(
                                 modifier = Modifier

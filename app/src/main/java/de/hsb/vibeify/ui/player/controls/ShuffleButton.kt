@@ -30,6 +30,7 @@ import androidx.media3.ui.compose.state.rememberShuffleButtonState
 
 @OptIn(UnstableApi::class)
 @Composable
+// This is a simple shuffle button that toggles the shuffle mode of the player.
 internal fun ShuffleButton(player: Player, modifier: Modifier = Modifier) {
     val state = rememberShuffleButtonState(player)
     val icon = if (state.shuffleOn) Icons.Default.ShuffleOn else Icons.Default.Shuffle

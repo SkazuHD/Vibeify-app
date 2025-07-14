@@ -31,6 +31,7 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
+        // Collect state flows from ViewModel
         val error = vm.uiState.collectAsState().value.generalError
         val hasErrors = vm.uiState.collectAsState().value.hasErrors
         val uiState = vm.uiState.collectAsState().value
@@ -49,6 +50,7 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
             )
 
 
+            // Email input with error handling and focus tracking
             OutlinedTextField(
                 state = vm.emailState,
                 label = { Text("Email") },
@@ -67,6 +69,7 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
                 }
             )
 
+            // Confirm Email input, same validation approach
             OutlinedTextField(
                 state = vm.confirmEmailState,
                 label = { Text("Confirm Email") },
@@ -85,6 +88,7 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
                 }
             )
 
+            // Password input with secure text and validation
             OutlinedSecureTextField(
                 state = vm.passwordState,
                 label = { Text("Password") },
@@ -103,6 +107,7 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
                 }
             )
 
+            // Confirm Password input, same as above
             OutlinedSecureTextField(
                 state = vm.confirmPasswordState,
                 label = { Text("Confirm Password") },
@@ -121,6 +126,7 @@ fun RegisterView(modifier: Modifier = Modifier, vm: RegisterViewModel = hiltView
                 }
             )
 
+            // Submit button enabled only if no validation errors present
             Button(
                 modifier = Modifier.fillMaxWidth(0.5f),
                 enabled = !hasErrors,

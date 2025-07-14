@@ -29,6 +29,7 @@ import androidx.media3.ui.compose.state.rememberPreviousButtonState
 
 @OptIn(UnstableApi::class)
 @Composable
+// A button that skips to the previous item in the playlist.
 internal fun PreviousButton(player: Player, modifier: Modifier = Modifier) {
     val state = rememberPreviousButtonState(player)
     IconButton(onClick = state::onClick, modifier = modifier, enabled = state.isEnabled) {

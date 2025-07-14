@@ -23,7 +23,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.media3.common.Player
 
+
 @Composable
+// Extra controls for the player, such as playback speed, shuffle, and repeat buttons.
 internal fun ExtraControls(player: Player, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,

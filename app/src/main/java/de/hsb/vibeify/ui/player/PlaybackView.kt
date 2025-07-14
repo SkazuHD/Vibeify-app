@@ -56,6 +56,7 @@ fun MinimalMusicPlayer(
     nextSong: String = "Next Songs",
     playbackViewModel: PlaybackViewModel = hiltViewModel()
 ) {
+    // Collecting state from the PlaybackViewModel
     val currentSong by playbackViewModel.currentSong.collectAsState()
     val nextSongs = playbackViewModel.upcomingSongs.collectAsState()
     val currentSongList by playbackViewModel.currentSongList.collectAsState()
@@ -84,6 +85,7 @@ fun MinimalMusicPlayer(
 
         Spacer(modifier = Modifier.height(12.dp))
 
+        // Displaying the next songs in a LazyColumn
         LazyColumn (verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(nextSongs.value) { song ->
                 SongCard(
@@ -107,6 +109,7 @@ fun MinimalMusicPlayer(
 }
 
 
+ // This composable function displays the hero section of the music player, including the song cover, title, artist, and favorite icon.
 @Composable
 fun PlayerHero(currentSong: Song?, playbackViewModel: PlaybackViewModel = hiltViewModel()) {
     val isFavorite by playbackViewModel.isCurrentSongFavorite.collectAsState(
@@ -183,12 +186,15 @@ fun PlayerHero(currentSong: Song?, playbackViewModel: PlaybackViewModel = hiltVi
     }
 }
 
+
+// This composable function displays the player controls, including the slider and buttons for playback control.
 @Composable
 fun PlayerControls(playbackViewModel: PlaybackViewModel = hiltViewModel()) {
     PlayerSlider(playbackViewModel)
     PlayerButtons(playbackViewModel)
 }
 
+// This composable function displays the player buttons, including shuffle, previous, play/pause, next, and repeat buttons.
 @Composable
 fun PlayerButtons(
     playbackViewModel: PlaybackViewModel = hiltViewModel()
@@ -214,6 +220,7 @@ fun PlayerButtons(
     }
 }
 
+// This composable function displays a button to add the current song to a playlist.
 @Composable
 fun AddSongMenu(
     song: Song
@@ -244,6 +251,7 @@ fun AddSongMenu(
     }
 }
 
+// This composable function displays a slider for the player, allowing users to seek through the song.
 @Composable
 fun PlayerSlider(playbackViewModel: PlaybackViewModel = hiltViewModel()) {
     val player = playbackViewModel.mediaController.collectAsState().value
@@ -295,6 +303,7 @@ fun PlayerSlider(playbackViewModel: PlaybackViewModel = hiltViewModel()) {
     }
 }
 
+// This function formats the time in milliseconds to a string in the format "HH:MM:SS" or "MM:SS".
 fun formatTime(ms: Long): String {
     val totalSeconds = ms / 1000
     val hours = totalSeconds / 3600

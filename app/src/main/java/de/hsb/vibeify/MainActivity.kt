@@ -29,7 +29,9 @@ class MainActivity : ComponentActivity() {
     private val loginViewModel: LoginViewModel by viewModels()
     private var pendingDeepLinkDestination by mutableStateOf<String?>(null)
 
+    // Called when the activity is created
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Show splash screen until authentication state is resolved
         val splashScreen = installSplashScreen()
         splashScreen.setKeepOnScreenCondition {
             !loginViewModel.uiState.value.isAuthResolved
@@ -37,9 +39,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Handle any deep link that launched the app
         val deepLinkDestination = handleDeepLink(intent)
         Log.d("MainActivity", "Deep link destination: $deepLinkDestination")
 
+        // Set up the app's UI with theme and navigation
         setContent {
             VibeifyTheme {
                 AppRouter(
@@ -51,7 +55,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // Handle new intents while app is running
     override fun onNewIntent(intent: Intent) {
+
         super.onNewIntent(intent)
         setIntent(intent)
 
@@ -64,6 +70,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // Extracts navigation destination from an Intent, either via URI or extras
     private fun handleDeepLink(intent: Intent): String? {
         return when {
             intent.action == Intent.ACTION_VIEW && intent.data != null -> {
@@ -72,6 +79,7 @@ class MainActivity : ComponentActivity() {
                 Log.d("MainActivity", "Host: ${uri?.host}")
                 Log.d("MainActivity", "Path: ${uri?.path}")
 
+                // Parse destination from host or path and map to navigation route
                 val destination = uri?.host ?: uri?.path?.removePrefix("/")
                 Log.d("MainActivity", "Parsed destination: $destination")
                 when (destination) {
@@ -84,6 +92,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
+            // Handle intent with an explicit "destination" extra
             intent.hasExtra("destination") -> {
                 intent.getStringExtra("destination")
             }
@@ -93,7 +102,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
+// Basic Composable preview used for UI inspection in Android Studio
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {

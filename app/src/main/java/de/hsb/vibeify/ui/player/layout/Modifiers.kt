@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 
+// Modifier that allows a clickable element without ripple effect
 @Composable
 internal fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier =
     clickable(

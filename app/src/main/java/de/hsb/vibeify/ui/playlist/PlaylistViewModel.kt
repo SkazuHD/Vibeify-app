@@ -22,6 +22,7 @@ class PlaylistViewModel @Inject constructor(
     private val playlistService: PlaylistService
 ) : ViewModel() {
 
+    //
     private val _playlists = MutableStateFlow<List<Playlist>>(emptyList())
     val playlists: StateFlow<List<Playlist>> = _playlists.asStateFlow()
 
@@ -32,6 +33,7 @@ class PlaylistViewModel @Inject constructor(
     private val _playlistFavorites = MutableStateFlow<Map<String, Boolean>>(emptyMap())
     val playlistFavorites: StateFlow<Map<String, Boolean>> = _playlistFavorites.asStateFlow()
 
+    // Initialize the ViewModel and load playlists
     init {
         viewModelScope.launch(Dispatchers.IO) {
             try {
@@ -52,6 +54,7 @@ class PlaylistViewModel @Inject constructor(
         }
     }
 
+    // Function to refresh playlists
     private fun loadPlaylistFavorites(playlists: List<Playlist>) {
         val favorites = mutableMapOf<String, Boolean>()
         viewModelScope.launch {
@@ -68,6 +71,7 @@ class PlaylistViewModel @Inject constructor(
 
     }
 
+    // Function to toggle favorite status of a playlist
     fun createPlaylist(playlistName: String, description: String, imageUrl: String? = null) {
         viewModelScope.launch {
             playlistService.createPlaylist(
@@ -79,6 +83,7 @@ class PlaylistViewModel @Inject constructor(
         }
     }
 
+    // Function to toggle favorite status of a playlist
     fun updatePlaylist(
         playlistId: String,
         playlistName: String,

@@ -46,6 +46,7 @@ class RegisterViewModel @Inject constructor(private val authRepository: Firebase
         val passwordHadFocus = mutableStateOf(false)
         val confirmPasswordHadFocus = mutableStateOf(false)
 
+    // Observes changes in each input field's text and triggers validation & error state updates
     init {
         viewModelScope.launch {
             launch {
@@ -76,6 +77,7 @@ class RegisterViewModel @Inject constructor(private val authRepository: Firebase
     }
 
 
+    // Attempts to register user with email and password, updates loading and error states accordingly
     fun register() {
             viewModelScope.launch {
                 _uiState.value = _uiState.value.copy(isLoading = true)
@@ -92,6 +94,7 @@ class RegisterViewModel @Inject constructor(private val authRepository: Firebase
 
     }
 
+    // Validates email format and emptiness; sets emailError accordingly
     fun validateEmail(){
         _uiState.value = _uiState.value.copy(emailError = "")
         if (emailState.text.isBlank()) {
@@ -101,6 +104,7 @@ class RegisterViewModel @Inject constructor(private val authRepository: Firebase
         }
     }
 
+    // Validates that confirmEmail matches email; sets confirmEmailError if not
     fun validateConfirmEmail(){
         _uiState.value = _uiState.value.copy(confirmEmailError = "")
         if(emailState.text.isNotBlank() && confirmEmailState.text.isNotBlank() &&
@@ -112,6 +116,7 @@ class RegisterViewModel @Inject constructor(private val authRepository: Firebase
 
     }
 
+    // Validates password complexity and emptiness
     fun validatePassword(){
         _uiState.value = _uiState.value.copy(passwordError = "")
         if(passwordState.text.isBlank()) {
@@ -121,6 +126,7 @@ class RegisterViewModel @Inject constructor(private val authRepository: Firebase
         }
 
     }
+    // Validates that confirmPassword matches password
     fun validateConfirmPassword(){
         _uiState.value = _uiState.value.copy(confirmPasswordError = "")
         if(passwordState.text.isNotBlank() && confirmPasswordState.text.isNotBlank() &&
@@ -132,7 +138,7 @@ class RegisterViewModel @Inject constructor(private val authRepository: Firebase
 
     }
 
-
+    // Checks if any validation error exists and updates the hasErrors flag accordingly
     fun hasErrors() {
         if(uiState.value.emailError.isNotEmpty() ||
             uiState.value.confirmEmailError.isNotEmpty() ||

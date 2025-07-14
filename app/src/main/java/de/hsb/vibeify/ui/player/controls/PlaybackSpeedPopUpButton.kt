@@ -47,6 +47,7 @@ import androidx.media3.ui.compose.state.rememberPlaybackSpeedState
 
 @OptIn(UnstableApi::class)
 @Composable
+// A button that opens a dialog to select playback speed.
 internal fun PlaybackSpeedPopUpButton(
     player: Player,
     modifier: Modifier = Modifier,
@@ -69,6 +70,7 @@ internal fun PlaybackSpeedPopUpButton(
 }
 
 @Composable
+// A dialog that shows a list of choices for playback speed.
 private fun BottomDialogOfChoices(
     currentSpeed: Float,
     choices: List<Float>,

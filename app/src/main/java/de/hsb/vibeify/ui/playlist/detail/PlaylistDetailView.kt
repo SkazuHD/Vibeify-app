@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import coil.request.CachePolicy
 import coil.request.ImageRequest
 import de.hsb.vibeify.R
 import de.hsb.vibeify.data.repository.LIKED_SONGS_PLAYLIST_ID
@@ -119,9 +118,6 @@ fun PlaylistDetailView(
                             .crossfade(true)
                             .placeholder(R.drawable.ic_launcher_foreground)
                             .error(R.drawable.ic_launcher_foreground)
-                            .memoryCachePolicy(CachePolicy.ENABLED)
-                            .diskCachePolicy(CachePolicy.ENABLED)
-                            .networkCachePolicy(CachePolicy.ENABLED)
                             .build(),
                         contentDescription = "Song Image",
                         contentScale = ContentScale.Crop,

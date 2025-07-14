@@ -8,6 +8,7 @@ import de.hsb.vibeify.data.repository.UserRepository
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// SmartSongCardViewModel is a ViewModel that handles the logic for managing songs in the user's favorites and playlists.
 @HiltViewModel
 class SmartSongCardViewModel @Inject constructor(
     private val userRepository: UserRepository

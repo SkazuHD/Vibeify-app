@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+//Data class for the UI state of the MainViewModel
 data class MainViewUIState(
     val recentActivityItems: List<RecentActivityItem> = emptyList(),
     val recommendations: List<Song> = emptyList(),
@@ -28,6 +29,7 @@ data class MainViewUIState(
     val isLoadingRecommendations: Boolean = true
 )
 
+//MainViewModel class that handles the logic for the main view of the app
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val userRepository: UserRepository,
@@ -43,6 +45,7 @@ class MainViewModel @Inject constructor(
     )
     val uiState: StateFlow<MainViewUIState> = _uiState
 
+    // Initialize the ViewModel by loading recent activities and recommendations
 
     init {
         _uiState.update { it.copy(isLoadingActivities = true, isLoadingRecommendations = true) }
@@ -76,6 +79,14 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Loads recent activities from the user repository and maps them to RecentActivityItem.
+     * Filters out the liked songs playlist and limits the number of activities to 8.
+     * @param activities List of RecentActivity to process.
+     * @return List of RecentActivityItem containing the mapped activities.
+     * This function handles both song and playlist activities,
+     * ensuring that only the most recent and relevant activities are displayed.
+     */
     private suspend fun loadRecentActivities(activities: List<RecentActivity>): List<RecentActivityItem> {
         val sortedActivities =
             activities.sortedByDescending { it.timestamp }.distinctBy { it.id }

@@ -27,6 +27,7 @@ import coil.compose.AsyncImage
 import de.hsb.vibeify.data.model.Song
 import kotlin.random.Random
 
+// TrendingSongCard is a composable function that displays a card for a trending song with its album cover, name, and artist.
 @Composable
 fun TrendingSongCard(
     song: Song,

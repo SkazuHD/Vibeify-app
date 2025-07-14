@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import de.hsb.vibeify.data.model.Song
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -16,6 +17,10 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Repository for managing songs in the application.
+ * Provides methods to interact with the Firestore database.
+ */
 interface SongRepository {
     suspend fun getSongById(id: String): Song?
     suspend fun getSongsByIds(ids: List<String>): List<Song>
@@ -29,6 +34,8 @@ interface SongRepository {
 
 }
 
+// Repository implementation for managing songs in the application.
+
 @Singleton
 class SongRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore
@@ -37,8 +44,9 @@ class SongRepositoryImpl @Inject constructor(
     private val _allSongsCache = mutableListOf<Song>()
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private var _job: kotlinx.coroutines.Job? = null
+    private var _job: Job? = null
 
+// Coroutine job to preload all songs into cache
     init {
         Log.d("SongRepository", "Initialized with collection: $collectionName")
         _job = scope.launch {
@@ -54,6 +62,10 @@ class SongRepositoryImpl @Inject constructor(
 
     }
 
+    /**
+     * Fetches all songs from Firestore and returns them as a list.
+     * This method is used to initialize the cache when the repository is created.
+     */
     private suspend fun fetchAllSongsFromFirestore(): List<Song> {
         Log.d("SongRepository", "Fetching all songs from Firestore")
         val res = db.collection(collectionName).get().await()
@@ -110,6 +122,8 @@ class SongRepositoryImpl @Inject constructor(
         val capitalizedQuery = query.lowercase().replaceFirstChar {
             if (it.isLowerCase()) it.titlecase() else it.toString()
         }
+
+        //Searching songs in Firestore using multiple filters. It searches for songs by name, artist, and album.
 
         val res = db.collection(collectionName)
             .where(

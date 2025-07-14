@@ -19,6 +19,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import de.hsb.vibeify.ui.components.LoadingIndicator
 import de.hsb.vibeify.ui.components.NoContentCard
 
+// This file defines the LiveFriendView composable which displays a list of live friend cards.
 @Composable
 fun LiveFriendView(
     modifier: Modifier = Modifier,
@@ -62,7 +63,7 @@ fun LiveFriendView(
                     modifier = Modifier.size(64.dp),
                 )
             },
-            title = "You have 0 Bitches",
+            title = "You are not following any friends",
         )
 
     }

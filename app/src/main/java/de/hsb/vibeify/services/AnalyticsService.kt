@@ -12,6 +12,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// This service is responsible for tracking user activities such as the current song and playlist.
+// It listens to changes in the PlayerServiceV2 and updates the UserRepository with recent activities.
 @Singleton
 class AnalyticsService
 @Inject constructor(userRepository: UserRepository, playerServiceV2: PlayerServiceV2) {

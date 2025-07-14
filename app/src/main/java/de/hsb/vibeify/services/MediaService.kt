@@ -32,6 +32,11 @@ import java.io.File
 import javax.inject.Inject
 
 
+/**
+ * MediaService is a service that provides a media library for the Vibeify app.
+ * It uses ExoPlayer to handle media playback and MediaLibrarySession to manage the media library.
+ */
+
 @AndroidEntryPoint
 class MediaService : MediaLibraryService() {
     private var mediaLibrarySession: MediaLibrarySession? = null
@@ -51,6 +56,7 @@ class MediaService : MediaLibraryService() {
 
     private val serviceScope = CoroutineScope(Dispatchers.IO)
 
+    // Callback for handling media library session events
     private val callback = object : MediaLibrarySession.Callback {
 
         override fun onConnect(
@@ -65,6 +71,7 @@ class MediaService : MediaLibraryService() {
                 connectionResult.availablePlayerCommands
             )
         }
+        // session commands are not used in this service, so we return the default implementation
 
         override fun onGetLibraryRoot(
             session: MediaLibrarySession,
@@ -85,6 +92,7 @@ class MediaService : MediaLibraryService() {
             return Futures.immediateFuture(LibraryResult.ofItem(rootItem, params))
         }
 
+        // Handles requests for children of a given media item
         @OptIn(UnstableApi::class)
         override fun onGetChildren(
             session: MediaLibrarySession,
@@ -131,6 +139,7 @@ class MediaService : MediaLibraryService() {
             }
         }
 
+        // Handles requests for a specific media item by its ID
         @OptIn(UnstableApi::class)
         override fun onGetItem(
             session: MediaLibrarySession,
@@ -145,6 +154,7 @@ class MediaService : MediaLibraryService() {
             }
         }
 
+        // Handles requests to add media items to the session
         override fun onAddMediaItems(
             mediaSession: MediaSession,
             controller: MediaSession.ControllerInfo,
@@ -162,6 +172,7 @@ class MediaService : MediaLibraryService() {
         }
     }
 
+    // Initialize the media library session and ExoPlayer
     @OptIn(UnstableApi::class)
     override fun onCreate() {
         super.onCreate()
@@ -206,7 +217,7 @@ class MediaService : MediaLibraryService() {
             .build()
     }
 
-
+    // Returns the media library session for this service
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? =
         mediaLibrarySession
 
@@ -219,6 +230,7 @@ class MediaService : MediaLibraryService() {
         super.onDestroy()
     }
 
+    // Helper function to create a MediaItem for a category
     private fun createCategoryItem(mediaId: String, title: String): MediaItem {
         return MediaItem.Builder()
             .setMediaId(mediaId)
@@ -231,7 +243,7 @@ class MediaService : MediaLibraryService() {
             )
             .build()
     }
-
+    // Helper functions to load songs, albums, artists, and playlists from the repository
     private fun loadSongs(): ImmutableList<MediaItem> {
         return try {
             val songs = runBlocking {

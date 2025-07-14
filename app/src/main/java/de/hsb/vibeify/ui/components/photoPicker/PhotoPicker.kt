@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import de.hsb.vibeify.ui.components.Avatar
 
-
+//PhotoPicker to pick a photo from the gallery
 @Composable
 fun PickPhoto(
     onImagePicked: (Uri) -> Unit,
@@ -37,6 +37,8 @@ fun PickPhoto(
 ) {
     val selectedImageUri = remember { mutableStateOf(initialImageUri) }
 
+
+    // Launcher for picking an image from the gallery
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
@@ -67,6 +69,7 @@ fun PickPhoto(
                 isCircle = isCircle,
             )
         }
+        // Button to pick a photo from the gallery
         IconButton(
             onClick = {
                 photoPickerLauncher.launch(

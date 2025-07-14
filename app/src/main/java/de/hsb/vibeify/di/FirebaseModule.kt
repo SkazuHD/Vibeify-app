@@ -9,6 +9,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+
+// FirebaseModule provides Firebase-related dependencies such as FirebaseDatabase, FirebaseFirestore, and FirebaseAuth.
 @Module
 @InstallIn(SingletonComponent::class)
 object FirebaseModule {

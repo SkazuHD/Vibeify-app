@@ -8,7 +8,8 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 
-
+// StickyBarViewModel is a ViewModel that provides data for the StickyBar composable.
+// it interacts with the PlayerServiceV2 to get the current playback state, position, duration, and current song.
 @HiltViewModel
 class StickyBarViewModel @Inject constructor(
     private val playerServiceV2: PlayerServiceV2,

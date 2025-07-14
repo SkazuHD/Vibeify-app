@@ -16,12 +16,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 
+// A data class representing a menu option in the options menu.
 data class MenuOption(
     val text: String,
     val onClick: () -> Unit,
     val icon: ImageVector? = null
 )
 
+// A composable function that displays an options menu with a menu icon and a list of menu options.
 @Composable
 fun OptionsMenu(
     modifier: Modifier = Modifier,

@@ -38,6 +38,7 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import de.hsb.vibeify.R
 
+// PlaylistCard is a composable function that displays a card for a playlist.
 @Composable
 fun PlaylistCard(
     modifier: Modifier = Modifier,
@@ -66,6 +67,7 @@ fun PlaylistCard(
     )
 }
 
+// PlaylistCardVM is a composable function that displays a card for a playlist with ViewModel support.
 @Composable
 fun PlaylistCardVM(
     modifier: Modifier = Modifier,
@@ -100,6 +102,7 @@ fun PlaylistCardVM(
     )
 }
 
+// PlaylistCardContent is a private composable function that contains the actual UI for the playlist card.
 @Composable
 private fun PlaylistCardContent(
     modifier: Modifier = Modifier,

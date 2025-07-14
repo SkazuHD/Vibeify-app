@@ -35,6 +35,9 @@ import de.hsb.vibeify.ui.components.songCard.TrendingSongCard
 import de.hsb.vibeify.ui.player.PlaybackViewModel
 
 
+// Composable function for the main view of the home screen
+// Displays friend activities, recent activities, and recommendations
+
 @Composable
 fun MainView(
     navController: NavController,
@@ -49,11 +52,13 @@ fun MainView(
     val recommendations = uiState.value.recommendations
 
 
+    //Column to display the main content
     LazyColumn(
         modifier = modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         item {
+            // Header for the main view
             ListItem(
                 modifier = Modifier.fillMaxWidth(),
                 headlineContent = { Text("Friend Activities") },
@@ -61,6 +66,7 @@ fun MainView(
         }
 
         item {
+            // Live friend view to display friends who are currently active
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -77,6 +83,7 @@ fun MainView(
             }
         }
         item {
+            // Surprise card to discover new content
             Column {
                 ListItem(
                     modifier = Modifier.fillMaxWidth(),
@@ -88,12 +95,14 @@ fun MainView(
             }
         }
         item {
+            // Header for recent activities
             ListItem(
                 modifier = Modifier.fillMaxWidth(),
                 headlineContent = { Text("Recent Activities") },
             )
         }
         item {
+            // Display recent activities in a grid format
             if (isLoadingActivities) {
                 LoadingIndicator(
                     Modifier
@@ -109,6 +118,7 @@ fun MainView(
                 )
             }
         }
+        // Header for recommendations
         if (isLoadingRecommendations) {
             item {
                 LoadingIndicator(
@@ -119,6 +129,7 @@ fun MainView(
                 )
             }
         } else if (recommendations.isEmpty()) {
+            // If there are no recommendations, display a no content card
             item {
                 NoContentCard(
                     modifier = Modifier.fillMaxWidth(),
@@ -133,6 +144,7 @@ fun MainView(
                 )
             }
         } else {
+            // If there are recommendations, display them in a horizontal list
             item {
                 ListItem(
                     modifier = Modifier.fillMaxWidth(),
@@ -157,6 +169,7 @@ fun MainView(
     }
 
 }
+// Composable function to display recent activities in a grid format
 
 @Composable
 fun RecentActivityGrid(
@@ -179,6 +192,7 @@ fun RecentActivityGrid(
 
 
     } else {
+        // Display recent activities in a flow layout
         FlowRow(
             modifier = modifier,
             horizontalArrangement = Arrangement.spacedBy(4.dp),

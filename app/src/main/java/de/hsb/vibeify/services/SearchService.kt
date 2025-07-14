@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+// Represents the result of a search operation, containing lists of various entities
 data class SearchResult(
     val songs: List<Song> = emptyList(),
     val playlists: List<Playlist> = emptyList(),
@@ -35,6 +36,7 @@ interface SearchService {
 }
 
 
+// Implementation of the SearchService interface
 class SearchServiceImpl @Inject constructor(
     private val songRepository: SongRepository,
     private val playlistRepository: PlaylistRepository,
@@ -51,11 +53,19 @@ class SearchServiceImpl @Inject constructor(
         it?.recentSearches?.take(5)
     }
 
+    /**
+     * Searches for songs, playlists, artists, genres, and user profiles based on the provided query.
+     * The search is performed concurrently using coroutines for better performance.
+     *
+     * @param query The search query string.
+     * @return A SearchResult object containing the search results.
+     */
     override suspend fun search(query: String): SearchResult = coroutineScope {
         currentSearchJob?.cancel()
 
         currentSearchJob = coroutineContext[Job]
 
+        // Searching concurrently for songs, playlists, artists, genres, and user profiles
         try {
             val songsDeferred = async { songRepository.searchSongs(query) }
             val playlistsDeferred = async { playlistRepository.searchPlaylists(query) }
@@ -69,6 +79,7 @@ class SearchServiceImpl @Inject constructor(
                 userRepository.searchUsers(query)
             }
 
+            // Awaiting all deferred results
             val res = SearchResult(
                 songs = songsDeferred.await(),
                 playlists = playlistsDeferred.await(),
@@ -94,6 +105,14 @@ class SearchServiceImpl @Inject constructor(
         }
     }
 
+    /**
+     * Sorts the search results by relevance based on the provided query.
+     * The sorting is done by calculating a relevance score for each entity.
+     *
+     * @param searchResult The SearchResult object containing the search results.
+     * @param query The search query string.
+     * @return A new SearchResult object with sorted entities.
+     */
     fun sortByRelevance(
         searchResult: SearchResult,
         query: String
@@ -127,6 +146,14 @@ class SearchServiceImpl @Inject constructor(
         )
     }
 
+    /**
+     * Calculates the relevance score for a playlist based on the query.
+     * The score is determined by how closely the playlist title and description match the query.
+     *
+     * @param playlist The Playlist object to evaluate.
+     * @param lowerQuery The lowercase version of the search query.
+     * @return An integer score representing the relevance of the playlist to the query.
+     */
     private fun calculatePlaylistRelevanceScore(playlist: Playlist, lowerQuery: String): Int {
         val title = playlist.title.lowercase()
         val description = playlist.description?.lowercase() ?: ""
@@ -155,6 +182,14 @@ class SearchServiceImpl @Inject constructor(
         return score
     }
 
+    /**
+     * Calculates the relevance score for an artist based on the query.
+     * The score is determined by how closely the artist's name matches the query.
+     *
+     * @param artist The Artist object to evaluate.
+     * @param lowerQuery The lowercase version of the search query.
+     * @return An integer score representing the relevance of the artist to the query.
+     */
     private fun calculateArtistRelevanceScore(artist: Artist, lowerQuery: String): Int {
         val artistName = artist.name.lowercase()
         var score = 0
@@ -171,6 +206,14 @@ class SearchServiceImpl @Inject constructor(
         return score
     }
 
+    /**
+     * Calculates the relevance score for a song based on the query.
+     * The score is determined by how closely the song's name, artist, and album match the query.
+     *
+     * @param song The Song object to evaluate.
+     * @param lowerQuery The lowercase version of the search query.
+     * @return An integer score representing the relevance of the song to the query.
+     */
 
     private fun calculateSongRelevanceScore(song: Song, lowerQuery: String): Int {
         val songName = song.name.lowercase()

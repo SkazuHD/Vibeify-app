@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
+// Represents the UI state for the login screen.
 data class LoginUiState(
     val isLoading: Boolean = false,
     val error: String? = null,
@@ -22,6 +23,9 @@ data class LoginUiState(
     val isAuthResolved: Boolean = false
 )
 
+
+// ViewModel for the login screen.
+// This ViewModel handles the login logic, including user input validation and authentication.
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository,
@@ -34,6 +38,7 @@ class LoginViewModel @Inject constructor(
     val passwordState = TextFieldState()
 
 
+    // Initializes the ViewModel and sets up observers for authentication state and input changes.
     init {
         viewModelScope.launch {
             authRepository.state.collect {
@@ -60,6 +65,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    // Attempts to sign in the user with the provided username and password.
     fun signIn() {
         viewModelScope.launch {
             _uiState.value = LoginUiState(isLoading = true)

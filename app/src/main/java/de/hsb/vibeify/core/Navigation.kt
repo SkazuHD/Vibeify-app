@@ -57,6 +57,8 @@ import de.hsb.vibeify.ui.publicProfile.PublicProfileView
 import de.hsb.vibeify.ui.register.RegisterView
 import de.hsb.vibeify.ui.search.SearchView
 
+
+// AppRouter is the main entry point for the app's navigation.
 @Composable
 fun AppRouter(
     authViewModel: AuthViewModel = hiltViewModel(),
@@ -78,6 +80,7 @@ fun AppRouter(
     }
 }
 
+//Component for the loading screen
 @Composable
 private fun LoadingScreen() {
     Surface(
@@ -96,6 +99,7 @@ private fun LoadingScreen() {
     }
 }
 
+// UnauthenticatedNavigation is the navigation graph for unauthenticated users. Allows only login and registration.
 @Composable
 private fun UnauthenticatedNavigation() {
     val navController = rememberNavController()
@@ -114,6 +118,7 @@ private fun UnauthenticatedNavigation() {
     }
 }
 
+// AuthenticatedNavigation is the navigation graph for authenticated users. Contains all main and detail views.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AuthenticatedNavigation(
@@ -168,6 +173,8 @@ private fun AuthenticatedNavigation(
                 )
             }
         }
+
+        // Contains the main navigation graph with all composable destinations. Also adds transitions for each destination.
     ) { contentPadding ->
         NavHost(
             navController = navController,
@@ -388,6 +395,7 @@ private fun AuthenticatedNavigation(
     }
 }
 
+// BottomNavigationBar is the bottom navigation bar that allows users to switch between main sections of the app.
 @Composable
 private fun BottomNavigationBar(
     currentDestination: NavigationDestination?,

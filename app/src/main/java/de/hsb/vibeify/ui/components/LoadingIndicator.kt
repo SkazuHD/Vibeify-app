@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
+// A composable function that displays a loading indicator.
 @Composable
 fun LoadingIndicator(
     modifier: Modifier = Modifier

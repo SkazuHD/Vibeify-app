@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.hsb.vibeify.ui.components.songCard.SmartSongCard
 
+// A composable function that displays a surprise card with a random song or a loading/error state.
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SurpriseCard(

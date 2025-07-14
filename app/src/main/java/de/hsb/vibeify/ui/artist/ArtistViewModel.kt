@@ -13,6 +13,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+// Data class representing the UI state for the Artist screen
+data class ArtistUiState(
+    val artist: Artist? = null,
+    val songs: List<Song> = emptyList(),
+    val isLoading: Boolean = false,
+    val error: String? = null
+)
+
+
+// ViewModel for managing the state of the Artist screen
 @HiltViewModel
 class ArtistViewModel @Inject constructor(
     private val artistRepository: ArtistRepository,
@@ -22,6 +32,7 @@ class ArtistViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ArtistUiState())
     val uiState: StateFlow<ArtistUiState> = _uiState.asStateFlow()
 
+    // Function to load artist details and their songs by artist ID
     fun loadArtist(artistId: String) {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
@@ -55,9 +66,3 @@ class ArtistViewModel @Inject constructor(
     }
 }
 
-data class ArtistUiState(
-    val artist: Artist? = null,
-    val songs: List<Song> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null
-)

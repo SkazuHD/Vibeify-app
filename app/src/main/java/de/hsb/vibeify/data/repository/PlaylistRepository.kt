@@ -11,6 +11,12 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * PlaylistRepository interface defines the contract for playlist operations.
+ * It includes methods to get, create, update, delete playlists and manage songs within them.
+ */
+
+// constant for special liked songs playlist
 const val LIKED_SONGS_PLAYLIST_ID = "liked_songs_virtual_playlist"
 
 interface PlaylistRepository {
@@ -51,6 +57,10 @@ interface PlaylistRepository {
     suspend fun getLikedSongsPlaylist(likedSongIds: List<String>): Playlist
 }
 
+/**
+ * PlaylistRepositoryImpl is the implementation of PlaylistRepository.
+ * It uses Firebase Firestore to perform operations on playlists.
+ **/
 @Singleton
 class PlaylistRepositoryImpl @Inject constructor(
     private val db: FirebaseFirestore

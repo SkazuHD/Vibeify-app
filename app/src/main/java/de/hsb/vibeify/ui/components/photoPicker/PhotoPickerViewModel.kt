@@ -9,12 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-
-
-
-
-
-
+// ViewModel for managing the state of the photo picker
 @HiltViewModel
 class PhotoPickerViewModel @Inject constructor(
     private val userRepository: UserRepository,

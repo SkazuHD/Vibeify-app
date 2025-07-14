@@ -4,6 +4,8 @@ import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 
+// Song data class representing a song in the application
+
 data class Song(
     val id: String = "",
     val name: String = "",
@@ -18,6 +20,12 @@ data class Song(
     override fun toString(): String {
         return "Song(name='$name', artist='$artist', album='$album', imageUrl='$imageUrl', filePath='$filePath', duration=$duration)"
     }
+
+    /**
+     * Converts the Song object to a MediaItem for use in media playback.
+     *
+     * @return MediaItem representing the song.
+     */
 
     companion object {
         fun toMediaItem(song: Song): MediaItem {

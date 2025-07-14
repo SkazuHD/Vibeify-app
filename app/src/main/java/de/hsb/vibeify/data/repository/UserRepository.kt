@@ -23,6 +23,7 @@ import retrofit2.awaitResponse
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// Represents the state of the UserRepository
 
 data class UserRepositoryState(
     val currentUser: User? = null,
@@ -51,6 +52,9 @@ interface UserRepository {
     val state: StateFlow<UserRepositoryState>
 }
 
+
+/**Implementation of UserRepository that interacts with Firebase Firestore and retrofit to store images on our server.
+ */
 @Singleton
 class UserRepositoryImpl @Inject constructor(
     private val authRepository: AuthRepository,
@@ -69,6 +73,9 @@ class UserRepositoryImpl @Inject constructor(
     override val state: StateFlow<UserRepositoryState> = _state
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    // Initialize the repository and collect authentication state. Collect authentication data to create our own user in firestore.
+    //This is done, so the we can work with the user data without manipulating the auth user data.
 
     init {
         Log.d("UserRepository", "init block entered")
@@ -161,6 +168,8 @@ class UserRepositoryImpl @Inject constructor(
         return _state.value.currentUser?.likedSongs ?: emptyList()
     }
 
+
+    //see if a playlist is favorite by checking if the playlistId is in the user's playlists list to show the heart emoji.
     override fun isPlaylistFavorite(playlistId: String): Boolean {
         if (_state.value.currentUser == null) {
             return false
@@ -187,6 +196,7 @@ class UserRepositoryImpl @Inject constructor(
         )
     }
 
+    //see if a song is favorite by checking if the songId is in the user's likedSongs list to show the heart emoji.
     override fun isSongFavorite(songId: String): Boolean {
         if (_state.value.currentUser == null) {
             return false
@@ -224,6 +234,14 @@ class UserRepositoryImpl @Inject constructor(
         _state.value = _state.value.copy(currentUser = user)
     }
 
+
+    /**
+     * Uploads a photo to the server and updates the user's profile picture URL.
+     * Since the location of the image is already know, it is not fetched here, but already assigned to the user.
+     * @param id The user ID to associate with the uploaded photo.
+     * @param imageUrl The URI of the image to upload.
+     * @return The URL of the uploaded photo or an empty string if the upload failed.
+     */
     override suspend fun uploadPhoto(id: String, imageUrl: String): String {
         val uri = try {
             imageUrl.toUri()
@@ -253,6 +271,11 @@ class UserRepositoryImpl @Inject constructor(
     }
 
 
+    /**
+     * Adds a recent search term to the user's recent searches.
+     * If the user is not logged in, this operation will not be performed.
+     * @param searchTerm The search term to add to the user's recent searches.
+     */
     override suspend fun addRecentSearch(searchTerm: String) {
         Log.d("UserRepository", "addRecentSearch called with term: $searchTerm")
         _state.update { currentState ->
@@ -274,6 +297,11 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
+    /**
+     * Adds a recent activity to the user's recent activities.
+     * If the user is not logged in, this operation will not be performed.
+     * @param activity The recent activity to add to the user's recent activities.
+     */
     override suspend fun addRecentActivity(activity: RecentActivity) {
         _state.update { currentState ->
             Log.d("UserRepository", "addRecentActivity called with activity: $activity")

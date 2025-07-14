@@ -24,9 +24,12 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// PlayerServiceV2 is a singleton service that manages media playback using MediaController.
 @Singleton
 class PlayerServiceV2 {
 
+    // values for context, media controller, and various states related to playback exposed as StateFlow.
+    // It allows for playing songs, managing playlists, and tracking playback state.
     private var context: Context
     private val controllerReadyActions = mutableListOf<(MediaController) -> Unit>()
     private var _mediaController: MutableStateFlow<Player?> = MutableStateFlow(null)
@@ -52,6 +55,9 @@ class PlayerServiceV2 {
     private val _playbackMode = MutableStateFlow(PlaybackMode.NONE)
     val playbackMode: StateFlow<PlaybackMode> = _playbackMode
 
+    // upcomingSongs provides a list of songs that are queued to play after the current song.
+    // It combines the current song list, current song, and playback mode to determine the next songs.
+    // In SHUFFLE mode, it fetches the next song randomly; otherwise, it fetches the next songs in order.
     val upcomingSongs: StateFlow<List<Song>> = combine(
         currentSongList,
         currentSong,
@@ -85,6 +91,8 @@ class PlayerServiceV2 {
         initialValue = emptyList()
     )
 
+    // values for position and duration are updated based on the current playback state.
+    // position tracks the current playback position, while duration tracks the total duration of the current media item.
     private val _duration = MutableStateFlow(1L)
     val duration: StateFlow<Long> = _duration
 
@@ -96,6 +104,8 @@ class PlayerServiceV2 {
     private var positionTrackingJob: Job? = null
     private val serviceScope = CoroutineScope(Dispatchers.Main)
 
+    // Constructor initializes the MediaController with a SessionToken and sets up listeners for playback state changes.
+    // It also handles media item transitions and updates the current song based on the media item.
     @Inject
     constructor(context: Context) {
         this.context = context
@@ -118,6 +128,7 @@ class PlayerServiceV2 {
                     _playerState.value = playbackState
                 }
 
+                // This method is called when the playback state changes, such as when the player starts or stops playing.
                 override fun onIsPlayingChanged(isPlayingState: Boolean) {
                     _isPlaying.value = isPlayingState
                     if (isPlayingState) {
@@ -127,18 +138,22 @@ class PlayerServiceV2 {
                     }
                 }
 
+                // This method is called when the current media item changes, allowing us to update the current song.
                 override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                     updateCurrentSongFromMediaItem(controller)
                 }
 
+                // This method is called when the media metadata changes, allowing us to handle metadata updates if needed.
                 override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
                 }
 
+                // This method is called when the player events occur, such as seeking or changing the playback position.
                 override fun onEvents(player: Player, events: Player.Events) {
                     updatePositionAndDuration()
 
                 }
 
+                // This method is called when the shuffle mode is enabled or disabled, allowing us to update the playback mode.
                 override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
                     super.onShuffleModeEnabledChanged(shuffleModeEnabled)
                     _playbackMode.value = if (shuffleModeEnabled) {
@@ -153,6 +168,7 @@ class PlayerServiceV2 {
         }, ContextCompat.getMainExecutor(context))
     }
 
+    // withController is a utility function that executes an action with the MediaController if it is available.
     fun withController(action: (Player) -> Unit) {
         val controller = _mediaController.value
         if (controller != null) {
@@ -162,6 +178,7 @@ class PlayerServiceV2 {
         }
     }
 
+    // play functions allow playing a single song or a list of songs, setting the current song and playlist ID.
     fun play(song: Song) {
         _currentSong.value = song
         _currentSongList.value = listOf(song)
@@ -174,6 +191,7 @@ class PlayerServiceV2 {
         startPositionTracking()
     }
 
+    // play function with a list of songs allows playing multiple songs starting from a specified index.
     fun play(songs: List<Song>, startIndex: Int = 0, playlistId: String? = null) {
         if (songs.isEmpty()) return
         _currentSong.value = songs[startIndex]
@@ -189,6 +207,7 @@ class PlayerServiceV2 {
         startPositionTracking()
     }
 
+    // pause function allows pausing the playback of the current song.
     fun insertIntoQueue(song: Song) {
         _currentSongList.value = _currentSongList.value.toMutableList().apply {
             add(1, song)

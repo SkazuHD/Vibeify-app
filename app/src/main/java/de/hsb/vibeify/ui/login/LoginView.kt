@@ -24,6 +24,8 @@ import androidx.navigation.NavController
 import de.hsb.vibeify.core.navigation.navigateToRegister
 
 
+// Login view for the login screen of the app.
+// This view is used to display the login screen and handle user input for login.
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LoginView(

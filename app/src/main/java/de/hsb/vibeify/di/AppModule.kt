@@ -35,6 +35,9 @@ import de.hsb.vibeify.services.SearchServiceImpl
 import javax.inject.Singleton
 
 
+/** * Hilt entry point for the PlayerServiceV2.
+ * This allows us to access the PlayerServiceV2 from other parts of the app.
+ */
 @EntryPoint
 @InstallIn(SingletonComponent::class)
 internal interface PlayerServiceEntryPoint {
@@ -50,6 +53,10 @@ internal interface PlayerServiceEntryPoint {
     }
 }
 
+
+ /** Hilt module for providing dependencies in the application.
+ * This module provides various repositories and services used throughout the app.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {

@@ -25,6 +25,7 @@ import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// Data class to hold detailed information about a playlist
 data class PlaylistDetailData(
     val title: String,
     val description: String,
@@ -69,6 +70,8 @@ interface PlaylistService {
     val playlists: MutableStateFlow<List<Playlist>>
 }
 
+//PlaylistService implementation
+// This service handles all operations related to playlists, including fetching, creating, updating, and managing songs within playlists.
 @Singleton
 class PlaylistServiceImpl @Inject constructor(
     private val playlistRepository: PlaylistRepository,
@@ -83,6 +86,7 @@ class PlaylistServiceImpl @Inject constructor(
 
     override val playlists = MutableStateFlow(emptyList<Playlist>())
 
+    // Initialize the service by observing the current user state and loading playlists accordingly
     init {
         scope.launch {
             userRepository.state
@@ -127,10 +131,12 @@ class PlaylistServiceImpl @Inject constructor(
         }
     }
 
+    // Fetch playlists created by a specific user
     override suspend fun getPlaylistCreatedByUser(userId: String): List<Playlist> {
         return playlistRepository.getPlaylistsByUserId(userId)
     }
 
+    // Fetch playlists created by the current user
     override suspend fun getPlaylistsCreatedByCurrentUser(): List<Playlist> {
         val currentUser = userRepository.state.value.currentUser
         return if (currentUser != null) {
@@ -140,6 +146,7 @@ class PlaylistServiceImpl @Inject constructor(
         }
     }
 
+    // Check if a playlist is liked by the current user to show it in the UI
     override suspend fun isPlaylistLiked(playlistId: String): Boolean {
         val playlist = playlistRepository.getPlaylistById(playlistId)
         playlist?.let { playlistData ->
@@ -150,6 +157,7 @@ class PlaylistServiceImpl @Inject constructor(
         return false
     }
 
+    // Fetch detailed information about a playlist, including its songs and metadata
     override suspend fun getPlaylistDetail(playlistId: String): PlaylistDetailData? {
         return if (playlistId == LIKED_SONGS_PLAYLIST_ID) {
             val likedSongIds = userRepository.getLikedSongIds()
@@ -205,6 +213,16 @@ class PlaylistServiceImpl @Inject constructor(
         return sortedPlaylists
     }
 
+    /**
+     * Uploads a photo to the server and returns the URL of the uploaded photo.
+     * @param id The ID of the playlist for which the photo is being uploaded.
+     * @param imageUrl The local URI of the image to be uploaded.
+     * @return The URL of the uploaded photo or an empty string if the upload fails.
+     * This function reads the image from the provided URI, converts it to a byte array,
+     * and uploads it as a multipart form data request to the server.
+     * If the upload is successful, it returns the URL of the uploaded photo.
+     * If the upload fails, it logs the error and returns a default URL for the playlist cover.
+     */
     private suspend fun uploadPhoto(id: String, imageUrl: String): String {
         val uri = try {
             imageUrl.toUri()
@@ -232,6 +250,14 @@ class PlaylistServiceImpl @Inject constructor(
         }
     }
 
+    /**
+     * Creates a new playlist with the given title, description, and optional image URL.
+     * @param title The title of the playlist.
+     * @param description The description of the playlist.
+     * @param imageUrl The local URI of the image to be uploaded for the playlist cover.
+     * @param userId The ID of the user creating the playlist.
+     * @return The created Playlist object.
+     */
     override suspend fun createPlaylist(
         title: String,
         description: String,
@@ -264,6 +290,14 @@ class PlaylistServiceImpl @Inject constructor(
         return newPlaylist
     }
 
+    /**
+     * Updates an existing playlist with the given title, description, and optional image URL.
+     * @param playlistId The ID of the playlist to be updated.
+     * @param title The new title for the playlist.
+     * @param description The new description for the playlist.
+     * @param imageUrl The local URI of the new image to be uploaded for the playlist cover.
+     * @return True if the update was successful, false otherwise.
+     */
     override suspend fun updatePlaylist(
         playlistId: String,
         title: String,
@@ -305,6 +339,13 @@ class PlaylistServiceImpl @Inject constructor(
         return isRemoved
     }
 
+    /**
+     * Toggles the favorite status of a playlist.
+     * If the playlist is already a favorite, it will be removed from favorites.
+     * If it is not a favorite, it will be added to favorites.
+     * @param playlistId The ID of the playlist to toggle.
+     * @return True if the playlist is now a favorite, false if it was removed from favorites.
+     */
     override suspend fun togglePlaylistFavorite(playlistId: String): Boolean {
         val isFavorite = userRepository.isPlaylistFavorite(playlistId)
         return if (isFavorite) {
@@ -349,6 +390,11 @@ class PlaylistServiceImpl @Inject constructor(
         }
     }
 
+    /**
+     * Generates a readable text representation of the total duration of a playlist.
+     * @param songs The list of songs in the playlist.
+     * @return A string representing the total duration in hours, minutes, and seconds.
+     */
     override fun getPlaylistDurationText(songs: List<Song>): String {
         val playlistDuration = songs.sumOf { it.duration }
         val playlistDurationMinutes = playlistDuration / 60
@@ -366,6 +412,11 @@ class PlaylistServiceImpl @Inject constructor(
         }
     }
 
+    /**
+     * Retrieves a playlist representing a specific genre.
+     * @param genreName The name of the genre to create a playlist for.
+     * @return A Playlist object containing the genre information or null if the genre is not found.
+     */
     suspend fun getGenreAsPlaylist(genreName: String): Playlist? {
         val genreList = discoveryService.getGenreList()
         val genre = genreList.find { it.name.equals(genreName, ignoreCase = true) }

@@ -6,6 +6,11 @@ import androidx.compose.runtime.remember
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
+/**
+ * Navigation controller for Vibeify that handles navigation between different destinations.
+ * It provides methods to navigate to specific destinations,
+ * navigate back, and check the current destination.
+ **/
 class VibeifyNavigationController(private val navController: NavController) {
 
     fun navigateTo(destination: NavigationDestination) {
@@ -78,6 +83,8 @@ class VibeifyNavigationController(private val navController: NavController) {
         }
     }
 
+
+    //Check Destination to determine if the appbar/stickybar should be shown
     @Composable
     fun shouldShowAppBar(): Boolean {
         val currentDestination = getCurrentDestination()

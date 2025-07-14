@@ -117,7 +117,7 @@ class ProfileViewModel @Inject constructor(
                         imageUrl = userRepository.uploadPhoto(currentUser.id, url)
                     }
                 }
-                val updatedUser = currentUser.copy(name = name, imageUrl = imageUrl)
+                val updatedUser = currentUser.copy(name = name, imageUrl = "$imageUrl?t=${System.currentTimeMillis()}")
                 userRepository.updateUser(updatedUser)
             }
         }

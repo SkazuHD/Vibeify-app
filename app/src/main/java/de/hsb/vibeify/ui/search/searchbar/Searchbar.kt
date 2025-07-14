@@ -253,12 +253,11 @@ fun SimpleSearchBar(
                         searchResults.playlists.take(if (showAllPlaylists) Int.MAX_VALUE else resultLimit)
                             .forEach { playlist ->
                                 PlaylistCardVM(
-                                    modifier = Modifier
-                                        .clickable {
-                                            onPlaylistClick(playlist)
-                                            expanded = false
-                                            textFieldState.edit { replace(0, length, "") }
-                                        },
+                                    onClick = {
+                                        onPlaylistClick(playlist)
+                                        expanded = false
+                                        textFieldState.edit { replace(0, length, "") }
+                                    },
                                     playlistDescription = playlist.description ?: "No description",
                                     playlistName = playlist.title,
                                     playlistId = playlist.id,

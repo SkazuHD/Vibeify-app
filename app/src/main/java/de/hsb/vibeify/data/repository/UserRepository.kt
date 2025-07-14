@@ -67,7 +67,7 @@ class UserRepositoryImpl @Inject constructor(
     private val _state = MutableStateFlow(UserRepositoryState())
 
     companion object {
-        private const val MAX_RECENT_ACTIVITIES = 20
+        private const val MAX_RECENT_ACTIVITIES = 30
     }
 
     override val state: StateFlow<UserRepositoryState> = _state
@@ -282,8 +282,8 @@ class UserRepositoryImpl @Inject constructor(
             val user = currentState.currentUser ?: return@update currentState
 
             val updatedSearches = (user.recentSearches + searchTerm)
+                .takeLast(20)
                 .distinct()
-                .takeLast(10)
 
             db.collection(collectionName).document(user.id).update(
                 "recentSearches", updatedSearches

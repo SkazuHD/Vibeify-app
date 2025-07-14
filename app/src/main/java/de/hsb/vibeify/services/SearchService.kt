@@ -17,6 +17,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -48,9 +49,9 @@ class SearchServiceImpl @Inject constructor(
     private var currentSearchJob: Job? = null
 
     override val recentSearchQueries = userRepository.state.map {
-        it.currentUser
-    }.distinctUntilChanged().map { it ->
-        it?.recentSearches?.take(5)
+        it.currentUser?.recentSearches
+    }.filterNotNull().distinctUntilChanged().map { it ->
+        it.takeLast(8)
     }
 
     /**

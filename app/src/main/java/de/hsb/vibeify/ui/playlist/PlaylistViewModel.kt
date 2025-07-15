@@ -71,7 +71,7 @@ class PlaylistViewModel @Inject constructor(
 
     }
 
-    // Function to toggle favorite status of a playlist
+    // Function to create a playlist
     fun createPlaylist(playlistName: String, description: String, imageUrl: String? = null) {
         viewModelScope.launch {
             playlistService.createPlaylist(
@@ -83,21 +83,19 @@ class PlaylistViewModel @Inject constructor(
         }
     }
 
-    // Function to toggle favorite status of a playlist
-    fun updatePlaylist(
+    // Function to update a playlist
+    suspend fun updatePlaylist(
         playlistId: String,
         playlistName: String,
         description: String,
         imageUrl: String? = null
-    ) {
-        viewModelScope.launch {
-            playlistService.updatePlaylist(
-                playlistId = playlistId,
-                title = playlistName,
-                description = description,
-                imageUrl = imageUrl
-            )
-        }
+    ): Boolean {
+        return playlistService.updatePlaylist(
+            playlistId = playlistId,
+            title = playlistName,
+            description = description,
+            imageUrl = imageUrl
+        )
     }
 
 }

@@ -11,12 +11,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -25,6 +27,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.hsb.vibeify.ui.components.photoPicker.PickPhoto
 import de.hsb.vibeify.ui.playlist.PlaylistViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun EditPlaylistDialog(
@@ -39,6 +42,8 @@ fun EditPlaylistDialog(
     val playlistName = TextFieldState(initialText = playlistName ?: "")
     val playListDescription = TextFieldState(initialText = playListDescription ?: "")
     val pickedImageUri = remember { mutableStateOf<Uri?>(pickedImageUri) }
+    val isLoading = remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
@@ -54,7 +59,7 @@ fun EditPlaylistDialog(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Create Playlist",
+                    text = "Edit Playlist",
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentSize(Alignment.Center),
@@ -73,10 +78,12 @@ fun EditPlaylistDialog(
                 OutlinedTextField(
                     state = playlistName,
                     label = { Text("Playlist Name") },
+                    enabled = !isLoading.value
                 )
                 OutlinedTextField(
                     state = playListDescription,
                     label = { Text("Playlist Description") },
+                    enabled = !isLoading.value
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -84,12 +91,12 @@ fun EditPlaylistDialog(
                     verticalAlignment = Alignment.CenterVertically
                 )
                 {
-
                     Button(
                         modifier = Modifier,
                         onClick = {
                             onDismissRequest()
-                        }
+                        },
+                        enabled = !isLoading.value
                     ) {
                         Text("Cancel")
                     }
@@ -97,16 +104,31 @@ fun EditPlaylistDialog(
                     Button(
                         modifier = Modifier,
                         onClick = {
-                            playlistViewModel.updatePlaylist(
-                                playlistId = playlistId.value,
-                                playlistName = playlistName.text.toString(),
-                                description = playListDescription.text.toString(),
-                                imageUrl = pickedImageUri.value?.toString()
-                            )
-                            onDismissRequest()
-                        }
+                            coroutineScope.launch {
+                                isLoading.value = true
+                                try {
+                                    val success = playlistViewModel.updatePlaylist(
+                                        playlistId = playlistId.value,
+                                        playlistName = playlistName.text.toString(),
+                                        description = playListDescription.text.toString(),
+                                        imageUrl = pickedImageUri.value?.toString()
+                                    )
+                                    if (success) {
+                                        onDismissRequest()
+                                    }
+                                } catch (_: Exception) {
+                                } finally {
+                                    isLoading.value = false
+                                }
+                            }
+                        },
+                        enabled = !isLoading.value
                     ) {
-                        Text("Save")
+                        if (isLoading.value) {
+                            CircularProgressIndicator()
+                        } else {
+                            Text("Save")
+                        }
                     }
                 }
             }

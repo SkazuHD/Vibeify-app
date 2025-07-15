@@ -68,6 +68,6 @@ Warning: The media player may break when used with the emulator provided by andr
 
 
 ### Features
-Stop and resume songs
-Previous song and next song buttons
-Pressing anywhere else on the widget leads you to the current songs playback view
+- Stop and resume songs
+- Previous song and next song buttons
+- Pressing anywhere else on the widget leads you to the current songs playback view

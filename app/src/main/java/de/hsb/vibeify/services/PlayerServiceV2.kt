@@ -10,6 +10,7 @@ import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import de.hsb.vibeify.data.model.Song
+import de.hsb.vibeify.data.repository.UserRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -18,6 +19,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -107,7 +110,7 @@ class PlayerServiceV2 {
     // Constructor initializes the MediaController with a SessionToken and sets up listeners for playback state changes.
     // It also handles media item transitions and updates the current song based on the media item.
     @Inject
-    constructor(context: Context) {
+    constructor(context: Context, userRepository: UserRepository) {
         this.context = context
         val sessionToken = SessionToken(
             context,
@@ -166,6 +169,21 @@ class PlayerServiceV2 {
             updatePositionAndDuration()
 
         }, ContextCompat.getMainExecutor(context))
+
+        serviceScope.launch {
+            userRepository.state.map { it.currentUser }.distinctUntilChanged().collect { user ->
+                if (user == null) {
+                    Log.d(
+                        "PlayerServiceV2",
+                        "User is null, stopping position tracking and releasing controller"
+                    )
+                    stopPositionTracking()
+                    withController {
+                        it.stop()
+                    }
+                }
+            }
+        }
     }
 
     // withController is a utility function that executes an action with the MediaController if it is available.

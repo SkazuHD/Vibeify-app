@@ -54,7 +54,7 @@ internal interface PlayerServiceEntryPoint {
 }
 
 
- /** Hilt module for providing dependencies in the application.
+/** Hilt module for providing dependencies in the application.
  * This module provides various repositories and services used throughout the app.
  */
 @Module
@@ -106,8 +106,11 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun providePlayerService(@ApplicationContext context: Context): PlayerServiceV2 {
-        return PlayerServiceV2(context)
+    fun providePlayerService(
+        @ApplicationContext context: Context,
+        userRepository: UserRepository
+    ): PlayerServiceV2 {
+        return PlayerServiceV2(context, userRepository)
     }
 
     @Singleton

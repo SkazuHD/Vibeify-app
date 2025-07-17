@@ -31,6 +31,7 @@ password: 123456A
 ### App
 To start the app, just sync the gradle and start the application.
 The media player tends to fail, which is the result of the emulator failing. On an android mobile device, the playback works as intended.
+Sometimes the first fetch takes an little longer than expected.
 
 Warning: The media player may break when used with the emulator provided by android studio, every feature still functions but you can no longer listen to the songs except when re-running the app
 ### Features
